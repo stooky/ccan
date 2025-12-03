@@ -1,0 +1,212 @@
+================================================================================
+                              CAPTAIN'S LOG
+================================================================================
+Entry:        caplog-20251203-120000-setting-up-foundational-website-builder.txt
+Created:      2025-12-03 12:00:00
+Author:       Claude (AI Assistant)
+Project:      SMB Website Boilerplate (ffm)
+Branch:       N/A (not yet a git repository)
+Previous Log: None - First Entry
+================================================================================
+
+## Summary
+
+Created a complete SMB website boilerplate from scratch, based on the ex10x
+project architecture. The boilerplate uses Astro 5, Tailwind CSS 4, and
+TypeScript. Also developed a comprehensive vertical taxonomy document for
+scaling the boilerplate to serve specific industries (HVAC, legal, dental, etc.).
+
+--------------------------------------------------------------------------------
+## Current State of the Project
+--------------------------------------------------------------------------------
+
+### Technology Stack
+- Framework: Astro 5.1.0
+- Styling: Tailwind CSS 4.0.0 with Typography plugin
+- Build: Vite (via Astro)
+- Language: TypeScript 5.7.2
+- Sitemap: @astrojs/sitemap 3.2.1
+
+### Project Structure
+```
+ffm/
+├── docs/
+│   ├── SETUP.md              # Comprehensive setup documentation
+│   └── VERTICALS.md          # Industry vertical taxonomy
+├── public/
+│   ├── favicon.svg
+│   └── images/
+├── src/
+│   ├── components/           # 10 reusable components
+│   ├── config/
+│   │   └── site.ts           # Centralized configuration
+│   ├── content/
+│   │   └── blog/             # 2 sample posts
+│   ├── layouts/
+│   │   └── Layout.astro      # SEO-ready layout
+│   ├── pages/
+│   │   ├── index.astro       # Home
+│   │   ├── about.astro       # About
+│   │   ├── services.astro    # Services
+│   │   ├── contact.astro     # Contact
+│   │   └── blog/             # Blog system
+│   ├── styles/
+│   │   └── global.css        # Tailwind + custom CSS vars
+│   └── content.config.ts     # Blog collection schema
+├── astro.config.mjs
+├── package.json
+├── tsconfig.json
+├── startup.bat               # Windows dev server script
+└── README.md
+```
+
+### Components Created
+1. Navigation.astro - Responsive nav with mobile menu
+2. Footer.astro - Multi-column footer with social links
+3. Hero.astro - Flexible hero section
+4. Section.astro - Reusable page section wrapper
+5. Card.astro - Versatile card component
+6. CTA.astro - Call-to-action sections
+7. FeatureGrid.astro - Feature/service grid display
+8. Testimonial.astro - Customer testimonial card
+9. ContactForm.astro - Contact form with validation
+10. BlogCard.astro - Blog post preview card
+
+### Pages Created
+- Home (/) - Hero, features, about preview, testimonials, CTA
+- About (/about) - Story, values, team, stats
+- Services (/services) - Service list, process, FAQ
+- Contact (/contact) - Form, contact info, business hours, map placeholder
+- Blog (/blog) - Post listing
+- Blog Post (/blog/[slug]) - Individual post template
+
+--------------------------------------------------------------------------------
+## Work Completed
+--------------------------------------------------------------------------------
+
+1. Created comprehensive SETUP.md documentation
+2. Set up package.json with all dependencies
+3. Configured Astro with Tailwind CSS 4 Vite plugin
+4. Created centralized site configuration (src/config/site.ts)
+5. Built Layout component with full SEO support (OG, Twitter, canonical)
+6. Created 10 reusable UI components
+7. Built 5 page templates with placeholder content
+8. Set up blog system with content collections
+9. Created global styles with CSS custom properties for theming
+10. Added 2 sample blog posts
+11. Created startup.bat for Windows development
+12. Fixed bugs in services.astro (missing import) and ContactForm.astro (@apply issue)
+13. Created VERTICALS.md with industry taxonomy for future expansion
+
+--------------------------------------------------------------------------------
+## Decisions Made
+--------------------------------------------------------------------------------
+
+1. **Astro 5 + Tailwind CSS 4** - Modern stack matching ex10x architecture,
+   excellent DX and performance
+
+2. **Centralized site config** - All client-specific info in one file
+   (src/config/site.ts) for easy customization
+
+3. **CSS custom properties for theming** - Primary colors defined in global.css
+   @theme block for easy brand customization
+
+4. **Content collections for blog** - Type-safe, validated blog posts using
+   Astro's built-in content collections
+
+5. **Component-based architecture** - Reusable components (Hero, Section, CTA,
+   Card) that can be composed for any page layout
+
+6. **Vertical taxonomy structure** - Organized industries by profitability and
+   demand (Tier 1: Home Services, Construction, Legal, Medical)
+
+--------------------------------------------------------------------------------
+## Issues Encountered
+--------------------------------------------------------------------------------
+
+1. **services.astro error** - Missing `siteConfig` import while using it in CTA
+   - Fix: Added `import { siteConfig } from '../config/site';`
+
+2. **ContactForm.astro error** - Used `@apply` in scoped <style> block which
+   doesn't work with Tailwind CSS 4 in Astro
+   - Fix: Removed style block, added utility classes directly to elements
+
+--------------------------------------------------------------------------------
+## Commits Made
+--------------------------------------------------------------------------------
+
+None yet - repository not initialized
+
+--------------------------------------------------------------------------------
+## Mistakes & Lessons
+--------------------------------------------------------------------------------
+
+1. **@apply in Astro scoped styles** - Tailwind CSS 4 with Vite plugin doesn't
+   support @apply in component-scoped <style> blocks. Use utility classes
+   directly or put @apply rules in global.css.
+
+2. **Import validation** - Always check that variables used in templates are
+   properly imported in the frontmatter, especially when copying patterns
+   between files.
+
+--------------------------------------------------------------------------------
+## Vertical Strategy Summary
+--------------------------------------------------------------------------------
+
+### Tier 1 Priorities (Highest Value)
+1. Home Services (HVAC, Plumbing, Electrical, Roofing)
+2. Construction & Remodeling
+3. Legal Services
+4. Medical & Dental
+
+### Launch Order (Recommended)
+1. HVAC - High urgency, clear service structure
+2. Plumbing - Similar template, emergency-driven
+3. Electrical - Completes home services
+4. Dental - High LTV, appointment-based
+5. Personal Injury Law - Content-driven, high value
+
+### Vertical-Specific Features Identified
+- Emergency banners (Home Services)
+- Before/after galleries (Construction, Medical)
+- Case results with disclaimers (Legal)
+- Online scheduling integration (Medical, Dental)
+- Service area maps (Home Services)
+- Financing calculators (High-ticket services)
+
+--------------------------------------------------------------------------------
+## Next Steps
+--------------------------------------------------------------------------------
+
+1. [ ] Initialize git repository
+2. [ ] Create first vertical variant (HVAC/Home Services)
+   - Emergency service banner component
+   - Service area configuration
+   - Maintenance plan signup
+   - Financing calculator widget
+3. [ ] Build vertical config schema
+4. [ ] Create CLI tool or wizard for vertical selection
+5. [ ] Develop industry-specific content templates
+6. [ ] Document integration options per vertical
+7. [ ] Set up deployment pipeline (Vercel/Netlify)
+
+--------------------------------------------------------------------------------
+## Session Context for Future Claude
+--------------------------------------------------------------------------------
+
+This is the first captain's log for the SMB Website Boilerplate project. The
+foundational boilerplate is complete and functional. The next phase is building
+out vertical-specific variants, starting with Home Services (HVAC recommended
+as first target).
+
+Key files to understand:
+- src/config/site.ts - All customizable settings
+- src/styles/global.css - Theme colors in @theme block
+- docs/VERTICALS.md - Industry taxonomy and strategy
+- docs/SETUP.md - Full documentation
+
+The dev server runs with `startup.bat` or `npm run dev` on port 4321.
+
+================================================================================
+                              END OF LOG
+================================================================================

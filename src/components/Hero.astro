@@ -1,0 +1,73 @@
+---
+interface Props {
+  title: string;
+  subtitle?: string;
+  primaryCta?: {
+    text: string;
+    href: string;
+  };
+  secondaryCta?: {
+    text: string;
+    href: string;
+  };
+  centered?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+}
+
+const {
+  title,
+  subtitle,
+  primaryCta,
+  secondaryCta,
+  centered = true,
+  size = 'lg',
+} = Astro.props;
+
+const sizeClasses = {
+  sm: 'py-16 sm:py-20',
+  md: 'py-20 sm:py-28',
+  lg: 'py-24 sm:py-32',
+};
+
+const titleSizes = {
+  sm: 'text-3xl sm:text-4xl',
+  md: 'text-4xl sm:text-5xl',
+  lg: 'text-4xl sm:text-5xl lg:text-6xl',
+};
+---
+
+<section class={`bg-white ${sizeClasses[size]}`}>
+  <div class={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 ${centered ? 'text-center' : ''}`}>
+    <div class={centered ? 'mx-auto max-w-3xl' : 'max-w-2xl'}>
+      <h1 class={`font-bold tracking-tight text-gray-900 ${titleSizes[size]}`}>
+        {title}
+      </h1>
+      {subtitle && (
+        <p class="mt-6 text-lg leading-8 text-gray-600 sm:text-xl">
+          {subtitle}
+        </p>
+      )}
+      {(primaryCta || secondaryCta) && (
+        <div class={`mt-10 flex gap-4 ${centered ? 'justify-center' : ''}`}>
+          {primaryCta && (
+            <a
+              href={primaryCta.href}
+              class="inline-flex items-center justify-center rounded-lg bg-primary-600 px-6 py-3 text-base font-medium text-white shadow-sm transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+            >
+              {primaryCta.text}
+            </a>
+          )}
+          {secondaryCta && (
+            <a
+              href={secondaryCta.href}
+              class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+            >
+              {secondaryCta.text}
+            </a>
+          )}
+        </div>
+      )}
+    </div>
+    <slot />
+  </div>
+</section>

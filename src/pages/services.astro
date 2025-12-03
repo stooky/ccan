@@ -1,0 +1,196 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import Section from '../components/Section.astro';
+import Card from '../components/Card.astro';
+import CTA from '../components/CTA.astro';
+import { siteConfig } from '../config/site';
+
+// Define services - customize for each client
+const services = [
+  {
+    id: 'service-one',
+    title: 'Service One',
+    description: 'A comprehensive description of your first service. Explain what it includes, who it\'s for, and the benefits customers can expect.',
+    features: [
+      'Key feature or benefit one',
+      'Key feature or benefit two',
+      'Key feature or benefit three',
+      'Key feature or benefit four',
+    ],
+    icon: `<svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>`,
+  },
+  {
+    id: 'service-two',
+    title: 'Service Two',
+    description: 'A comprehensive description of your second service. Highlight the unique value proposition and outcomes.',
+    features: [
+      'Key feature or benefit one',
+      'Key feature or benefit two',
+      'Key feature or benefit three',
+      'Key feature or benefit four',
+    ],
+    icon: `<svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>`,
+  },
+  {
+    id: 'service-three',
+    title: 'Service Three',
+    description: 'A comprehensive description of your third service. Focus on the transformation or results clients achieve.',
+    features: [
+      'Key feature or benefit one',
+      'Key feature or benefit two',
+      'Key feature or benefit three',
+      'Key feature or benefit four',
+    ],
+    icon: `<svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" /></svg>`,
+  },
+];
+
+// Process steps (optional)
+const process = [
+  {
+    step: 1,
+    title: 'Consultation',
+    description: 'We start by understanding your needs, goals, and challenges.',
+  },
+  {
+    step: 2,
+    title: 'Planning',
+    description: 'We develop a customized strategy tailored to your situation.',
+  },
+  {
+    step: 3,
+    title: 'Execution',
+    description: 'Our team implements the plan with precision and care.',
+  },
+  {
+    step: 4,
+    title: 'Results',
+    description: 'We measure outcomes and optimize for continued success.',
+  },
+];
+---
+
+<Layout
+  title="Services"
+  description="Explore our comprehensive range of services designed to help your business succeed."
+>
+  <!-- Hero -->
+  <Hero
+    title="Our Services"
+    subtitle="Comprehensive solutions tailored to meet your business needs."
+    primaryCta={{ text: "Get a Quote", href: "/contact" }}
+    size="md"
+  />
+
+  <!-- Services List -->
+  {services.map((service, index) => (
+    <Section
+      id={service.id}
+      background={index % 2 === 0 ? 'white' : 'gray'}
+    >
+      <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
+        <div class={index % 2 === 1 ? 'lg:order-2' : ''}>
+          <div class="flex h-16 w-16 items-center justify-center rounded-xl bg-primary-100 text-primary-600">
+            <Fragment set:html={service.icon} />
+          </div>
+          <h2 class="mt-6 text-3xl font-bold text-gray-900">{service.title}</h2>
+          <p class="mt-4 text-lg text-gray-600">{service.description}</p>
+          <ul class="mt-8 space-y-4">
+            {service.features.map((feature) => (
+              <li class="flex items-start gap-3">
+                <svg class="mt-1 h-5 w-5 flex-shrink-0 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span class="text-gray-600">{feature}</span>
+              </li>
+            ))}
+          </ul>
+          <div class="mt-8">
+            <a
+              href="/contact"
+              class="inline-flex items-center rounded-lg bg-primary-600 px-6 py-3 text-base font-medium text-white shadow-sm transition-colors hover:bg-primary-700"
+            >
+              Learn More
+            </a>
+          </div>
+        </div>
+        <div class={index % 2 === 1 ? 'lg:order-1' : ''}>
+          <!-- Placeholder for service image -->
+          <div class="aspect-video rounded-xl bg-gray-200 flex items-center justify-center">
+            <span class="text-gray-400">Service image placeholder</span>
+          </div>
+        </div>
+      </div>
+    </Section>
+  ))}
+
+  <!-- Our Process -->
+  <Section
+    title="How We Work"
+    subtitle="A simple, proven process to deliver results."
+    background="gray"
+  >
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      {process.map((item) => (
+        <div class="relative text-center">
+          <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary-600 text-xl font-bold text-white">
+            {item.step}
+          </div>
+          <h3 class="mt-4 text-lg font-semibold text-gray-900">{item.title}</h3>
+          <p class="mt-2 text-gray-600">{item.description}</p>
+        </div>
+      ))}
+    </div>
+  </Section>
+
+  <!-- FAQ Section (optional) -->
+  <Section title="Frequently Asked Questions">
+    <div class="mx-auto max-w-3xl divide-y divide-gray-200">
+      <details class="group py-6">
+        <summary class="flex cursor-pointer items-center justify-between text-lg font-medium text-gray-900">
+          How much do your services cost?
+          <svg class="h-5 w-5 text-gray-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </summary>
+        <p class="mt-4 text-gray-600">
+          Our pricing varies based on your specific needs and project scope. We offer flexible
+          packages to fit different budgets. Contact us for a free consultation and custom quote.
+        </p>
+      </details>
+      <details class="group py-6">
+        <summary class="flex cursor-pointer items-center justify-between text-lg font-medium text-gray-900">
+          How long does a typical project take?
+          <svg class="h-5 w-5 text-gray-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </summary>
+        <p class="mt-4 text-gray-600">
+          Project timelines depend on complexity and scope. During our initial consultation,
+          we'll provide a detailed timeline based on your specific requirements.
+        </p>
+      </details>
+      <details class="group py-6">
+        <summary class="flex cursor-pointer items-center justify-between text-lg font-medium text-gray-900">
+          Do you offer ongoing support?
+          <svg class="h-5 w-5 text-gray-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </summary>
+        <p class="mt-4 text-gray-600">
+          Yes! We offer various support and maintenance packages to ensure your continued
+          success. We're here to help you every step of the way.
+        </p>
+      </details>
+    </div>
+  </Section>
+
+  <!-- CTA -->
+  <CTA
+    title="Ready to Get Started?"
+    description="Let's discuss how our services can help you achieve your goals."
+    primaryButton={{ text: "Request a Quote", href: "/contact" }}
+    secondaryButton={{ text: "Call Us", href: `tel:${siteConfig.contact.phone.replace(/\D/g, '')}` }}
+  />
+</Layout>

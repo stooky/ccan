@@ -1,0 +1,62 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  href: string;
+  pubDate: Date;
+  author?: string;
+  image?: string;
+  imageAlt?: string;
+  tags?: string[];
+}
+
+const {
+  title,
+  description,
+  href,
+  pubDate,
+  author,
+  image,
+  imageAlt = '',
+  tags = [],
+} = Astro.props;
+
+const formattedDate = pubDate.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<article class="group flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200 transition-shadow hover:shadow-lg">
+  {image && (
+    <a href={href} class="overflow-hidden">
+      <img
+        src={image}
+        alt={imageAlt}
+        class="h-48 w-full object-cover transition-transform group-hover:scale-105"
+      />
+    </a>
+  )}
+  <div class="flex flex-1 flex-col p-6">
+    {tags.length > 0 && (
+      <div class="mb-3 flex flex-wrap gap-2">
+        {tags.slice(0, 3).map((tag) => (
+          <span class="inline-flex items-center rounded-full bg-primary-50 px-2.5 py-0.5 text-xs font-medium text-primary-700">
+            {tag}
+          </span>
+        ))}
+      </div>
+    )}
+    <h3 class="text-xl font-semibold text-gray-900 group-hover:text-primary-600">
+      <a href={href}>{title}</a>
+    </h3>
+    <p class="mt-2 flex-1 text-gray-600 line-clamp-3">
+      {description}
+    </p>
+    <div class="mt-4 flex items-center justify-between text-sm text-gray-500">
+      <time datetime={pubDate.toISOString()}>{formattedDate}</time>
+      {author && <span>{author}</span>}
+    </div>
+  </div>
+</article>

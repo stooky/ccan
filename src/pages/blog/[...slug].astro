@@ -1,0 +1,111 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+const formattedDate = post.data.pubDate.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+const formattedUpdatedDate = post.data.updatedDate?.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<Layout
+  title={post.data.title}
+  description={post.data.description}
+  image={post.data.image}
+  imageAlt={post.data.imageAlt}
+  type="article"
+  publishedTime={post.data.pubDate}
+  modifiedTime={post.data.updatedDate}
+  author={post.data.author}
+>
+  <article class="py-12 sm:py-16">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+      <!-- Header -->
+      <header class="mb-10">
+        <!-- Tags -->
+        {post.data.tags.length > 0 && (
+          <div class="mb-4 flex flex-wrap gap-2">
+            {post.data.tags.map((tag: string) => (
+              <span class="inline-flex items-center rounded-full bg-primary-50 px-3 py-1 text-sm font-medium text-primary-700">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+          {post.data.title}
+        </h1>
+
+        <p class="mt-4 text-xl text-gray-600">
+          {post.data.description}
+        </p>
+
+        <!-- Meta -->
+        <div class="mt-6 flex flex-wrap items-center gap-4 text-sm text-gray-500">
+          <div class="flex items-center gap-2">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-600 font-semibold">
+              {post.data.author.charAt(0)}
+            </div>
+            <span class="font-medium text-gray-900">{post.data.author}</span>
+          </div>
+          <span>&middot;</span>
+          <time datetime={post.data.pubDate.toISOString()}>{formattedDate}</time>
+          {formattedUpdatedDate && (
+            <>
+              <span>&middot;</span>
+              <span>Updated {formattedUpdatedDate}</span>
+            </>
+          )}
+        </div>
+      </header>
+
+      <!-- Featured Image -->
+      {post.data.image && (
+        <div class="mb-10">
+          <img
+            src={post.data.image}
+            alt={post.data.imageAlt || post.data.title}
+            class="w-full rounded-xl"
+          />
+        </div>
+      )}
+
+      <!-- Content -->
+      <div class="prose prose-lg prose-gray max-w-none prose-headings:font-bold prose-a:text-primary-600 prose-a:no-underline hover:prose-a:underline">
+        <Content />
+      </div>
+
+      <!-- Footer -->
+      <footer class="mt-12 border-t border-gray-200 pt-8">
+        <a
+          href="/blog"
+          class="inline-flex items-center text-primary-600 font-medium hover:text-primary-700"
+        >
+          <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+          Back to Blog
+        </a>
+      </footer>
+    </div>
+  </article>
+</Layout>
