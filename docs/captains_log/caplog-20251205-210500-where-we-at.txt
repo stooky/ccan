@@ -1,0 +1,274 @@
+================================================================================
+                              CAPTAIN'S LOG
+================================================================================
+Entry:        caplog-20251205-210500-where-we-at.txt
+Created:      2025-12-05 21:05:00
+Author:       Claude (AI Assistant)
+Project:      C-Can Sam - Storage Container Website (ffm2 repo, storage-containers branch)
+Branch:       storage-containers
+Previous Log: caplog-20251204-010000-ready-to-rock-an-hvac-site-in-the-cloud.txt
+================================================================================
+
+## Summary
+
+Major pivot! The ffm2 repository has been repurposed to support multiple business
+verticals. We've branched from the Fire & Frost Mechanical (HVAC) site to create
+a new "Storage Containers" vertical for C-Can Sam, a shipping container sales and
+rental company in Martensville, SK. Implemented a stash/restore system to manage
+multiple sites from the same codebase.
+
+--------------------------------------------------------------------------------
+## Current State of the Project
+--------------------------------------------------------------------------------
+
+### Active Site: C-Can Sam
+- Business: Shipping container sales, rentals, and storage
+- Location: 12 Peters Avenue, Martensville, SK S0K 0A2
+- Phone: 1-844-473-2226 (toll-free), 1-306-281-4100 (local)
+- Website: ccansam.com
+- Branch: storage-containers
+
+### Stashed Site: Fire & Frost Mechanical
+- HVAC & Refrigeration company (previous work)
+- Stashed to: stash/fireandfrostmechanical.ca/
+- Tagged as: v1.0-hvac
+- Can be restored with: npm run restore fireandfrostmechanical.ca
+
+### Multi-Site Architecture
+```
+ffm2/
+├── main branch           → Clean boilerplate
+├── storage-containers    → C-Can Sam (ACTIVE)
+├── stash/
+│   └── fireandfrostmechanical.ca/  → Fire & Frost (STASHED)
+│       ├── src/
+│       ├── public/
+│       └── manifest.json
+└── scripts/
+    ├── stash.js          → npm run stash <domain>
+    └── restore.js        → npm run restore <domain>
+```
+
+--------------------------------------------------------------------------------
+## Work Completed This Session
+--------------------------------------------------------------------------------
+
+### 1. Git Branching Strategy
+- Created tag `v1.0-hvac` on main for Fire & Frost release
+- Created branch `storage-containers` for C-Can Sam
+- Pushed branch to origin
+
+### 2. Stash/Restore System
+Created a multi-site management system:
+- `npm run stash <domain>` - Archives site files to stash/<domain>/
+- `npm run restore <domain>` - Restores from stash
+- Manifest tracks source URL, stash date, and git info
+- Fire & Frost stashed to `stash/fireandfrostmechanical.ca/`
+
+### 3. Brand Transformation: HVAC → Storage Containers
+
+#### Theme Colors Updated (src/styles/global.css)
+| Element | HVAC (Fire & Frost) | Storage (C-Can Sam) |
+|---------|---------------------|---------------------|
+| Primary | Blue (#3b82f6) | Coral (#D45C44) |
+| Secondary | Red (#ef4444) | Green (#5B9A4A) |
+| Accent | - | Yellow (#F4C75E) |
+
+#### Site Config (src/config/site.ts)
+- Company: C-Can Sam
+- Tagline: "Saskatchewan's Premier Seacan Solutions Provider"
+- Contact: ccansam22@gmail.com
+- Social: Facebook, Instagram, WhatsApp
+- Hours: Mon-Fri 9-5, Sat by appointment
+
+#### Logo
+- Source: ccansam/assets/images/Frame-1.png
+- Copied to: src/assets/images/ccansam-logo.png
+- Features pelican mascot with coral/green shipping containers
+- Aspect ratio: ~2.13:1
+
+### 4. Page Rewrites
+
+#### Homepage (index.astro)
+- Hero: "Seacan Storage, Sales & Rentals" with background image
+- Background: Sunset prairie scene with stacked containers
+- Overlay: Dark gradient (85%→50%) for text readability
+- Features: Container Rentals, Sales, On-Site Storage, Off-Site Storage
+- Testimonials: Mike R. (Warman), Sarah L. (Saskatoon), Dave K. (Martensville)
+- CTA: WhatsApp integration
+
+#### Services Page (services.astro)
+- Container Types: 20ft Standard, 40ft Standard, 40ft High Cube
+- Service Options: Rentals, Sales, On-Site Storage, Off-Site Storage
+- Process: "How It Works" section
+- Service Areas: Martensville, Saskatoon, Warman, etc.
+- FAQ: Accordion-style questions
+
+#### About Page (about.astro)
+- Company values: Quality, Flexible, Local, Reliable
+- Container features: Move-in Ready, Weatherproof, Secure
+- Location section with contact info
+
+#### Contact Page (contact.astro)
+- WhatsApp button (prominent, green styling)
+- Dual phone numbers (toll-free + local)
+- Embedded Google Maps iframe
+- Business hours display
+- Social links (Facebook, Instagram)
+
+### 5. Blog Content
+Deleted HVAC posts, created container-focused content:
+| Old (Deleted) | New (Created) |
+|---------------|---------------|
+| preparing-furnace-saskatchewan-winter.md | eco-friendly-seacan-uses.md |
+| hvac-tips-saskatoon-homeowners.md | 5-smart-tips-buying-containers.md |
+| commercial-refrigeration-saskatoon-businesses.md | buy-used-shipping-containers-canada.md |
+
+### 6. Hero Background Image
+- Source: ccansam/assets/images/Ccansam-storage-containers-for-sale-Saskatoon-2048x1544.webp
+- Beautiful sunset prairie scene with coral/orange containers
+- Matches brand colors perfectly
+- Responsive sizes generated: 640px, 1024px, 1536px, 2048px
+- Compression: 158KB → 27-122KB depending on size
+- Dark gradient overlay for text contrast
+
+### 7. Images Copied
+- Logo: public/images/logo.png (C-Can Sam)
+- Hero background: src/assets/images/hero-bg.webp
+- Source material: ccansam/ folder (scraped from original site)
+
+--------------------------------------------------------------------------------
+## Decisions Made
+--------------------------------------------------------------------------------
+
+1. **Branch per vertical** - Each business type gets its own branch. Main stays
+   clean as a boilerplate. Enables parallel development.
+
+2. **Stash system over git submodules** - Simpler for single-developer workflow.
+   Full files are preserved, not just git references.
+
+3. **Gradient overlay direction** - Left-to-right (85%→50%) because text is
+   centered/left-aligned. Shows more of the sunset on the right.
+
+4. **WhatsApp as primary CTA** - C-Can Sam uses WhatsApp heavily for customer
+   communication. Pre-filled message included.
+
+5. **Dual phone numbers** - Toll-free (1-844) for broader reach, local (306)
+   for Saskatchewan customers who prefer local numbers.
+
+6. **Coral/Green/Yellow palette** - Extracted directly from C-Can Sam logo.
+   Coral containers, green containers, yellow pelican circle.
+
+--------------------------------------------------------------------------------
+## Issues Encountered
+--------------------------------------------------------------------------------
+
+1. **Escaped backticks in index.astro**
+   - Error: Syntax error "`" at line 80
+   - Cause: Template literal had escaped backticks `\`tel:\${...}\``
+   - Fix: Changed to proper backticks `tel:${...}`
+
+2. **Large HTML files from scraped site**
+   - Blog article HTMLs exceeded 25000 token limit
+   - Solution: Used Grep to extract headings, wrote content manually
+
+3. **Windows path issues with del command**
+   - `del` is Windows-specific, bash uses `rm`
+   - Fixed by using `rm` for file deletion
+
+--------------------------------------------------------------------------------
+## Uncommitted Changes
+--------------------------------------------------------------------------------
+
+```
+14 files changed, 525 insertions(+), 685 deletions(-)
+
+Modified:
+- .claude/settings.local.json    (tool permissions)
+- package.json                   (stash/restore scripts)
+- src/components/Footer.astro    (C-Can Sam logo)
+- src/components/Hero.astro      (background image support)
+- src/components/Navigation.astro (C-Can Sam logo)
+- src/config/site.ts             (C-Can Sam info)
+- src/pages/about.astro          (container content)
+- src/pages/contact.astro        (WhatsApp, maps)
+- src/pages/index.astro          (hero bg, container content)
+- src/pages/services.astro       (container services)
+- src/styles/global.css          (coral/green theme)
+
+Deleted:
+- src/content/blog/commercial-refrigeration-saskatoon-businesses.md
+- src/content/blog/hvac-tips-saskatoon-homeowners.md
+- src/content/blog/preparing-furnace-saskatchewan-winter.md
+
+Added (untracked):
+- ccansam/                       (scraped source material)
+- membersolutions.com/           (unknown - investigate)
+- public/images/                 (blog, containers, testimonials, logo)
+- scripts/stash.js
+- scripts/restore.js
+- src/assets/images/ccansam-logo.png
+- src/assets/images/hero-bg.webp
+- src/content/blog/5-smart-tips-buying-containers.md
+- src/content/blog/buy-used-shipping-containers-canada.md
+- src/content/blog/eco-friendly-seacan-uses.md
+- stash/                         (Fire & Frost stashed here)
+```
+
+--------------------------------------------------------------------------------
+## Mistakes & Lessons
+--------------------------------------------------------------------------------
+
+1. **Template literal escaping** - In Astro components, use normal backticks
+   for template literals. The escaped version was likely from a copy/paste.
+
+2. **Read file size limits** - Large HTML files from scraping need to be
+   processed in chunks or with Grep. Can't read >25000 tokens at once.
+
+3. **Cross-platform commands** - Use bash commands (rm, cp) not Windows (del).
+   The shell environment is bash even on Windows.
+
+--------------------------------------------------------------------------------
+## Next Steps
+--------------------------------------------------------------------------------
+
+1. [ ] Commit all C-Can Sam changes to storage-containers branch
+2. [ ] Review/remove membersolutions.com folder (unclear why it's there)
+3. [ ] Test all pages visually
+4. [ ] Run Lighthouse audit
+5. [ ] Decide on deployment strategy for C-Can Sam
+6. [ ] Contact form backend (same issue as Fire & Frost)
+7. [ ] Consider adding more container images to services page
+
+--------------------------------------------------------------------------------
+## Session Context for Future Claude
+--------------------------------------------------------------------------------
+
+This repo now supports multiple business sites through branching:
+
+**To work on C-Can Sam (storage containers):**
+```bash
+git checkout storage-containers
+npm run dev
+```
+
+**To work on Fire & Frost (HVAC):**
+```bash
+npm run restore fireandfrostmechanical.ca
+npm run dev
+```
+
+**To stash current work:**
+```bash
+npm run stash ccansam.com
+```
+
+Key source material is in `ccansam/` folder - scraped copy of the original
+ccansam.com website with all images and content.
+
+Build: `npm run build`
+Dev: `npm run dev` (port 4321)
+
+================================================================================
+                              END OF LOG
+================================================================================
