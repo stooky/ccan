@@ -9,7 +9,9 @@
     "preview": "astro preview",
     "astro": "astro",
     "launch": "node scripts/launch.js",
-    "validate": "node scripts/validate.js"
+    "validate": "node scripts/validate.js",
+    "stash": "node scripts/stash.js",
+    "restore": "node scripts/restore.js"
   },
   "dependencies": {
     "astro": "^5.1.0",

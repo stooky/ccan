@@ -1,24 +1,26 @@
 /**
  * Site Configuration
- * Fire & Frost Mechanical - Saskatoon, SK
+ * C-Can Sam - Martensville, SK
+ * Saskatchewan's Premier Seacan Solutions Provider
  */
 
 export const siteConfig = {
   // Basic Info
-  name: "Fire & Frost Mechanical",
-  tagline: "Your Comfort, Our Priority",
-  description: "Professional HVAC services in Saskatoon and area. Heating, cooling, and refrigeration repair, maintenance, and installation. 24/7 on-call service available.",
-  url: "https://fireandfrostmechanical.ca",
+  name: "C-Can Sam",
+  tagline: "Saskatchewan's Premier Seacan Solutions Provider",
+  description: "Saskatoon new & used seacan shipping container rental, sales, and on and off-site storage. Perfect for construction sites, moving, farms, homes, and more!",
+  url: "https://ccansam.com",
 
   // Contact Information
   contact: {
-    email: "clay@fireandfrostmechanical.ca",
-    phone: "306-914-8194",
+    email: "ccansam22@gmail.com",
+    phone: "1-844-473-2226",
+    phoneLocal: "1-306-281-4100",
     address: {
-      street: "",
-      city: "Saskatoon",
+      street: "12 Peters Avenue",
+      city: "Martensville",
       state: "SK",
-      zip: "",
+      zip: "S0K 0A2",
       country: "Canada",
     },
   },
@@ -27,28 +29,37 @@ export const siteConfig = {
   social: {
     twitter: "",
     linkedin: "",
-    facebook: "",
-    instagram: "",
+    facebook: "https://www.facebook.com/ccansam",
+    instagram: "https://www.instagram.com/ccansam_",
     youtube: "",
+    whatsapp: "https://wa.me/13062814100",
   },
 
   // Business Hours
   hours: {
-    monday: "7:30 AM - 7:30 PM",
-    tuesday: "7:30 AM - 7:30 PM",
-    wednesday: "7:30 AM - 7:30 PM",
-    thursday: "7:30 AM - 7:30 PM",
-    friday: "7:30 AM - 7:30 PM",
-    saturday: "7:30 AM - 7:30 PM",
-    sunday: "7:30 AM - 7:30 PM",
+    monday: "9:00 AM - 5:00 PM",
+    tuesday: "9:00 AM - 5:00 PM",
+    wednesday: "9:00 AM - 5:00 PM",
+    thursday: "9:00 AM - 5:00 PM",
+    friday: "9:00 AM - 5:00 PM",
+    saturday: "By Appointment",
+    sunday: "Closed",
   },
 
   // Navigation Links
   navigation: [
     { name: "Home", href: "/" },
-    { name: "Services", href: "/services" },
+    {
+      name: "Our Containers",
+      href: "/storage-container-sales-and-rentals",
+      children: [
+        { name: "Buy", href: "/storage-containers-for-sale" },
+        { name: "Rent", href: "/storage-container-rentals" },
+        { name: "Lease", href: "/storage-container-leasing" },
+      ]
+    },
+    { name: "On-Site Rentals", href: "/on-site-storage-rentals" },
     { name: "About", href: "/about" },
-    { name: "Blog", href: "/blog" },
     { name: "Contact", href: "/contact" },
   ],
 
@@ -56,28 +67,29 @@ export const siteConfig = {
   footerLinks: {
     company: [
       { name: "About Us", href: "/about" },
-      { name: "Our Team", href: "/about#team" },
-      { name: "Service Areas", href: "/services#areas" },
+      { name: "Contact", href: "/contact" },
+      { name: "Blog", href: "/blog" },
     ],
     services: [
-      { name: "Heating", href: "/services#heating" },
-      { name: "Cooling", href: "/services#cooling" },
-      { name: "Refrigeration", href: "/services#refrigeration" },
+      { name: "Container Sales", href: "/storage-container-sales-and-rentals" },
+      { name: "On-Site Rentals", href: "/on-site-storage-rentals" },
+      { name: "Off-Site Storage", href: "/storage-container-sales-and-rentals#offsite" },
+      { name: "Service Areas", href: "/storage-container-sales-and-rentals#areas" },
     ],
     legal: [
       { name: "Privacy Policy", href: "/privacy" },
-      { name: "Terms of Service", href: "/terms" },
+      { name: "Terms & Conditions", href: "/terms" },
     ],
   },
 
   // Default SEO Image (for social sharing)
-  defaultOgImage: "/og-image.png",
+  defaultOgImage: "/images/logo.png",
 
   // Google Analytics ID (leave empty to disable)
   googleAnalyticsId: "",
 
   // Copyright
-  copyright: `© ${new Date().getFullYear()} Fire & Frost Heating & Cooling. All rights reserved.`,
+  copyright: `© ${new Date().getFullYear()} C-Can Sam. All rights reserved.`,
 };
 
 export type SiteConfig = typeof siteConfig;
