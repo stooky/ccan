@@ -13,16 +13,39 @@ BRANCH="storage-containers"
 
 # Colors
 GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
 NC='\033[0m'
 
 echo -e "${GREEN}[INFO]${NC} Updating C-Can Sam site..."
 
 cd "$INSTALL_DIR"
 
-echo -e "${GREEN}[INFO]${NC} Pulling latest changes..."
+# Fix "dubious ownership" error if running as different user
+git config --global --add safe.directory "$INSTALL_DIR" 2>/dev/null || true
+
+echo -e "${GREEN}[INFO]${NC} Fetching latest changes..."
 git fetch origin
-git checkout "$BRANCH"
-git pull origin "$BRANCH"
+
+# Check for local changes that would be overwritten
+if ! git diff --quiet HEAD || ! git diff --cached --quiet; then
+    echo -e "${YELLOW}[WARN]${NC} Local changes detected that would be overwritten."
+    echo ""
+    git status --short
+    echo ""
+    read -p "Discard local changes and sync with remote? (y/N): " -n 1 -r
+    echo ""
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${GREEN}[INFO]${NC} Resetting to remote..."
+        git reset --hard origin/"$BRANCH"
+    else
+        echo -e "${RED}[ERROR]${NC} Update aborted. Please commit or stash your changes first."
+        exit 1
+    fi
+else
+    git checkout "$BRANCH"
+    git pull origin "$BRANCH"
+fi
 
 echo -e "${GREEN}[INFO]${NC} Installing dependencies..."
 npm ci --production=false
