@@ -75,7 +75,7 @@ apt-get upgrade -y
 
 # Install required packages
 log_info "Installing dependencies..."
-apt-get install -y curl git nginx certbot python3-certbot-nginx ufw
+apt-get install -y curl git nginx certbot python3-certbot-nginx ufw php-fpm php-yaml
 
 # Install Node.js 20.x if not installed
 if ! command -v node &> /dev/null; then
@@ -113,12 +113,22 @@ npm ci --production=false
 log_info "Building static site..."
 npm run build
 
+# ============================================
+# Step 4: Set up data directory for form submissions
+# ============================================
+log_info "Setting up data directory..."
+mkdir -p "$INSTALL_DIR/data"
+touch "$INSTALL_DIR/data/submissions.json"
+echo "[]" > "$INSTALL_DIR/data/submissions.json"
+
 # Set proper ownership
 chown -R www-data:www-data "$INSTALL_DIR"
 chmod -R 755 "$INSTALL_DIR"
+chmod 775 "$INSTALL_DIR/data"
+chmod 664 "$INSTALL_DIR/data/submissions.json"
 
 # ============================================
-# Step 4: Configure nginx
+# Step 5: Configure nginx
 # ============================================
 log_info "Configuring nginx..."
 
@@ -149,6 +159,26 @@ server {
     location ~* \.(jpg|jpeg|png|gif|ico|css|js|webp|woff|woff2|ttf|svg)$ {
         expires 30d;
         add_header Cache-Control "public, immutable";
+    }
+
+    # PHP API endpoints
+    location ~ ^/api/.*\.php$ {
+        root $INSTALL_DIR;
+        fastcgi_pass unix:/var/run/php/php-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    # Block direct access to data directory
+    location /data {
+        deny all;
+        return 404;
+    }
+
+    # Block access to config file
+    location = /config.yaml {
+        deny all;
+        return 404;
     }
 
     # Handle Astro routes (clean URLs)
@@ -195,14 +225,16 @@ else
 fi
 
 # ============================================
-# Step 7: Start/restart services
+# Step 8: Start/restart services
 # ============================================
 log_info "Starting services..."
 systemctl enable nginx
+systemctl enable php-fpm || systemctl enable php8.3-fpm || systemctl enable php8.1-fpm
+systemctl restart php-fpm || systemctl restart php8.3-fpm || systemctl restart php8.1-fpm
 systemctl restart nginx
 
 # ============================================
-# Step 8: Set up auto-renewal for SSL
+# Step 9: Set up auto-renewal for SSL
 # ============================================
 log_info "Setting up SSL auto-renewal..."
 systemctl enable certbot.timer
@@ -218,12 +250,16 @@ echo "========================================"
 echo ""
 echo "Your site should now be available at:"
 echo "  https://$DOMAIN"
-echo "  https://www.$DOMAIN"
+echo ""
+echo "Admin panel:"
+echo "  https://$DOMAIN/api/admin.php?key=YOUR_SECRET_KEY"
+echo "  (Change secret_path in config.yaml)"
 echo ""
 echo "Useful commands:"
 echo "  - View nginx logs:    tail -f /var/log/nginx/access.log"
 echo "  - View error logs:    tail -f /var/log/nginx/error.log"
 echo "  - Restart nginx:      systemctl restart nginx"
-echo "  - Update site:        cd $INSTALL_DIR && git pull && npm ci && npm run build"
+echo "  - Update site:        cd $INSTALL_DIR && sudo bash update.sh"
 echo "  - Renew SSL:          certbot renew --dry-run"
+echo "  - View submissions:   cat $INSTALL_DIR/data/submissions.json"
 echo ""

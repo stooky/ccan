@@ -1,0 +1,44 @@
+# C-Can Sam Site Configuration
+# This file contains settings for forms, admin, and other server-side features
+
+# Contact Form Settings
+contact_form:
+  # Email address to receive form submissions
+  recipient_email: "ccansam22@gmail.com"
+
+  # Email subject prefix
+  subject_prefix: "[C-Can Sam Contact]"
+
+  # SMTP settings (for production email sending)
+  # Leave empty to use PHP's mail() function
+  smtp:
+    host: ""
+    port: 587
+    username: ""
+    password: ""
+    encryption: "tls"  # tls or ssl
+
+# Admin Panel Settings
+admin:
+  # Secret URL path for admin access (e.g., /admin/your-secret-here)
+  # Change this to something unique and hard to guess!
+  secret_path: "ccan-admin-2024"
+
+  # Number of submissions to show per page
+  per_page: 50
+
+# Logging Settings
+logging:
+  # Where to store submission logs (relative to site root)
+  submissions_file: "data/submissions.json"
+
+  # Maximum log file size in MB before rotation
+  max_size_mb: 10
+
+# Security Settings
+security:
+  # Honeypot field name (for spam prevention)
+  honeypot_field: "website_url"
+
+  # Rate limiting: max submissions per IP per hour
+  rate_limit: 10
