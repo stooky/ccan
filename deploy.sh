@@ -127,7 +127,7 @@ cat > "$NGINX_CONF" << EOF
 server {
     listen 80;
     listen [::]:80;
-    server_name $DOMAIN www.$DOMAIN;
+    server_name $DOMAIN;
 
     root $INSTALL_DIR/dist;
     index index.html;
@@ -191,7 +191,7 @@ log_info "Setting up SSL certificate..."
 if [[ -d "/etc/letsencrypt/live/$DOMAIN" ]]; then
     log_info "SSL certificate already exists, skipping..."
 else
-    certbot --nginx -d "$DOMAIN" -d "www.$DOMAIN" --non-interactive --agree-tos --email "$EMAIL" --redirect
+    certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --email "$EMAIL" --redirect
 fi
 
 # ============================================

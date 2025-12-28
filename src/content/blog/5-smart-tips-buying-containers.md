@@ -4,6 +4,8 @@ description: "Thinking about buying a shipping container? Here are 5 essential t
 pubDate: 2024-08-20
 author: "C-Can Sam"
 tags: ["shipping containers", "buying guide", "storage", "tips", "Saskatchewan"]
+image: "/images/blog/smart-tips-container.jpg"
+imageAlt: "A shipping container being inspected before purchase"
 draft: false
 ---
 
@@ -32,6 +34,8 @@ Shipping containers come in standard sizes, and choosing the right one depends o
 - **Extra**: That additional foot of height makes a big difference for workshop or office conversions
 
 **Pro tip**: When in doubt, go bigger. You'll likely find uses for the extra space, and it's much easier to have room to grow than to need a second container later.
+
+> **Not sure which size is right for you?** Our team can help you figure out the perfect fit for your needs. [Get a free consultation](/contact) or call 1-844-473-2226.
 
 ## 2. Understand the Condition Grades
 
@@ -74,6 +78,8 @@ If possible, see the container in person before purchasing. Here's what to look 
 - Verify the rubber seals are intact
 
 **Can't inspect in person?** Buy from a reputable dealer who provides detailed photos and honest condition reports. At C-Can Sam, we're happy to walk you through the condition of any container and send additional photos on request.
+
+> **Want to see our current inventory?** We'll send you photos and honest condition reports for any container you're interested in. [Request photos today](/contact).
 
 ## 4. Plan for Delivery and Placement
 

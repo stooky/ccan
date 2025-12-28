@@ -4,6 +4,8 @@ description: "Discover sustainable ways to use shipping containers for your summ
 pubDate: 2024-06-15
 author: "C-Can Sam"
 tags: ["sea cans", "construction", "eco-friendly", "storage", "Saskatchewan"]
+image: "/images/blog/eco-friendly-seacans.jpg"
+imageAlt: "Workers inspecting containers at a construction site"
 draft: false
 ---
 
@@ -53,6 +55,8 @@ Power tools and construction equipment represent a significant investment. A shi
 
 When you're not replacing stolen or damaged equipment, you're not contributing to manufacturing demand—another way sea cans support sustainability.
 
+> **Need secure storage for your job site?** We deliver throughout Saskatchewan. [Get a rental quote](/contact) or call 1-844-473-2226.
+
 ## Choosing the Right Container
 
 For most construction projects, you have several options:
@@ -74,6 +78,8 @@ For one-time projects, renting makes environmental sense—the container gets re
 - No transportation back and forth between rentals
 - Long-term cost savings
 - An asset that holds value
+
+> **Not sure whether to rent or buy?** We can help you run the numbers. [Talk to our team](/contact) about the best option for your situation.
 
 ## Getting Started
 

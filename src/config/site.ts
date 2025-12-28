@@ -59,6 +59,7 @@ export const siteConfig = {
       ]
     },
     { name: "On-Site Rentals", href: "/on-site-storage-rentals" },
+    { name: "Blog", href: "/blog" },
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
   ],

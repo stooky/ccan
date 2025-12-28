@@ -4,6 +4,8 @@ description: "A complete guide to buying used shipping containers in Canada. Lea
 pubDate: 2024-04-10
 author: "C-Can Sam"
 tags: ["shipping containers", "used containers", "buying guide", "Canada", "Saskatchewan"]
+image: "/images/blog/buy-used-containers.jpg"
+imageAlt: "Shipping containers in a rental yard ready for sale"
 draft: false
 ---
 
@@ -24,6 +26,8 @@ A used container has already proven itself. It's survived ocean voyages, tempera
 
 ### Immediate Availability
 New containers often need to be ordered and shipped from overseas. Used containers are typically available locally and can be delivered within days.
+
+> **Looking for a used container in Saskatchewan?** We have inventory ready for delivery. [Check availability](/contact) or call 1-844-473-2226.
 
 ## Understanding Container Conditions
 
@@ -92,6 +96,8 @@ Container prices fluctuate with global shipping demand. Prices spiked during sup
 
 ### Time of Year
 Demand is higher in spring and summer when construction and moving seasons peak. Off-season purchases may offer better deals.
+
+> **Want to know current pricing?** Container prices change frequently. [Get a quote](/contact) for the most up-to-date pricing on the size and condition you need.
 
 ## Delivery Considerations
 
