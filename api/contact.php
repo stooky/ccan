@@ -165,6 +165,8 @@ if (file_put_contents($logFile, json_encode($submissions, JSON_PRETTY_PRINT)) ==
 // Send email notification
 $recipientEmail = $config['contact_form']['recipient_email'] ?? 'ccansam22@gmail.com';
 $subjectPrefix = $config['contact_form']['subject_prefix'] ?? '[Contact Form]';
+$resendApiKey = $config['email']['resend_api_key'] ?? '';
+$fromEmail = $config['email']['from_email'] ?? 'noreply@ccansam.com';
 
 $emailSubject = $subjectPrefix . ' ' . $submission['subject'] . ' from ' . $submission['firstName'];
 
@@ -180,17 +182,67 @@ $emailBody .= "\n\n--- End of Message ---\n";
 $emailBody .= "\nIP: {$submission['ip']}\n";
 $emailBody .= "Submission ID: {$submission['id']}\n";
 
-$emailHeaders = [
-    'From: noreply@' . ($_SERVER['HTTP_HOST'] ?? 'ccansam.com'),
-    'Reply-To: ' . $submission['email'],
-    'X-Mailer: PHP/' . phpversion(),
-    'Content-Type: text/plain; charset=UTF-8'
-];
+$emailSent = false;
 
-$emailSent = @mail($recipientEmail, $emailSubject, $emailBody, implode("\r\n", $emailHeaders));
+// Try Resend API first (recommended)
+if (!empty($resendApiKey)) {
+    $emailSent = sendViaResend($resendApiKey, $fromEmail, $recipientEmail, $submission['email'], $emailSubject, $emailBody);
+} else {
+    // Fallback to PHP mail()
+    $emailHeaders = [
+        'From: ' . $fromEmail,
+        'Reply-To: ' . $submission['email'],
+        'X-Mailer: PHP/' . phpversion(),
+        'Content-Type: text/plain; charset=UTF-8'
+    ];
+    $emailSent = @mail($recipientEmail, $emailSubject, $emailBody, implode("\r\n", $emailHeaders));
+}
 
 if (!$emailSent) {
     error_log('Failed to send contact form email to: ' . $recipientEmail);
+}
+
+/**
+ * Send email via Resend API
+ * https://resend.com - Free tier: 3,000 emails/month
+ */
+function sendViaResend($apiKey, $from, $to, $replyTo, $subject, $body) {
+    $data = [
+        'from' => $from,
+        'to' => [$to],
+        'reply_to' => $replyTo,
+        'subject' => $subject,
+        'text' => $body
+    ];
+
+    $ch = curl_init('https://api.resend.com/emails');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => json_encode($data),
+        CURLOPT_HTTPHEADER => [
+            'Authorization: Bearer ' . $apiKey,
+            'Content-Type: application/json'
+        ],
+        CURLOPT_TIMEOUT => 10
+    ]);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
+    curl_close($ch);
+
+    if ($error) {
+        error_log('Resend cURL error: ' . $error);
+        return false;
+    }
+
+    if ($httpCode !== 200) {
+        error_log('Resend API error (HTTP ' . $httpCode . '): ' . $response);
+        return false;
+    }
+
+    return true;
 }
 
 // Return success response

@@ -75,26 +75,57 @@ Server-side configuration for the contact form and admin panel. **This file live
 # Contact Form Settings
 contact_form:
   recipient_email: "your-email@example.com"  # Where submissions are sent
-  subject_prefix: "[C-Can Sam Contact]"       # Email subject prefix
+  subject_prefix: "[C-Can Sam Contact]"
+
+# Email Sending (Resend - free 3,000/month)
+email:
+  resend_api_key: "re_xxxxxxxxx"              # ⚠️ Get from resend.com
+  from_email: "Site <onboarding@resend.dev>"  # Or your verified domain
 
 # Admin Panel Settings
 admin:
   secret_path: "your-secret-key-here"  # ⚠️ CHANGE THIS!
   per_page: 50
 
-# Logging Settings
+# Logging & Security
 logging:
   submissions_file: "data/submissions.json"
-
-# Security Settings
 security:
   honeypot_field: "website_url"
-  rate_limit: 10  # Max submissions per IP per hour
+  rate_limit: 10
 ```
 
-**⚠️ IMPORTANT:** After deployment, edit `config.yaml` on the server to:
-1. Set `recipient_email` to your actual email
-2. Change `secret_path` to a unique, hard-to-guess value
+**⚠️ IMPORTANT:** After deployment, edit `config.yaml` on the server:
+
+```bash
+nano /var/www/ccan/config.yaml
+```
+
+1. Set `recipient_email` to your email
+2. Change `secret_path` to something unique
+3. Add your Resend API key (see below)
+
+### Email Setup with Resend
+
+[Resend](https://resend.com) provides reliable email delivery. Free tier: 3,000 emails/month.
+
+**Quick setup (5 minutes):**
+
+1. Sign up at https://resend.com
+2. Go to **API Keys** → Create new key → Copy it
+3. Add to `config.yaml`:
+   ```yaml
+   email:
+     resend_api_key: "re_your_key_here"
+     from_email: "C-Can Sam <onboarding@resend.dev>"
+   ```
+
+**For production**, verify your domain in Resend and update `from_email`:
+```yaml
+from_email: "C-Can Sam <noreply@ccansam.com>"
+```
+
+Without Resend configured, the form falls back to PHP `mail()` which often lands in spam.
 
 ---
 

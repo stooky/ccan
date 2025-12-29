@@ -4,19 +4,24 @@
 # Contact Form Settings
 contact_form:
   # Email address to receive form submissions
-  recipient_email: "ccansam22@gmail.com"
+  recipient_email: "chris@fossenier.com"
 
   # Email subject prefix
   subject_prefix: "[C-Can Sam Contact]"
 
-  # SMTP settings (for production email sending)
-  # Leave empty to use PHP's mail() function
-  smtp:
-    host: ""
-    port: 587
-    username: ""
-    password: ""
-    encryption: "tls"  # tls or ssl
+# Email Sending (Resend - recommended)
+# Sign up at https://resend.com (free: 3,000 emails/month)
+# 1. Create account -> Get API key
+# 2. Add & verify your domain (or use onboarding@resend.dev for testing)
+# 3. Paste API key below
+email:
+  # Resend API key (starts with "re_")
+  # Leave empty to fall back to PHP mail() - often lands in spam
+  resend_api_key: ""
+
+  # From email address
+  # Must be from a verified domain in Resend, or use: onboarding@resend.dev
+  from_email: "C-Can Sam <onboarding@resend.dev>"
 
 # Admin Panel Settings
 admin:
