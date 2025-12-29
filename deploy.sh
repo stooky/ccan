@@ -13,6 +13,14 @@
 
 set -e
 
+# Logging
+LOG_FILE="/var/log/ccan-deploy.log"
+exec > >(tee -a "$LOG_FILE") 2>&1
+echo ""
+echo "============================================"
+echo "Deployment started at $(date)"
+echo "============================================"
+
 # Configuration
 REPO_URL="https://github.com/stooky/ccan.git"
 BRANCH="storage-containers"
@@ -201,7 +209,14 @@ ln -sf "$NGINX_CONF" "$NGINX_ENABLED"
 rm -f /etc/nginx/sites-enabled/default
 
 # Test nginx configuration
-nginx -t
+log_info "Testing nginx configuration..."
+if nginx -t; then
+    log_info "Nginx config test passed"
+else
+    log_error "Nginx config test FAILED"
+    cat "$NGINX_CONF"
+    exit 1
+fi
 
 # ============================================
 # Step 5: Configure firewall
@@ -233,7 +248,17 @@ if [[ -d "/etc/letsencrypt/live/$DOMAIN" ]]; then
     fi
 else
     log_info "No SSL certificate found, creating one..."
-    certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --email "$EMAIL" --redirect
+    if certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --email "$EMAIL" --redirect; then
+        log_info "SSL certificate created successfully"
+    else
+        log_error "SSL certificate creation FAILED"
+        log_warn "Site will be available on HTTP only. Common causes:"
+        echo "  - Domain DNS not pointing to this server"
+        echo "  - Using Cloudflare proxy (use Cloudflare SSL instead)"
+        echo "  - Firewall blocking port 80"
+        echo ""
+        echo "Check: /var/log/letsencrypt/letsencrypt.log"
+    fi
 fi
 
 # ============================================
@@ -264,25 +289,69 @@ systemctl enable certbot.timer
 systemctl start certbot.timer
 
 # ============================================
+# Step 10: Verify deployment
+# ============================================
+log_info "Verifying deployment..."
+echo ""
+
+# Test HTTP response
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost)
+if [[ "$HTTP_STATUS" == "200" ]]; then
+    log_info "HTTP check: OK (status $HTTP_STATUS)"
+else
+    log_error "HTTP check: FAILED (status $HTTP_STATUS)"
+fi
+
+# Test HTTPS if cert exists
+if [[ -d "/etc/letsencrypt/live/$DOMAIN" ]]; then
+    HTTPS_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -k https://localhost 2>/dev/null || echo "000")
+    if [[ "$HTTPS_STATUS" == "200" ]]; then
+        log_info "HTTPS check: OK (status $HTTPS_STATUS)"
+    else
+        log_warn "HTTPS check: status $HTTPS_STATUS (may need nginx reload)"
+    fi
+fi
+
+# Test PHP-FPM
+PHP_TEST=$(curl -s -X POST http://localhost/api/contact.php -H "Content-Type: application/json" -d '{"test":true}' 2>/dev/null)
+if [[ "$PHP_TEST" == *"error"* ]] || [[ "$PHP_TEST" == *"success"* ]]; then
+    log_info "PHP-FPM check: OK"
+else
+    log_warn "PHP-FPM check: May need attention"
+    echo "  Response: $PHP_TEST"
+fi
+
+# Show listening ports
+echo ""
+log_info "Services listening:"
+ss -tlnp | grep -E ':(80|443)\s' | head -5
+
+# ============================================
 # Done!
 # ============================================
 echo ""
 echo "========================================"
-log_info "Deployment complete!"
+log_info "Deployment complete at $(date)"
 echo "========================================"
 echo ""
 echo "Your site should now be available at:"
-echo "  https://$DOMAIN"
+echo "  http://$DOMAIN"
+if [[ -d "/etc/letsencrypt/live/$DOMAIN" ]]; then
+    echo "  https://$DOMAIN"
+fi
 echo ""
 echo "Admin panel:"
 echo "  https://$DOMAIN/api/admin.php?key=YOUR_SECRET_KEY"
 echo "  (Change secret_path in config.yaml)"
 echo ""
-echo "Useful commands:"
-echo "  - View nginx logs:    tail -f /var/log/nginx/access.log"
-echo "  - View error logs:    tail -f /var/log/nginx/error.log"
+echo "Logs:"
+echo "  - Deploy log:         cat $LOG_FILE"
+echo "  - Nginx access:       tail -f /var/log/nginx/access.log"
+echo "  - Nginx errors:       tail -f /var/log/nginx/error.log"
+echo "  - Certbot:            cat /var/log/letsencrypt/letsencrypt.log"
+echo ""
+echo "Commands:"
 echo "  - Restart nginx:      systemctl restart nginx"
 echo "  - Update site:        cd $INSTALL_DIR && sudo bash update.sh"
-echo "  - Renew SSL:          certbot renew --dry-run"
 echo "  - View submissions:   cat $INSTALL_DIR/data/submissions.json"
 echo ""
