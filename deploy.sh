@@ -215,12 +215,24 @@ ufw status
 # ============================================
 # Step 6: Set up SSL with Certbot
 # ============================================
-log_info "Setting up SSL certificate..."
+log_info "Checking SSL certificate..."
 
 # Check if certificate already exists
 if [[ -d "/etc/letsencrypt/live/$DOMAIN" ]]; then
-    log_info "SSL certificate already exists, skipping..."
+    # Get certificate expiry date
+    CERT_EXPIRY=$(openssl x509 -enddate -noout -in "/etc/letsencrypt/live/$DOMAIN/cert.pem" 2>/dev/null | cut -d= -f2)
+    log_info "SSL certificate already exists for $DOMAIN"
+    echo "  Expires: $CERT_EXPIRY"
+    echo ""
+    read -p "Do you want to recreate the SSL certificate? (y/N): " RECREATE_SSL
+    if [[ "$RECREATE_SSL" =~ ^[Yy]$ ]]; then
+        log_info "Recreating SSL certificate..."
+        certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --email "$EMAIL" --redirect --force-renewal
+    else
+        log_info "Keeping existing SSL certificate"
+    fi
 else
+    log_info "No SSL certificate found, creating one..."
     certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --email "$EMAIL" --redirect
 fi
 
