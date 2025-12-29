@@ -55,7 +55,9 @@
       "Bash(while read f)",
       "Bash(do echo \"$f\")",
       "Bash(done)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(yt-dlp:*)",
+      "Bash(C:/Users/chris/AppData/Roaming/Python/Python314/Scripts/yt-dlp.exe:*)"
     ],
     "deny": [],
     "ask": []
