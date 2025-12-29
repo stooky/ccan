@@ -69,43 +69,79 @@ Main site configuration including:
 
 ### Server Config (`config.yaml`)
 
-Server-side settings for:
-- Contact form recipient email
-- Admin panel secret URL
-- Logging preferences
-- Security settings (honeypot, rate limiting)
+Server-side configuration for the contact form and admin panel. **This file lives on the server** at `/var/www/ccan/config.yaml`.
 
-**Important:** Update `admin.secret_path` before deploying to production!
+```yaml
+# Contact Form Settings
+contact_form:
+  recipient_email: "your-email@example.com"  # Where submissions are sent
+  subject_prefix: "[C-Can Sam Contact]"       # Email subject prefix
+
+# Admin Panel Settings
+admin:
+  secret_path: "your-secret-key-here"  # ⚠️ CHANGE THIS!
+  per_page: 50
+
+# Logging Settings
+logging:
+  submissions_file: "data/submissions.json"
+
+# Security Settings
+security:
+  honeypot_field: "website_url"
+  rate_limit: 10  # Max submissions per IP per hour
+```
+
+**⚠️ IMPORTANT:** After deployment, edit `config.yaml` on the server to:
+1. Set `recipient_email` to your actual email
+2. Change `secret_path` to a unique, hard-to-guess value
 
 ---
 
-## Contact Form
+## Contact Form & Admin Panel
 
-The contact form uses different backends:
-- **Production:** PHP handler (`/api/contact.php`) with email + JSON logging
-- **Local dev:** Node.js handler (`api/contact-local.js`) with console + JSON logging
+### How It Works
 
-### Testing Locally
+- **Production:** PHP handler (`/api/contact.php`) sends email + logs to JSON
+- **Local dev:** Node.js handler (`api/contact-local.js`) logs only (no email)
 
-1. Start the dev server: `npm run dev`
-2. In another terminal, start the form handler: `node api/contact-local.js`
-3. Submit a test form on the contact page
-4. Check the console and `data/submissions.json` for the logged submission
+### Admin Panel Access
 
-### Admin Panel
+The admin panel lets you view all contact form submissions.
 
-View submissions at:
+**URL Format:**
 ```
-https://yourdomain.com/api/admin.php?key=YOUR_SECRET_PATH
+https://yourdomain.com/api/admin.php?key=YOUR_SECRET_KEY
 ```
 
-The secret path is configured in `config.yaml` under `admin.secret_path`.
+**Example** (using default config):
+```
+https://ccan.crkid.com/api/admin.php?key=ccan-admin-2024
+```
 
-Features:
+The `key` parameter must match `admin.secret_path` in `config.yaml`.
+
+**To change the admin key:**
+```bash
+# On the server
+nano /var/www/ccan/config.yaml
+# Change: secret_path: "your-new-secret-key"
+# Save and exit - no restart needed
+```
+
+### Admin Features
+
 - View all submissions with pagination
 - Export to CSV
 - Delete individual submissions
 - Stats (total, today, last 7 days)
+
+### Testing Locally
+
+1. Start the dev server: `npm run dev`
+2. In another terminal: `node api/contact-local.js`
+3. Submit a test form on the contact page
+4. Check the console and `data/submissions.json`
 
 ---
 
