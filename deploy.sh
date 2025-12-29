@@ -229,8 +229,19 @@ fi
 # ============================================
 log_info "Starting services..."
 systemctl enable nginx
-systemctl enable php-fpm || systemctl enable php8.3-fpm || systemctl enable php8.1-fpm
-systemctl restart php-fpm || systemctl restart php8.3-fpm || systemctl restart php8.1-fpm
+
+# Find and enable PHP-FPM (version varies by distro)
+PHP_FPM_SERVICE=$(systemctl list-unit-files | grep -o 'php[0-9.]*-fpm.service' | head -1)
+if [[ -n "$PHP_FPM_SERVICE" ]]; then
+    log_info "Found PHP-FPM service: $PHP_FPM_SERVICE"
+    systemctl enable "$PHP_FPM_SERVICE"
+    systemctl restart "$PHP_FPM_SERVICE"
+else
+    log_warn "PHP-FPM service not found, trying common names..."
+    systemctl enable php8.3-fpm 2>/dev/null || systemctl enable php8.1-fpm 2>/dev/null || true
+    systemctl restart php8.3-fpm 2>/dev/null || systemctl restart php8.1-fpm 2>/dev/null || true
+fi
+
 systemctl restart nginx
 
 # ============================================
