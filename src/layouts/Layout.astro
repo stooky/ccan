@@ -1,6 +1,7 @@
 ---
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/Footer.astro';
+import CookieConsent from '../components/CookieConsent.astro';
 import { siteConfig } from '../config/site';
 import '../styles/global.css';
 
@@ -32,7 +33,7 @@ const fullTitle = `${title} | ${siteConfig.name}`;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-ga-id={siteConfig.googleAnalyticsId || ''}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -119,26 +120,7 @@ const fullTitle = `${title} | ${siteConfig.name}`;
       }
     })} />
 
-    <!-- Google Analytics (if configured) -->
-    {siteConfig.googleAnalyticsId && (
-      <>
-        <script
-          async
-          src={`https://www.googletagmanager.com/gtag/js?id=${siteConfig.googleAnalyticsId}`}
-        />
-        <script
-          is:inline
-          define:vars={{ gaId: siteConfig.googleAnalyticsId }}
-        >
-          window.dataLayer = window.dataLayer || [];
-          function gtag() {
-            dataLayer.push(arguments);
-          }
-          gtag('js', new Date());
-          gtag('config', gaId);
-        </script>
-      </>
-    )}
+    <!-- Google Analytics loaded conditionally after cookie consent -->
   </head>
   <body class="min-h-screen flex flex-col bg-white text-gray-900 antialiased">
     <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -147,5 +129,6 @@ const fullTitle = `${title} | ${siteConfig.name}`;
       <slot />
     </main>
     <Footer />
+    <CookieConsent />
   </body>
 </html>
