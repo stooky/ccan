@@ -14,8 +14,9 @@
     "restore": "node scripts/restore.js"
   },
   "dependencies": {
+    "@astrojs/sitemap": "^3.2.1",
     "astro": "^5.1.0",
-    "@astrojs/sitemap": "^3.2.1"
+    "yaml": "^2.8.2"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.15",

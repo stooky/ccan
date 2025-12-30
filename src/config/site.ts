@@ -1,96 +1,133 @@
 /**
- * Site Configuration
- * C-Can Sam - Martensville, SK
- * Saskatchewan's Premier Seacan Solutions Provider
+ * Site Configuration Loader
+ * Reads from config.yaml - the single source of truth for all settings
  */
 
-export const siteConfig = {
-  // Basic Info
-  name: "C-Can Sam",
-  tagline: "Saskatchewan's Premier Seacan Solutions Provider",
-  description: "Saskatoon new & used seacan shipping container rental, sales, and on and off-site storage. Perfect for construction sites, moving, farms, homes, and more!",
-  url: "https://ccansam.com",
+import fs from 'node:fs';
+import path from 'node:path';
+import YAML from 'yaml';
 
-  // Contact Information
-  contact: {
-    email: "ccansam22@gmail.com",
-    phone: "1-844-473-2226",
-    phoneLocal: "1-306-281-4100",
-    address: {
-      street: "12 Peters Avenue",
-      city: "Martensville",
-      state: "SK",
-      zip: "S0K 0A2",
-      country: "Canada",
+// Type definitions
+interface NavItem {
+  name: string;
+  href: string;
+  children?: NavItem[];
+}
+
+interface FooterLinks {
+  company: NavItem[];
+  services: NavItem[];
+  legal: NavItem[];
+}
+
+interface Address {
+  street: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+}
+
+interface Contact {
+  email: string;
+  phone: string;
+  phoneLocal: string;
+  address: Address;
+}
+
+interface Social {
+  facebook: string;
+  instagram: string;
+  twitter: string;
+  linkedin: string;
+  youtube: string;
+  whatsapp: string;
+}
+
+interface Hours {
+  monday: string;
+  tuesday: string;
+  wednesday: string;
+  thursday: string;
+  friday: string;
+  saturday: string;
+  sunday: string;
+}
+
+export interface SiteConfig {
+  name: string;
+  tagline: string;
+  description: string;
+  url: string;
+  contact: Contact;
+  social: Social;
+  hours: Hours;
+  navigation: NavItem[];
+  footerLinks: FooterLinks;
+  defaultOgImage: string;
+  googleAnalyticsId: string;
+  copyright: string;
+}
+
+// Load and parse config.yaml
+function loadConfig(): SiteConfig {
+  const configPath = path.join(process.cwd(), 'config.yaml');
+  const configFile = fs.readFileSync(configPath, 'utf-8');
+  const config = YAML.parse(configFile);
+
+  // Transform YAML structure to match expected interface
+  return {
+    // Site identity
+    name: config.site.name,
+    tagline: config.site.tagline,
+    description: config.site.description,
+    url: config.site.url,
+    defaultOgImage: config.site.default_og_image,
+
+    // Contact (transform snake_case to camelCase)
+    contact: {
+      email: config.contact.email,
+      phone: config.contact.phone,
+      phoneLocal: config.contact.phone_local,
+      address: {
+        street: config.contact.address.street,
+        city: config.contact.address.city,
+        state: config.contact.address.state,
+        zip: config.contact.address.zip,
+        country: config.contact.address.country,
+      },
     },
-  },
 
-  // Social Media Links
-  social: {
-    twitter: "",
-    linkedin: "",
-    facebook: "https://www.facebook.com/ccansam",
-    instagram: "https://www.instagram.com/ccansam_",
-    youtube: "",
-    whatsapp: "https://wa.me/13062814100",
-  },
-
-  // Business Hours
-  hours: {
-    monday: "9:00 AM - 5:00 PM",
-    tuesday: "9:00 AM - 5:00 PM",
-    wednesday: "9:00 AM - 5:00 PM",
-    thursday: "9:00 AM - 5:00 PM",
-    friday: "9:00 AM - 5:00 PM",
-    saturday: "By Appointment",
-    sunday: "Closed",
-  },
-
-  // Navigation Links
-  navigation: [
-    { name: "Home", href: "/" },
-    {
-      name: "Our Containers",
-      href: "/storage-container-sales-and-rentals",
-      children: [
-        { name: "Buy", href: "/storage-containers-for-sale" },
-        { name: "Rent", href: "/storage-container-rentals" },
-        { name: "Lease", href: "/storage-container-leasing" },
-      ]
+    // Social media
+    social: {
+      facebook: config.social.facebook || '',
+      instagram: config.social.instagram || '',
+      twitter: config.social.twitter || '',
+      linkedin: config.social.linkedin || '',
+      youtube: config.social.youtube || '',
+      whatsapp: config.social.whatsapp || '',
     },
-    { name: "On-Site Rentals", href: "/on-site-storage-rentals" },
-    { name: "Blog", href: "/blog" },
-    { name: "About", href: "/about" },
-    { name: "Contact", href: "/contact" },
-  ],
 
-  // Footer Navigation (additional links)
-  footerLinks: {
-    company: [
-      { name: "About Us", href: "/about" },
-      { name: "Contact", href: "/contact" },
-      { name: "Blog", href: "/blog" },
-    ],
-    services: [
-      { name: "Container Sales", href: "/storage-container-sales-and-rentals" },
-      { name: "On-Site Rentals", href: "/on-site-storage-rentals" },
-      { name: "Off-Site Storage", href: "/storage-container-sales-and-rentals#offsite" },
-      { name: "Service Areas", href: "/storage-container-sales-and-rentals#areas" },
-    ],
-    legal: [
-      { name: "Privacy Policy", href: "/privacy" },
-      { name: "Terms & Conditions", href: "/terms" },
-    ],
-  },
+    // Business hours
+    hours: config.hours,
 
-  // Default SEO Image (for social sharing)
-  defaultOgImage: "/images/logo.png",
+    // Navigation
+    navigation: config.navigation.main,
 
-  // Google Analytics ID (leave empty to disable)
-  googleAnalyticsId: "",
+    // Footer links
+    footerLinks: {
+      company: config.navigation.footer.company,
+      services: config.navigation.footer.services,
+      legal: config.navigation.footer.legal,
+    },
 
-  // Copyright
-  copyright: `© ${new Date().getFullYear()} C-Can Sam. All rights reserved.`,
-};
+    // Analytics
+    googleAnalyticsId: config.analytics?.google_analytics_id || '',
 
-export type SiteConfig = typeof siteConfig;
+    // Generated
+    copyright: `© ${new Date().getFullYear()} ${config.site.name}. All rights reserved.`,
+  };
+}
+
+// Export the loaded config
+export const siteConfig = loadConfig();
