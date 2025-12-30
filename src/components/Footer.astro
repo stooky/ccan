@@ -20,9 +20,9 @@ const activeSocials = Object.entries(siteConfig.social).filter(([, url]) => url)
 
 <footer class="border-t border-gray-200 bg-gray-50">
   <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-    <div class="grid grid-cols-1 gap-8 lg:grid-cols-4">
+    <div class="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-6">
       <!-- Brand Column -->
-      <div class="lg:col-span-1">
+      <div class="col-span-2 sm:col-span-3 lg:col-span-2">
         <a href="/" class="inline-block">
           <Image
             src={logoImage}
@@ -35,8 +35,8 @@ const activeSocials = Object.entries(siteConfig.social).filter(([, url]) => url)
             class="h-12 w-auto"
           />
         </a>
-        <p class="mt-4 text-sm text-gray-600">
-          {siteConfig.description}
+        <p class="mt-4 text-sm text-gray-600 max-w-xs">
+          {siteConfig.tagline}
         </p>
         <!-- Social Links -->
         {activeSocials.length > 0 && (
@@ -56,11 +56,11 @@ const activeSocials = Object.entries(siteConfig.social).filter(([, url]) => url)
         )}
       </div>
 
-      <!-- Company Links -->
+      <!-- Services Links -->
       <div>
-        <h3 class="text-sm font-semibold text-gray-900">Company</h3>
+        <h3 class="text-sm font-semibold text-gray-900">Services</h3>
         <ul class="mt-4 space-y-3">
-          {siteConfig.footerLinks.company.map((link) => (
+          {siteConfig.footerLinks.services.map((link) => (
             <li>
               <a
                 href={link.href}
@@ -73,11 +73,28 @@ const activeSocials = Object.entries(siteConfig.social).filter(([, url]) => url)
         </ul>
       </div>
 
-      <!-- Services Links -->
+      <!-- Products Links -->
       <div>
-        <h3 class="text-sm font-semibold text-gray-900">Services</h3>
+        <h3 class="text-sm font-semibold text-gray-900">Containers</h3>
         <ul class="mt-4 space-y-3">
-          {siteConfig.footerLinks.services.map((link) => (
+          {siteConfig.footerLinks.products.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class="text-sm text-gray-600 transition-colors hover:text-gray-900"
+              >
+                {link.name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Company Links -->
+      <div>
+        <h3 class="text-sm font-semibold text-gray-900">Company</h3>
+        <ul class="mt-4 space-y-3">
+          {siteConfig.footerLinks.company.map((link) => (
             <li>
               <a
                 href={link.href}
@@ -96,14 +113,6 @@ const activeSocials = Object.entries(siteConfig.social).filter(([, url]) => url)
         <ul class="mt-4 space-y-3 text-sm text-gray-600">
           <li>
             <a
-              href={`mailto:${siteConfig.contact.email}`}
-              class="transition-colors hover:text-gray-900"
-            >
-              {siteConfig.contact.email}
-            </a>
-          </li>
-          <li>
-            <a
               href={`tel:${siteConfig.contact.phone.replace(/\D/g, '')}`}
               class="transition-colors hover:text-gray-900"
             >
@@ -111,8 +120,15 @@ const activeSocials = Object.entries(siteConfig.social).filter(([, url]) => url)
             </a>
           </li>
           <li>
-            {siteConfig.contact.address.street}<br />
-            {siteConfig.contact.address.city}, {siteConfig.contact.address.state} {siteConfig.contact.address.zip}
+            <a
+              href={`mailto:${siteConfig.contact.email}`}
+              class="transition-colors hover:text-gray-900"
+            >
+              {siteConfig.contact.email}
+            </a>
+          </li>
+          <li>
+            {siteConfig.contact.address.city}, {siteConfig.contact.address.state}
           </li>
         </ul>
       </div>

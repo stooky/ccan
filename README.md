@@ -77,9 +77,10 @@ navigation:
         - name: "Rent"
           href: "/storage-container-rentals"
   footer:
-    company: [ ... ]
-    services: [ ... ]
-    legal: [ ... ]
+    services: [ ... ]   # Buy, Rent, Lease, On-Site
+    products: [ ... ]   # Container types (20ft, 40ft, High Cube)
+    company: [ ... ]    # About, Blog, Referrals, Contact
+    legal: [ ... ]      # Privacy, Terms
 ```
 
 ### Analytics
@@ -138,7 +139,7 @@ admin:
 | Component | Purpose |
 |-----------|---------|
 | `Navigation.astro` | Header with mobile hamburger menu |
-| `Footer.astro` | Footer with links, social icons, cookie settings |
+| `Footer.astro` | 6-column footer: brand, services, products, company, contact |
 | `Hero.astro` | Full-width hero with background image |
 | `Section.astro` | Content section wrapper |
 | `CTA.astro` | Call-to-action block |

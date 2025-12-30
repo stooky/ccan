@@ -80,22 +80,35 @@ navigation:
 
   # Footer links
   footer:
+    # Services - core offerings (primary SEO value)
+    services:
+      - name: "Buy Containers"
+        href: "/storage-containers-for-sale"
+      - name: "Rent Containers"
+        href: "/storage-container-rentals"
+      - name: "Lease Containers"
+        href: "/storage-container-leasing"
+      - name: "On-Site Storage"
+        href: "/on-site-storage-rentals"
+    # Products - specific container types (product SEO)
+    products:
+      - name: "20ft Standard Container"
+        href: "/containers/20ft-standard"
+      - name: "40ft Standard Container"
+        href: "/containers/40ft-standard"
+      - name: "40ft High Cube Container"
+        href: "/containers/40ft-high-cube"
+    # Company - trust signals and engagement
     company:
       - name: "About Us"
         href: "/about"
-      - name: "Contact"
-        href: "/contact"
       - name: "Blog"
         href: "/blog"
-    services:
-      - name: "Container Sales"
-        href: "/storage-container-sales-and-rentals"
-      - name: "On-Site Rentals"
-        href: "/on-site-storage-rentals"
-      - name: "Off-Site Storage"
-        href: "/storage-container-sales-and-rentals#offsite"
-      - name: "Service Areas"
-        href: "/storage-container-sales-and-rentals#areas"
+      - name: "Referral Program"
+        href: "/referrals"
+      - name: "Contact"
+        href: "/contact"
+    # Legal - compliance (required)
     legal:
       - name: "Privacy Policy"
         href: "/privacy"

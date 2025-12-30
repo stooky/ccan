@@ -15,8 +15,9 @@ interface NavItem {
 }
 
 interface FooterLinks {
-  company: NavItem[];
   services: NavItem[];
+  products: NavItem[];
+  company: NavItem[];
   legal: NavItem[];
 }
 
@@ -127,8 +128,9 @@ function loadConfig(): SiteConfig {
 
     // Footer links
     footerLinks: {
-      company: config.navigation.footer.company,
       services: config.navigation.footer.services,
+      products: config.navigation.footer.products,
+      company: config.navigation.footer.company,
       legal: config.navigation.footer.legal,
     },
 
