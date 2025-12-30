@@ -82,6 +82,23 @@ navigation:
     legal: [ ... ]
 ```
 
+### Analytics
+
+```yaml
+analytics:
+  # Google Analytics 4
+  google_analytics:
+    enabled: true                    # Set to true to enable
+    measurement_id: "G-XXXXXXXXXX"   # From GA4 Admin > Data Streams
+
+  # Google Tag Manager
+  google_tag_manager:
+    enabled: true                    # Set to true to enable
+    container_id: "GTM-XXXXXXX"      # From tagmanager.google.com
+```
+
+Both GA4 and GTM only load after user accepts "Analytics" cookies (GDPR compliant).
+
 ### Backend Settings
 
 ```yaml

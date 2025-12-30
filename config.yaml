@@ -105,10 +105,23 @@ navigation:
 # -----------------------------------------------------------------------------
 # Analytics & Tracking
 # -----------------------------------------------------------------------------
+# All tracking scripts only load after user accepts "Analytics" cookies.
+# Leave IDs empty to disable.
+#
 analytics:
-  # Google Analytics ID (leave empty to disable)
-  # Only loads after user accepts cookies
-  google_analytics_id: ""
+  # Google Analytics 4
+  # Get your ID from: Google Analytics > Admin > Data Streams > Measurement ID
+  # Format: G-XXXXXXXXXX
+  google_analytics:
+    enabled: false
+    measurement_id: ""
+
+  # Google Tag Manager
+  # Get your ID from: tagmanager.google.com > Container ID
+  # Format: GTM-XXXXXXX
+  google_tag_manager:
+    enabled: false
+    container_id: ""
 
 # -----------------------------------------------------------------------------
 # Contact Form Settings (PHP Backend)

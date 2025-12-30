@@ -54,6 +54,17 @@ interface Hours {
   sunday: string;
 }
 
+interface Analytics {
+  googleAnalytics: {
+    enabled: boolean;
+    measurementId: string;
+  };
+  googleTagManager: {
+    enabled: boolean;
+    containerId: string;
+  };
+}
+
 export interface SiteConfig {
   name: string;
   tagline: string;
@@ -65,7 +76,7 @@ export interface SiteConfig {
   navigation: NavItem[];
   footerLinks: FooterLinks;
   defaultOgImage: string;
-  googleAnalyticsId: string;
+  analytics: Analytics;
   copyright: string;
 }
 
@@ -122,7 +133,16 @@ function loadConfig(): SiteConfig {
     },
 
     // Analytics
-    googleAnalyticsId: config.analytics?.google_analytics_id || '',
+    analytics: {
+      googleAnalytics: {
+        enabled: config.analytics?.google_analytics?.enabled || false,
+        measurementId: config.analytics?.google_analytics?.measurement_id || '',
+      },
+      googleTagManager: {
+        enabled: config.analytics?.google_tag_manager?.enabled || false,
+        containerId: config.analytics?.google_tag_manager?.container_id || '',
+      },
+    },
 
     // Generated
     copyright: `© ${new Date().getFullYear()} ${config.site.name}. All rights reserved.`,

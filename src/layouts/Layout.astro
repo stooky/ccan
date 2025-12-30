@@ -33,7 +33,13 @@ const fullTitle = `${title} | ${siteConfig.name}`;
 ---
 
 <!doctype html>
-<html lang="en" data-ga-id={siteConfig.googleAnalyticsId || ''}>
+<html
+  lang="en"
+  data-ga-enabled={siteConfig.analytics.googleAnalytics.enabled.toString()}
+  data-ga-id={siteConfig.analytics.googleAnalytics.measurementId}
+  data-gtm-enabled={siteConfig.analytics.googleTagManager.enabled.toString()}
+  data-gtm-id={siteConfig.analytics.googleTagManager.containerId}
+>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

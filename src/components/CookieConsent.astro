@@ -283,22 +283,59 @@ import { siteConfig } from '../config/site';
     // Dispatch custom event for other scripts to listen to
     window.dispatchEvent(new CustomEvent('cookieConsentUpdated', { detail: consent }));
 
-    // Analytics (Google Analytics)
+    // Analytics cookies - load GA and/or GTM
     if (consent.analytics) {
-      loadAnalytics();
+      loadGoogleTagManager();
+      loadGoogleAnalytics();
     }
 
     // Marketing cookies
     if (consent.marketing) {
-      // Add marketing scripts here if needed
+      // Marketing scripts can be added here
+      // GTM can also handle marketing tags if configured
     }
   }
 
-  // Load Google Analytics
-  function loadAnalytics() {
-    // Check if GA ID is configured (set via data attribute or config)
-    const gaId = document.documentElement.dataset.gaId;
-    if (!gaId || window.gaLoaded) return;
+  // Load Google Tag Manager
+  function loadGoogleTagManager() {
+    const html = document.documentElement;
+    const gtmEnabled = html.dataset.gtmEnabled === 'true';
+    const gtmId = html.dataset.gtmId;
+
+    if (!gtmEnabled || !gtmId || window.gtmLoaded) return;
+
+    // GTM script
+    (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer',gtmId);
+
+    // Add noscript iframe to body
+    const noscript = document.createElement('noscript');
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.googletagmanager.com/ns.html?id=${gtmId}`;
+    iframe.height = '0';
+    iframe.width = '0';
+    iframe.style.display = 'none';
+    iframe.style.visibility = 'hidden';
+    noscript.appendChild(iframe);
+    document.body.insertBefore(noscript, document.body.firstChild);
+
+    window.gtmLoaded = true;
+    console.log('GTM loaded:', gtmId);
+  }
+
+  // Load Google Analytics 4
+  function loadGoogleAnalytics() {
+    const html = document.documentElement;
+    const gaEnabled = html.dataset.gaEnabled === 'true';
+    const gaId = html.dataset.gaId;
+
+    if (!gaEnabled || !gaId || window.gaLoaded) return;
+
+    // If GTM is also enabled, GA might be configured through GTM
+    // But we can still load GA directly for redundancy or standalone use
 
     // Create and load GA script
     const script = document.createElement('script');
@@ -314,6 +351,7 @@ import { siteConfig } from '../config/site';
     gtag('config', gaId, { anonymize_ip: true });
 
     window.gaLoaded = true;
+    console.log('GA4 loaded:', gaId);
   }
 
   // Show banner with animation
