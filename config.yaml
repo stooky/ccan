@@ -75,7 +75,7 @@ navigation:
       href: "/blog"
     - name: "About"
       href: "/about"
-    - name: "Contact"
+    - name: "Request a Quote"
       href: "/contact"
 
   # Footer links

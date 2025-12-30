@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import Section from '../components/Section.astro';
-import ContactForm from '../components/ContactForm.astro';
+import TabbedContactForm from '../components/TabbedContactForm.astro';
 import { siteConfig } from '../config/site';
 
 // Format business hours for display
@@ -18,8 +18,8 @@ const businessHours = Object.entries(siteConfig.hours).map(([day, hours]) => ({
 >
   <!-- Hero -->
   <Hero
-    title="Contact Us"
-    subtitle="Have a question about our containers? We're here to help with all your seacan storage needs."
+    title="Request a Quote"
+    subtitle="Get a personalized quote for container sales, rentals, or storage. We're here to help with all your seacan needs."
     size="sm"
   />
 
@@ -60,16 +60,9 @@ const businessHours = Object.entries(siteConfig.hours).map(([day, hours]) => ({
   <!-- Contact Section -->
   <Section padding="md">
     <div class="grid gap-12 lg:grid-cols-2">
-      <!-- Contact Form -->
+      <!-- Tabbed Contact Form -->
       <div>
-        <h2 class="text-2xl font-bold text-gray-900">Send Us a Message</h2>
-        <p class="mt-2 text-gray-600">
-          Fill out the form below and we'll get back to you as soon as possible.
-          For immediate assistance, please call or WhatsApp us directly.
-        </p>
-        <div class="mt-8">
-          <ContactForm />
-        </div>
+        <TabbedContactForm />
       </div>
 
       <!-- Contact Info -->
