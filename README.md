@@ -100,6 +100,32 @@ analytics:
 
 Both GA4 and GTM only load after user accepts "Analytics" cookies (GDPR compliant).
 
+### GTM: Mobile Device Detection
+
+Third-party widgets (like chat) can hurt mobile performance and UX. Use this GTM variable to conditionally load tags on desktop only.
+
+**Create Variable** (Variables → New → Custom JavaScript):
+
+Name: `Device Type`
+
+```javascript
+function() {
+  var ua = navigator.userAgent || '';
+  var isMobileUA = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+  var isSmallScreen = window.innerWidth < 768;
+  var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  return (isMobileUA || (isSmallScreen && isTouch)) ? 'mobile' : 'desktop';
+}
+```
+
+**Create Trigger** (Triggers → New → Page View → Some Page Views):
+
+Name: `Desktop Only - All Pages`
+
+Condition: `Device Type` equals `desktop`
+
+**Usage:** Replace "All Pages" trigger with "Desktop Only - All Pages" on any tag that should skip mobile devices.
+
 ### Backend Settings
 
 ```yaml

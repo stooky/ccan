@@ -1,0 +1,316 @@
+================================================================================
+                              CAPTAIN'S LOG
+================================================================================
+Entry:        caplog-20251230-140000-from-the-beginning.txt
+Created:      2025-12-30 14:00:00
+Author:       Claude (AI Assistant)
+Project:      C-Can Sam - Storage Container Website
+Repository:   stooky/ccan (git@github-stooky:stooky/ccan.git)
+Branch:       storage-containers
+Previous Log: caplog-20251205-210500-where-we-at.txt (deleted, reconstructed here)
+================================================================================
+
+## Summary
+
+Complete project history from initial boilerplate to production-ready shipping
+container website. This log consolidates all work across sessions: the pivot
+from HVAC to storage containers, backend integration, SEO optimization, and
+deployment to Ubuntu server.
+
+--------------------------------------------------------------------------------
+## Project Timeline
+--------------------------------------------------------------------------------
+
+### Phase 1: Foundation (Dec 3-4)
+- Started with SMB Website Boilerplate (Astro 5, Tailwind 4, TypeScript)
+- Built Fire & Frost Mechanical HVAC site as first vertical
+- Created vertical configuration system for home services
+- Achieved Lighthouse 100/100 scores
+
+### Phase 2: Pivot to Storage Containers (Dec 5-7)
+- Branched to `storage-containers` for C-Can Sam
+- Built stash/restore system for multi-site management
+- Complete rebrand: colors, logo, content, testimonials
+- Stashed HVAC site to `stash/fireandfrostmechanical.ca/`
+
+### Phase 3: Production Features (Dec 7-15)
+- Deployment scripts for Ubuntu 24 + nginx + SSL
+- Blog section with 6 SEO-optimized articles
+- Contact form backend (PHP + Resend API)
+- Admin panel for viewing submissions
+- Container detail pages (20ft, 40ft, 40ft High Cube)
+- Legal pages (Terms, Privacy, Referrals)
+- 27 WordPress URL redirects in nginx
+
+### Phase 4: Analytics & Compliance (Dec 15-30)
+- GDPR-compliant cookie consent banner
+- Google Analytics 4 integration (G-LZZQSG5ZL7)
+- Google Tag Manager integration (GTM-MTTG4KTT)
+- Unified config.yaml (single source of truth)
+- SEO-optimized footer with product links
+- GTM mobile device detection for conditional tag loading
+
+--------------------------------------------------------------------------------
+## Current State
+--------------------------------------------------------------------------------
+
+### Live Sites
+- Production: https://ccansam.com
+- Staging: https://ccan.crkid.com
+
+### Server
+- Ubuntu 24 on DigitalOcean (64.23.162.180)
+- nginx with SSL (Let's Encrypt)
+- PHP 8.x for contact form
+- SSH access: `ssh -i ~/.ssh/id_rsa root@ccan.crkid.com`
+
+### Deployment
+```bash
+git push origin storage-containers
+ssh -i ~/.ssh/id_rsa root@ccan.crkid.com "cd /var/www/ccan && git pull && npm run build"
+```
+
+--------------------------------------------------------------------------------
+## Architecture
+--------------------------------------------------------------------------------
+
+### Tech Stack
+| Layer      | Technology          |
+|------------|---------------------|
+| Framework  | Astro 5             |
+| Styling    | Tailwind CSS 4      |
+| Language   | TypeScript          |
+| Backend    | PHP 8.x             |
+| Email      | Resend API          |
+| Server     | nginx on Ubuntu 24  |
+| SSL        | Let's Encrypt       |
+| Analytics  | GA4 + GTM           |
+
+### File Structure
+```
+├── config.yaml              # Single source of truth
+├── deploy.sh                # One-command Ubuntu deployment
+├── api/
+│   ├── contact.php          # Form handler → Resend + JSON log
+│   └── admin.php            # Submissions viewer
+├── src/
+│   ├── config/site.ts       # Loads config.yaml
+│   ├── components/          # Astro components
+│   ├── content/blog/        # Markdown blog posts
+│   ├── layouts/             # Base templates
+│   ├── pages/               # File-based routing
+│   └── styles/global.css    # Tailwind + custom CSS
+├── public/                  # Static assets
+└── scripts/
+    ├── stash.js             # Multi-site archival
+    └── restore.js           # Multi-site restore
+```
+
+### Key Configuration (config.yaml)
+- Site identity (name, tagline, URL)
+- Contact info (email, phone, address)
+- Business hours
+- Social media links
+- Navigation (main + footer)
+- Analytics IDs (GA4, GTM)
+- Email settings (Resend API key)
+- Admin panel credentials
+- Security settings (honeypot, rate limiting)
+
+--------------------------------------------------------------------------------
+## Pages
+--------------------------------------------------------------------------------
+
+| Route                              | Purpose                    |
+|------------------------------------|----------------------------|
+| /                                  | Homepage                   |
+| /about/                            | About page                 |
+| /contact/                          | Contact form               |
+| /storage-containers-for-sale/      | Sales landing              |
+| /storage-container-rentals/        | Rentals landing            |
+| /storage-container-leasing/        | Leasing landing            |
+| /on-site-storage-rentals/          | On-site storage            |
+| /containers/20ft-standard/         | Product detail             |
+| /containers/40ft-standard/         | Product detail             |
+| /containers/40ft-high-cube/        | Product detail             |
+| /blog/                             | Blog listing               |
+| /blog/[slug]/                      | Blog posts (6 articles)    |
+| /terms/                            | Terms & conditions         |
+| /privacy/                          | Privacy policy             |
+| /referrals/                        | Referral program           |
+
+--------------------------------------------------------------------------------
+## Components
+--------------------------------------------------------------------------------
+
+| Component            | Purpose                                    |
+|----------------------|--------------------------------------------|
+| Navigation.astro     | Header with mobile hamburger, dropdowns    |
+| Footer.astro         | 6-column: brand, services, products, etc   |
+| Hero.astro           | Full-width hero with background image      |
+| Section.astro        | Content section wrapper                    |
+| CTA.astro            | Call-to-action blocks                      |
+| ContactForm.astro    | Form with honeypot, validation             |
+| CookieConsent.astro  | GDPR banner with preferences modal         |
+| BlogCard.astro       | Blog post preview cards                    |
+
+--------------------------------------------------------------------------------
+## Commits (storage-containers branch)
+--------------------------------------------------------------------------------
+
+28009c2: Add SEO-optimized footer with product links
+587dcd1: Enable GA4 and GTM with production IDs
+40b2ad6: Add Google Analytics 4 and Tag Manager support
+cad6d76: Update README with accurate documentation
+3ca2d13: Consolidate all config into single config.yaml
+812e53c: Add GDPR-compliant cookie consent banner
+0fe88e2: Fix quote escaping in container page descriptions
+6b6d14a: Add container detail pages, legal pages, and URL redirects
+99cc422: Add Resend API key to config
+3c3c4e2: Add Resend email integration for reliable delivery
+8bf7c3e: Improve README with clearer admin panel documentation
+7154dc4: Add deployment logging and verification checks
+0cede49: Add SSL certificate detection with recreate prompt
+596c56e: Fix PHP-FPM service detection in deploy script
+bf2a419: Add contact form backend with PHP handler and admin panel
+da6b586: Improve update.sh to handle common deployment issues
+63061d1: Add blog section with 6 articles, modern design, and strategic CTAs
+7690cb3: Add deployment scripts for Ubuntu 24
+9f108e8: C-Can Sam - Storage Container Sales & Rentals website
+
+--------------------------------------------------------------------------------
+## Decisions Made
+--------------------------------------------------------------------------------
+
+### 1. Single config.yaml
+Why: Eliminated duplication between frontend and backend. One file controls
+everything—site name, contact info, analytics IDs, API keys. PHP reads it
+directly; Astro loads it via site.ts.
+
+### 2. Static HTML + PHP Backend
+Why: Maximum performance (Lighthouse 100s) with zero client-side JS framework.
+PHP handles forms only—simple, reliable, works everywhere.
+
+### 3. Resend API for Email
+Why: PHP mail() lands in spam. Resend has 3,000 free emails/month, reliable
+delivery, simple API. Falls back to mail() if no API key.
+
+### 4. Cookie Consent Before Analytics
+Why: GDPR compliance. GA4 and GTM only load after user accepts Analytics
+cookies. Scripts are injected dynamically via CookieConsent.astro.
+
+### 5. GTM for Chat Widget Control
+Why: Vendasta AI Chat widget hurts mobile performance. GTM trigger condition
+checks device type—widget never loads on mobile (zero bytes, no CPU).
+
+### 6. SEO-Optimized Footer Structure
+Why: Direct links to product pages (20ft, 40ft, High Cube) improve crawlability
+and internal link equity. Action-oriented labels (Buy, Rent, Lease) for clarity.
+
+--------------------------------------------------------------------------------
+## Issues Encountered & Solutions
+--------------------------------------------------------------------------------
+
+### 1. SSH Host Key Verification Failed
+Problem: Couldn't SSH to server from new machine.
+Solution: `ssh-keyscan -H 64.23.162.180 >> ~/.ssh/known_hosts`
+
+### 2. SSH Permission Denied
+Problem: Default SSH command didn't find key.
+Solution: Explicit key path: `ssh -i ~/.ssh/id_rsa root@ccan.crkid.com`
+
+### 3. PHP-FPM Service Name
+Problem: Deploy script used wrong service name on Ubuntu 24.
+Solution: Detect version dynamically: `php-fpm$(php -v | grep -oP '\d+\.\d+')`
+
+### 4. Quote Escaping in JSON-LD
+Problem: Container descriptions with quotes broke structured data.
+Solution: Escape quotes in frontmatter, use proper JSON.stringify in Layout.
+
+### 5. Cookie Consent Blocking Analytics
+Problem: GA4/GTM loaded before consent, violating GDPR.
+Solution: Remove static script tags, inject via JS after consent granted.
+
+--------------------------------------------------------------------------------
+## Lessons Learned
+--------------------------------------------------------------------------------
+
+1. **config.yaml is king.** One source of truth eliminates drift between
+   frontend and backend. Worth the initial setup.
+
+2. **Test forms in production.** Local PHP and production PHP behave
+   differently. Always verify email delivery on live server.
+
+3. **Mobile detection belongs in GTM.** CSS hiding still downloads the widget.
+   GTM triggers prevent the request entirely—better for Core Web Vitals.
+
+4. **WordPress redirects are essential.** Old site had different URLs. Without
+   nginx redirects, all inbound links and SEO juice would 404.
+
+5. **Stash/restore enables multi-client work.** Same codebase, different
+   branches, archived configs. Can switch between clients in seconds.
+
+--------------------------------------------------------------------------------
+## GTM Configuration
+--------------------------------------------------------------------------------
+
+### Container ID: GTM-MTTG4KTT
+
+### Custom Variables
+- **Device Type** (Custom JavaScript):
+  ```javascript
+  function() {
+    var ua = navigator.userAgent || '';
+    var isMobileUA = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+    var isSmallScreen = window.innerWidth < 768;
+    var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    return (isMobileUA || (isSmallScreen && isTouch)) ? 'mobile' : 'desktop';
+  }
+  ```
+
+### Custom Triggers
+- **Desktop Only - All Pages**: Page View where Device Type equals "desktop"
+
+### Tags
+- **Vendasta AI Chat**: Custom HTML, fires on Desktop Only (not mobile)
+- Other tags as configured in GTM dashboard
+
+--------------------------------------------------------------------------------
+## Next Steps
+--------------------------------------------------------------------------------
+
+1. [ ] Verify chat widget is hidden on mobile devices (test on real phone)
+2. [ ] Monitor form submissions via admin panel
+3. [ ] Review Google Search Console for indexing status
+4. [ ] Consider adding more blog content for SEO
+5. [ ] Set up Google Business Profile integration
+6. [ ] Test email deliverability (check spam folders)
+
+--------------------------------------------------------------------------------
+## Stashed Sites
+--------------------------------------------------------------------------------
+
+### Fire & Frost Mechanical (HVAC)
+- Location: stash/fireandfrostmechanical.ca/
+- Tag: v1.0-hvac
+- Restore: `npm run restore fireandfrostmechanical.ca`
+
+--------------------------------------------------------------------------------
+## Contact & Access
+--------------------------------------------------------------------------------
+
+### Production Server
+- IP: 64.23.162.180
+- SSH: `ssh -i ~/.ssh/id_rsa root@ccan.crkid.com`
+- Deploy: `cd /var/www/ccan && git pull && npm run build`
+
+### Admin Panel
+- URL: https://ccansam.com/api/admin.php?key=ccan-admin-2024
+
+### Repository
+- GitHub: stooky/ccan
+- Branch: storage-containers
+
+================================================================================
+END OF LOG
+================================================================================
