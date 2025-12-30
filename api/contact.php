@@ -102,13 +102,25 @@ if (!empty($data[$honeypotField])) {
     exit();
 }
 
-// Validate required fields
-$required = ['firstName', 'lastName', 'email', 'message'];
+// Validate required fields based on form type
+$formType = $data['formType'] ?? 'message';
 $errors = [];
 
-foreach ($required as $field) {
-    if (empty($data[$field])) {
-        $errors[] = ucfirst($field) . ' is required';
+if ($formType === 'quote') {
+    // Quote form requires: name, email, phone
+    $required = ['name', 'email', 'phone'];
+    foreach ($required as $field) {
+        if (empty($data[$field])) {
+            $errors[] = ucfirst($field) . ' is required';
+        }
+    }
+} else {
+    // Message form requires: firstName, lastName, email, message
+    $required = ['firstName', 'lastName', 'email', 'message'];
+    foreach ($required as $field) {
+        if (empty($data[$field])) {
+            $errors[] = ucfirst($field) . ' is required';
+        }
     }
 }
 
@@ -123,22 +135,44 @@ if (!empty($errors)) {
     exit();
 }
 
-// Sanitize input
+// Sanitize input based on form type
 $submission = [
     'id' => uniqid('sub_'),
     'timestamp' => date('c'),
     'date' => date('Y-m-d'),
     'time' => date('H:i:s'),
     'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
-    'firstName' => htmlspecialchars(trim($data['firstName']), ENT_QUOTES, 'UTF-8'),
-    'lastName' => htmlspecialchars(trim($data['lastName']), ENT_QUOTES, 'UTF-8'),
+    'formType' => $formType,
     'email' => filter_var(trim($data['email']), FILTER_SANITIZE_EMAIL),
     'phone' => htmlspecialchars(trim($data['phone'] ?? ''), ENT_QUOTES, 'UTF-8'),
-    'subject' => htmlspecialchars(trim($data['subject'] ?? 'General Inquiry'), ENT_QUOTES, 'UTF-8'),
-    'message' => htmlspecialchars(trim($data['message']), ENT_QUOTES, 'UTF-8'),
     'userAgent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
     'referer' => $_SERVER['HTTP_REFERER'] ?? 'direct'
 ];
+
+if ($formType === 'quote') {
+    // Quote form fields
+    $submission['name'] = htmlspecialchars(trim($data['name']), ENT_QUOTES, 'UTF-8');
+    $submission['containerSize'] = htmlspecialchars(trim($data['containerSize'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $submission['condition'] = htmlspecialchars(trim($data['condition'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $submission['intention'] = htmlspecialchars(trim($data['intention'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $submission['delivery'] = htmlspecialchars(trim($data['delivery'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $submission['locationType'] = htmlspecialchars(trim($data['locationType'] ?? ''), ENT_QUOTES, 'UTF-8');
+    // Urban address fields
+    $submission['streetAddress'] = htmlspecialchars(trim($data['streetAddress'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $submission['city'] = htmlspecialchars(trim($data['city'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $submission['postalCode'] = htmlspecialchars(trim($data['postalCode'] ?? ''), ENT_QUOTES, 'UTF-8');
+    // Rural address fields
+    $submission['landLocation'] = htmlspecialchars(trim($data['landLocation'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $submission['additionalDirections'] = htmlspecialchars(trim($data['additionalDirections'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $submission['message'] = htmlspecialchars(trim($data['message'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $submission['subject'] = 'Quote Request';
+} else {
+    // Message form fields
+    $submission['firstName'] = htmlspecialchars(trim($data['firstName']), ENT_QUOTES, 'UTF-8');
+    $submission['lastName'] = htmlspecialchars(trim($data['lastName']), ENT_QUOTES, 'UTF-8');
+    $submission['subject'] = htmlspecialchars(trim($data['subject'] ?? 'General Inquiry'), ENT_QUOTES, 'UTF-8');
+    $submission['message'] = htmlspecialchars(trim($data['message']), ENT_QUOTES, 'UTF-8');
+}
 
 // Log submission to file
 $logFile = dirname(__DIR__) . '/' . ($config['logging']['submissions_file'] ?? 'data/submissions.json');
@@ -168,17 +202,55 @@ $subjectPrefix = $config['contact_form']['subject_prefix'] ?? '[Contact Form]';
 $resendApiKey = $config['email']['resend_api_key'] ?? '';
 $fromEmail = $config['email']['from_email'] ?? 'noreply@ccansam.com';
 
-$emailSubject = $subjectPrefix . ' ' . $submission['subject'] . ' from ' . $submission['firstName'];
+if ($formType === 'quote') {
+    $emailSubject = $subjectPrefix . ' Quote Request from ' . $submission['name'];
 
-$emailBody = "New contact form submission:\n\n";
-$emailBody .= "Name: {$submission['firstName']} {$submission['lastName']}\n";
-$emailBody .= "Email: {$submission['email']}\n";
-$emailBody .= "Phone: " . ($submission['phone'] ?: 'Not provided') . "\n";
-$emailBody .= "Subject: {$submission['subject']}\n";
-$emailBody .= "Date: {$submission['date']} at {$submission['time']}\n";
-$emailBody .= "\n--- Message ---\n\n";
-$emailBody .= $submission['message'];
-$emailBody .= "\n\n--- End of Message ---\n";
+    $emailBody = "New Quote Request:\n\n";
+    $emailBody .= "Name: {$submission['name']}\n";
+    $emailBody .= "Email: {$submission['email']}\n";
+    $emailBody .= "Phone: {$submission['phone']}\n";
+    $emailBody .= "Date: {$submission['date']} at {$submission['time']}\n";
+    $emailBody .= "\n--- Container Details ---\n\n";
+    $emailBody .= "Container Size: {$submission['containerSize']}\n";
+    $emailBody .= "Condition: {$submission['condition']}\n";
+    $emailBody .= "Intention: {$submission['intention']}\n";
+    $emailBody .= "Delivery: {$submission['delivery']}\n";
+
+    if (!empty($submission['locationType'])) {
+        $emailBody .= "\n--- Delivery Location ---\n\n";
+        $emailBody .= "Location Type: {$submission['locationType']}\n";
+        if ($submission['locationType'] === 'Urban') {
+            $emailBody .= "Street Address: {$submission['streetAddress']}\n";
+            $emailBody .= "City: {$submission['city']}\n";
+            $emailBody .= "Postal Code: {$submission['postalCode']}\n";
+        } else {
+            $emailBody .= "Land Location: {$submission['landLocation']}\n";
+            if (!empty($submission['additionalDirections'])) {
+                $emailBody .= "Additional Directions: {$submission['additionalDirections']}\n";
+            }
+        }
+    }
+
+    if (!empty($submission['message'])) {
+        $emailBody .= "\n--- Additional Message ---\n\n";
+        $emailBody .= $submission['message'];
+    }
+
+    $emailBody .= "\n\n--- End of Request ---\n";
+} else {
+    $emailSubject = $subjectPrefix . ' ' . $submission['subject'] . ' from ' . $submission['firstName'];
+
+    $emailBody = "New contact form submission:\n\n";
+    $emailBody .= "Name: {$submission['firstName']} {$submission['lastName']}\n";
+    $emailBody .= "Email: {$submission['email']}\n";
+    $emailBody .= "Phone: " . ($submission['phone'] ?: 'Not provided') . "\n";
+    $emailBody .= "Subject: {$submission['subject']}\n";
+    $emailBody .= "Date: {$submission['date']} at {$submission['time']}\n";
+    $emailBody .= "\n--- Message ---\n\n";
+    $emailBody .= $submission['message'];
+    $emailBody .= "\n\n--- End of Message ---\n";
+}
+
 $emailBody .= "\nIP: {$submission['ip']}\n";
 $emailBody .= "Submission ID: {$submission['id']}\n";
 

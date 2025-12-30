@@ -138,15 +138,91 @@ const apiEndpoint = isDev ? 'http://localhost:3001/contact' : '/api/contact.php'
         </select>
       </div>
 
-      <div>
-        <label for="quote-address" class="block text-sm font-medium text-gray-900">Delivery Address</label>
-        <textarea
-          name="deliveryAddress"
-          id="quote-address"
-          rows="2"
-          placeholder="Address"
-          class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-        ></textarea>
+      <!-- Delivery Address Section (shown when Delivery Required is selected) -->
+      <div id="delivery-address-section" class="hidden space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-900 mb-2">Location Type</label>
+          <div class="flex gap-4">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="locationType"
+                value="Urban"
+                class="h-4 w-4 text-primary-600 border-gray-300 focus:ring-primary-500"
+              />
+              <span class="text-sm text-gray-700">Urban</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="locationType"
+                value="Rural"
+                class="h-4 w-4 text-primary-600 border-gray-300 focus:ring-primary-500"
+              />
+              <span class="text-sm text-gray-700">Rural</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Urban Address Fields -->
+        <div id="urban-fields" class="hidden space-y-4">
+          <div>
+            <label for="quote-street" class="block text-sm font-medium text-gray-900">Street Address</label>
+            <input
+              type="text"
+              name="streetAddress"
+              id="quote-street"
+              placeholder="123 Main Street"
+              class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+            />
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="quote-city" class="block text-sm font-medium text-gray-900">City</label>
+              <input
+                type="text"
+                name="city"
+                id="quote-city"
+                placeholder="Saskatoon"
+                class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+              />
+            </div>
+            <div>
+              <label for="quote-postal" class="block text-sm font-medium text-gray-900">Postal Code</label>
+              <input
+                type="text"
+                name="postalCode"
+                id="quote-postal"
+                placeholder="S7K 0A1"
+                class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Rural Address Fields -->
+        <div id="rural-fields" class="hidden space-y-4">
+          <div>
+            <label for="quote-land-location" class="block text-sm font-medium text-gray-900">Land Location</label>
+            <input
+              type="text"
+              name="landLocation"
+              id="quote-land-location"
+              placeholder="e.g., NE 14-36-5 W3"
+              class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+            />
+          </div>
+          <div>
+            <label for="quote-directions" class="block text-sm font-medium text-gray-900">Additional Directions and Instructions</label>
+            <textarea
+              name="additionalDirections"
+              id="quote-directions"
+              rows="3"
+              placeholder="e.g., Turn left at the grain elevator, 2km down the gravel road..."
+              class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+            ></textarea>
+          </div>
+        </div>
       </div>
 
       <div>
@@ -309,6 +385,43 @@ const apiEndpoint = isDev ? 'http://localhost:3001/contact' : '/api/contact.php'
           panel.classList.add('hidden');
         });
         document.getElementById(`panel-${tabId}`)?.classList.remove('hidden');
+      });
+    });
+
+    // Delivery dropdown toggle
+    const deliverySelect = document.getElementById('quote-delivery') as HTMLSelectElement;
+    const deliverySection = document.getElementById('delivery-address-section');
+    const urbanFields = document.getElementById('urban-fields');
+    const ruralFields = document.getElementById('rural-fields');
+    const locationRadios = document.querySelectorAll('input[name="locationType"]');
+
+    if (deliverySelect && deliverySection) {
+      deliverySelect.addEventListener('change', () => {
+        if (deliverySelect.value === 'Delivery Required') {
+          deliverySection.classList.remove('hidden');
+        } else {
+          deliverySection.classList.add('hidden');
+          // Reset location type selection
+          locationRadios.forEach(radio => {
+            (radio as HTMLInputElement).checked = false;
+          });
+          urbanFields?.classList.add('hidden');
+          ruralFields?.classList.add('hidden');
+        }
+      });
+    }
+
+    // Urban/Rural toggle
+    locationRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        const value = (e.target as HTMLInputElement).value;
+        if (value === 'Urban') {
+          urbanFields?.classList.remove('hidden');
+          ruralFields?.classList.add('hidden');
+        } else {
+          urbanFields?.classList.add('hidden');
+          ruralFields?.classList.remove('hidden');
+        }
       });
     });
 
