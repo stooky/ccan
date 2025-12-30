@@ -1,279 +1,279 @@
 # C-Can Sam
 
-Saskatchewan's Premier Seacan Solutions Provider - Shipping container sales, rentals, and storage.
+Static website for C-Can Sam, a shipping container sales and rental business in Saskatchewan, Canada.
 
-Built with **Astro 5**, **Tailwind CSS 4**, and **TypeScript**.
-
----
+**Production:** https://ccansam.com
+**Staging:** https://ccan.crkid.com
 
 ## Quick Start
 
-### Local Development
-
 ```bash
-# Install dependencies
 npm install
-
-# Start dev server
-npm run dev
-
-# (Optional) Start local form handler for testing contact form
-node api/contact-local.js
+npm run dev      # Development server at localhost:4321
+npm run build    # Production build to dist/
 ```
 
-The site runs at `http://localhost:4321`. The local form handler runs at `http://localhost:3001`.
+## Architecture
 
-### Production Build
-
-```bash
-npm run build
-```
-
-Output is in the `dist/` folder.
-
----
-
-## Project Structure
+This is a static site generator with a PHP backend for form handling. The frontend builds to static HTML at deploy time; the backend runs on the server.
 
 ```
-├── api/                    # Backend API (PHP for production, JS for local dev)
-│   ├── contact.php         # Contact form handler (production)
-│   ├── admin.php           # Admin panel for viewing submissions
-│   └── contact-local.js    # Local dev form handler (Node.js)
-├── data/                   # Form submission logs (gitignored)
-├── public/                 # Static assets
-│   └── images/
+├── config.yaml              # All settings (site info, email, admin)
+├── deploy.sh                # One-command Ubuntu deployment
+├── api/
+│   ├── contact.php          # Form handler → Resend email + JSON log
+│   └── admin.php            # Submissions viewer (secret URL)
 ├── src/
-│   ├── components/         # Astro components
-│   ├── config/             # Site configuration
-│   ├── content/            # Blog posts (Markdown)
-│   ├── layouts/            # Page layouts
-│   ├── pages/              # Routes
-│   └── styles/             # Global CSS
-├── config.yaml             # Server-side configuration
-├── deploy.sh               # Ubuntu deployment script
-└── update.sh               # Site update script
+│   ├── config/site.ts       # Loads config.yaml for Astro
+│   ├── components/          # Astro components
+│   ├── content/blog/        # Markdown blog posts
+│   ├── layouts/Layout.astro # Base HTML template
+│   ├── pages/               # File-based routing
+│   └── styles/global.css    # Tailwind + custom CSS
+└── public/                  # Static assets (images, favicons)
 ```
-
----
 
 ## Configuration
 
-### Site Config (`src/config/site.ts`)
+**All settings are in `config.yaml`** — the single source of truth for both frontend and backend.
 
-Main site configuration including:
-- Business info (name, contact, hours)
-- Navigation structure
-- Social media links
-- SEO defaults
-
-### Server Config (`config.yaml`)
-
-Server-side configuration for the contact form and admin panel. **This file lives on the server** at `/var/www/ccan/config.yaml`.
+### Site Settings
 
 ```yaml
-# Contact Form Settings
+site:
+  name: "C-Can Sam"
+  tagline: "Saskatchewan's Premier Seacan Solutions Provider"
+  url: "https://ccansam.com"
+
+contact:
+  email: "ccansam22@gmail.com"
+  phone: "1-844-473-2226"
+  address:
+    street: "12 Peters Avenue"
+    city: "Martensville"
+    state: "SK"
+
+hours:
+  monday: "9:00 AM - 5:00 PM"
+  # ...
+
+social:
+  facebook: "https://www.facebook.com/ccansam"
+  whatsapp: "https://wa.me/13062814100"
+```
+
+### Navigation
+
+```yaml
+navigation:
+  main:
+    - name: "Home"
+      href: "/"
+    - name: "Our Containers"
+      href: "/storage-container-sales-and-rentals"
+      children:
+        - name: "Buy"
+          href: "/storage-containers-for-sale"
+        - name: "Rent"
+          href: "/storage-container-rentals"
+  footer:
+    company: [ ... ]
+    services: [ ... ]
+    legal: [ ... ]
+```
+
+### Backend Settings
+
+```yaml
 contact_form:
-  recipient_email: "your-email@example.com"  # Where submissions are sent
+  recipient_email: "you@example.com"
   subject_prefix: "[C-Can Sam Contact]"
 
-# Email Sending (Resend - free 3,000/month)
 email:
-  resend_api_key: "re_xxxxxxxxx"              # ⚠️ Get from resend.com
-  from_email: "Site <onboarding@resend.dev>"  # Or your verified domain
+  resend_api_key: "re_..."        # From resend.com
+  from_email: "C-Can Sam <onboarding@resend.dev>"
 
-# Admin Panel Settings
 admin:
-  secret_path: "your-secret-key-here"  # ⚠️ CHANGE THIS!
-  per_page: 50
-
-# Logging & Security
-logging:
-  submissions_file: "data/submissions.json"
-security:
-  honeypot_field: "website_url"
-  rate_limit: 10
+  secret_path: "your-secret-here"  # Admin panel access key
 ```
 
-**⚠️ IMPORTANT:** After deployment, edit `config.yaml` on the server:
+## Pages
 
-```bash
-nano /var/www/ccan/config.yaml
-```
+| Route | Source | Description |
+|-------|--------|-------------|
+| `/` | `index.astro` | Homepage |
+| `/about/` | `about.astro` | About page |
+| `/contact/` | `contact.astro` | Contact form |
+| `/storage-containers-for-sale/` | `storage-containers-for-sale.astro` | Sales page |
+| `/storage-container-rentals/` | `storage-container-rentals.astro` | Rentals page |
+| `/on-site-storage-rentals/` | `on-site-storage-rentals.astro` | On-site storage |
+| `/containers/20ft-standard/` | `containers/20ft-standard.astro` | Product detail |
+| `/containers/40ft-standard/` | `containers/40ft-standard.astro` | Product detail |
+| `/containers/40ft-high-cube/` | `containers/40ft-high-cube.astro` | Product detail |
+| `/blog/` | `blog/index.astro` | Blog listing |
+| `/blog/[slug]/` | `blog/[...slug].astro` | Blog posts (dynamic) |
+| `/terms/` | `terms.astro` | Terms & conditions |
+| `/privacy/` | `privacy.astro` | Privacy policy |
+| `/referrals/` | `referrals.astro` | Referral program |
 
-1. Set `recipient_email` to your email
-2. Change `secret_path` to something unique
-3. Add your Resend API key (see below)
+## Components
 
-### Email Setup with Resend
+| Component | Purpose |
+|-----------|---------|
+| `Navigation.astro` | Header with mobile hamburger menu |
+| `Footer.astro` | Footer with links, social icons, cookie settings |
+| `Hero.astro` | Full-width hero with background image |
+| `Section.astro` | Content section wrapper |
+| `CTA.astro` | Call-to-action block |
+| `ContactForm.astro` | Form with honeypot, validation, submission |
+| `CookieConsent.astro` | GDPR cookie banner with preferences modal |
+| `BlogCard.astro` | Blog post preview card |
 
-[Resend](https://resend.com) provides reliable email delivery. Free tier: 3,000 emails/month.
+## Blog Posts
 
-**Quick setup (5 minutes):**
-
-1. Sign up at https://resend.com
-2. Go to **API Keys** → Create new key → Copy it
-3. Add to `config.yaml`:
-   ```yaml
-   email:
-     resend_api_key: "re_your_key_here"
-     from_email: "C-Can Sam <onboarding@resend.dev>"
-   ```
-
-**For production**, verify your domain in Resend and update `from_email`:
-```yaml
-from_email: "C-Can Sam <noreply@ccansam.com>"
-```
-
-Without Resend configured, the form falls back to PHP `mail()` which often lands in spam.
-
----
-
-## Contact Form & Admin Panel
-
-### How It Works
-
-- **Production:** PHP handler (`/api/contact.php`) sends email + logs to JSON
-- **Local dev:** Node.js handler (`api/contact-local.js`) logs only (no email)
-
-### Admin Panel Access
-
-The admin panel lets you view all contact form submissions.
-
-**URL Format:**
-```
-https://yourdomain.com/api/admin.php?key=YOUR_SECRET_KEY
-```
-
-**Example** (using default config):
-```
-https://ccan.crkid.com/api/admin.php?key=ccan-admin-2024
-```
-
-The `key` parameter must match `admin.secret_path` in `config.yaml`.
-
-**To change the admin key:**
-```bash
-# On the server
-nano /var/www/ccan/config.yaml
-# Change: secret_path: "your-new-secret-key"
-# Save and exit - no restart needed
-```
-
-### Admin Features
-
-- View all submissions with pagination
-- Export to CSV
-- Delete individual submissions
-- Stats (total, today, last 7 days)
-
-### Testing Locally
-
-1. Start the dev server: `npm run dev`
-2. In another terminal: `node api/contact-local.js`
-3. Submit a test form on the contact page
-4. Check the console and `data/submissions.json`
-
----
-
-## Deployment
-
-### Initial Deployment (Ubuntu 24)
-
-```bash
-# On your server
-curl -O https://raw.githubusercontent.com/stooky/ccan/storage-containers/deploy.sh
-sudo bash deploy.sh
-```
-
-The script will:
-1. Install dependencies (Node.js, nginx, PHP-FPM, certbot)
-2. Clone the repository
-3. Build the site
-4. Configure nginx with SSL
-5. Set up PHP for form handling
-6. Configure firewall
-
-### Updating the Site
-
-```bash
-cd /var/www/ccan
-sudo bash update.sh
-```
-
-The update script handles:
-- Git pull with conflict detection
-- npm install
-- Build
-- Permission reset
-- nginx reload
-
----
-
-## Blog
-
-Blog posts are in `src/content/blog/` as Markdown files.
-
-### Creating a New Post
+Create Markdown files in `src/content/blog/`:
 
 ```markdown
 ---
-title: "Your Post Title"
-description: "Brief description for SEO"
-pubDate: 2024-01-15
+title: "5 Smart Tips for Buying Containers"
+description: "What to look for when purchasing a shipping container."
+pubDate: 2025-01-15
 author: "C-Can Sam"
-tags: ["shipping containers", "storage"]
-image: "/images/blog/your-image.jpg"
-imageAlt: "Description of image"
-draft: false
+tags: ["buying", "tips"]
+image: "/images/blog/buying-tips.jpg"
 ---
 
-Your content here...
+Content here...
 ```
 
-### Image Optimization
+## Cookie Consent
 
-For best performance, create responsive versions:
-- `image-400w.webp`
-- `image-800w.webp`
-- `image-1200w.webp`
-- `image.jpg` (fallback)
+GDPR-compliant banner with four cookie categories:
 
----
+- **Essential** — Always on (site functionality)
+- **Analytics** — Google Analytics (loads only after consent)
+- **Marketing** — Ad tracking
+- **Functional** — Personalization
 
-## Commands
+Preferences stored in `localStorage`. Users can change via "Cookie Settings" in footer.
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
-| `npm run preview` | Preview production build |
-| `node api/contact-local.js` | Run local form handler |
+## Contact Form
 
----
+The form at `/contact/` submits to `/api/contact.php`:
+
+1. Validates required fields
+2. Checks honeypot (spam prevention)
+3. Rate-limits by IP (10/hour default)
+4. Sends email via Resend API
+5. Logs to `data/submissions.json`
+
+### Admin Panel
+
+View submissions at:
+
+```
+https://your-domain/api/admin.php?key=YOUR_SECRET_PATH
+```
+
+Features: pagination, CSV export, delete, stats.
+
+### Local Development
+
+For testing forms locally without sending email:
+
+```bash
+node api/contact-local.js  # Runs on port 3001
+```
+
+## Deployment
+
+### First Time (Ubuntu 24)
+
+```bash
+ssh root@your-server
+
+# Download and run
+curl -O https://raw.githubusercontent.com/stooky/ccan/storage-containers/deploy.sh
+DOMAIN=ccansam.com EMAIL=you@example.com sudo bash deploy.sh
+```
+
+The script:
+1. Installs Node.js 20, nginx, PHP-FPM, Certbot
+2. Clones the repository
+3. Runs `npm ci && npm run build`
+4. Configures nginx with SSL and redirects
+5. Sets up firewall (UFW)
+
+### Updates
+
+```bash
+ssh root@your-server "cd /var/www/ccan && git pull && npm run build"
+```
+
+Or push and deploy:
+
+```bash
+git push origin storage-containers
+ssh root@your-server "cd /var/www/ccan && git pull && npm run build"
+```
+
+### URL Redirects
+
+Old WordPress URLs redirect to new paths (configured in nginx via `deploy.sh`):
+
+| Old URL | New URL |
+|---------|---------|
+| `/homepage/` | `/` |
+| `/rentals/` | `/storage-container-rentals/` |
+| `/our-containers/20ft-standard-container/` | `/containers/20ft-standard/` |
+| `/terms-and-conditions/` | `/terms/` |
+
+27 redirects total. See `deploy.sh` for the full list.
+
+## Performance
+
+Lighthouse scores: 100/100 across all categories.
+
+Key optimizations:
+- Static HTML (no client-side framework)
+- Responsive images with `<picture>` and WebP
+- Font preloading with `display=swap`
+- Gzip compression (nginx)
+- Cache headers: 30 days for static assets
+- Critical CSS inlined by Astro
 
 ## Tech Stack
 
-- **[Astro 5](https://astro.build)** - Static site framework
-- **[Tailwind CSS 4](https://tailwindcss.com)** - Utility-first CSS
-- **PHP 8.x** - Contact form handling (production)
-- **nginx** - Web server
-- **Let's Encrypt** - SSL certificates
+| Layer | Technology |
+|-------|------------|
+| Framework | Astro 5 |
+| Styling | Tailwind CSS 4 |
+| Language | TypeScript |
+| Backend | PHP 8.x |
+| Email | Resend API |
+| Server | nginx on Ubuntu 24 |
+| SSL | Let's Encrypt (Certbot) |
 
----
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start dev server |
+| `npm run build` | Production build |
+| `npm run preview` | Preview production build |
+| `npm run stash` | Save current config to backup |
+| `npm run restore` | Restore config from backup |
 
 ## Security
 
-- Honeypot field for spam prevention
-- Rate limiting (configurable)
-- Input sanitization
-- CSRF protection via same-origin policy
-- Admin panel behind secret URL
-- Data directory blocked from web access
-- Config file blocked from web access
-
----
+- Honeypot field blocks bots
+- Rate limiting prevents abuse
+- Input sanitization (PHP `htmlspecialchars`)
+- Admin panel requires secret key
+- `data/` directory blocked in nginx
+- `config.yaml` blocked in nginx
+- HTTPS enforced with HSTS
 
 ## License
 
-Proprietary - C-Can Sam
+Proprietary. All rights reserved.
