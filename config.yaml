@@ -113,15 +113,15 @@ analytics:
   # Get your ID from: Google Analytics > Admin > Data Streams > Measurement ID
   # Format: G-XXXXXXXXXX
   google_analytics:
-    enabled: false
-    measurement_id: ""
+    enabled: true
+    measurement_id: "G-LZZQSG5ZL7"
 
   # Google Tag Manager
   # Get your ID from: tagmanager.google.com > Container ID
   # Format: GTM-XXXXXXX
   google_tag_manager:
-    enabled: false
-    container_id: ""
+    enabled: true
+    container_id: "GTM-MTTG4KTT"
 
 # -----------------------------------------------------------------------------
 # Contact Form Settings (PHP Backend)
