@@ -30,7 +30,7 @@ if (file_exists($configPath)) {
 }
 
 $secretPath = $config['admin']['secret_path'] ?? 'ccan-admin-2024';
-$perPage = $config['admin']['per_page'] ?? 50;
+$perPage = $config['admin']['per_page'] ?? 100;
 $logFile = dirname(__DIR__) . '/' . ($config['logging']['submissions_file'] ?? 'data/submissions.json');
 
 // Check authentication
@@ -41,49 +41,66 @@ if ($providedKey !== $secretPath) {
     exit();
 }
 
-// Load submissions
-$submissions = [];
+// Load all submissions
+$allSubmissions = [];
 if (file_exists($logFile)) {
     $content = file_get_contents($logFile);
-    $submissions = json_decode($content, true) ?? [];
+    $allSubmissions = json_decode($content, true) ?? [];
 }
-
-// Pagination
-$page = max(1, (int)($_GET['page'] ?? 1));
-$totalSubmissions = count($submissions);
-$totalPages = max(1, ceil($totalSubmissions / $perPage));
-$page = min($page, $totalPages);
-$offset = ($page - 1) * $perPage;
-$pagedSubmissions = array_slice($submissions, $offset, $perPage);
 
 // Handle delete action
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     $deleteId = $_POST['delete_id'];
-    $submissions = array_filter($submissions, fn($s) => $s['id'] !== $deleteId);
-    $submissions = array_values($submissions);
-    file_put_contents($logFile, json_encode($submissions, JSON_PRETTY_PRINT));
-    header('Location: ?key=' . urlencode($secretPath) . '&page=' . $page . '&deleted=1');
+    $allSubmissions = array_filter($allSubmissions, fn($s) => $s['id'] !== $deleteId);
+    $allSubmissions = array_values($allSubmissions);
+    file_put_contents($logFile, json_encode($allSubmissions, JSON_PRETTY_PRINT));
+    header('Location: ?key=' . urlencode($secretPath) . '&deleted=1');
     exit();
 }
 
-// Handle export action
+// Helper: Get display name for submission
+function getDisplayName($sub) {
+    if (!empty($sub['name'])) {
+        return $sub['name'];
+    }
+    return trim(($sub['firstName'] ?? '') . ' ' . ($sub['lastName'] ?? ''));
+}
+
+// Handle export action (exports filtered data)
 if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     header('Content-Type: text/csv');
     header('Content-Disposition: attachment; filename="submissions-' . date('Y-m-d') . '.csv"');
 
     $output = fopen('php://output', 'w');
-    fputcsv($output, ['ID', 'Date', 'Time', 'Name', 'Email', 'Phone', 'Subject', 'Message', 'IP']);
+    fputcsv($output, [
+        'ID', 'Form Type', 'Date', 'Time', 'Name', 'Email', 'Phone',
+        'Container Size', 'Condition', 'Intention', 'Delivery',
+        'Location Type', 'Street Address', 'City', 'Postal Code',
+        'Land Location', 'Additional Directions',
+        'Subject', 'Message', 'IP'
+    ]);
 
-    foreach ($submissions as $sub) {
+    foreach ($allSubmissions as $sub) {
         fputcsv($output, [
             $sub['id'],
+            $sub['formType'] ?? 'message',
             $sub['date'],
             $sub['time'],
-            $sub['firstName'] . ' ' . $sub['lastName'],
+            getDisplayName($sub),
             $sub['email'],
             $sub['phone'] ?? '',
+            $sub['containerSize'] ?? '',
+            $sub['condition'] ?? '',
+            $sub['intention'] ?? '',
+            $sub['delivery'] ?? '',
+            $sub['locationType'] ?? '',
+            $sub['streetAddress'] ?? '',
+            $sub['city'] ?? '',
+            $sub['postalCode'] ?? '',
+            $sub['landLocation'] ?? '',
+            $sub['additionalDirections'] ?? '',
             $sub['subject'] ?? '',
-            $sub['message'],
+            $sub['message'] ?? '',
             $sub['ip']
         ]);
     }
@@ -91,6 +108,13 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     fclose($output);
     exit();
 }
+
+// Prepare submissions data as JSON for client-side filtering
+$submissionsJson = json_encode($allSubmissions);
+$totalSubmissions = count($allSubmissions);
+$quoteCount = count(array_filter($allSubmissions, fn($s) => ($s['formType'] ?? 'message') === 'quote'));
+$todayCount = count(array_filter($allSubmissions, fn($s) => ($s['date'] ?? '') === date('Y-m-d')));
+$last7DaysCount = count(array_filter($allSubmissions, fn($s) => strtotime($s['date'] ?? '1970-01-01') >= strtotime('-7 days')));
 
 ?>
 <!DOCTYPE html>
@@ -113,7 +137,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
         h1 { font-size: 1.875rem; font-weight: 700; margin-bottom: 0.5rem; }
         .subtitle { color: #6b7280; margin-bottom: 2rem; }
         .stats {
-            display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;
+            display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;
         }
         .stat {
             background: white; padding: 1rem 1.5rem; border-radius: 0.5rem;
@@ -121,7 +145,34 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
         }
         .stat-value { font-size: 1.5rem; font-weight: 700; color: #d97706; }
         .stat-label { font-size: 0.875rem; color: #6b7280; }
-        .actions { margin-bottom: 1.5rem; }
+
+        /* Filter bar */
+        .filter-bar {
+            background: white; padding: 1rem 1.5rem; border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1.5rem;
+            display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;
+        }
+        .filter-group { display: flex; align-items: center; gap: 0.5rem; }
+        .filter-group label { font-size: 0.875rem; font-weight: 500; color: #374151; }
+        .filter-group input[type="date"], .filter-group input[type="text"], .filter-group select {
+            padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem;
+            font-size: 0.875rem; background: white;
+        }
+        .filter-group input[type="text"] { width: 200px; }
+        .filter-group input:focus, .filter-group select:focus {
+            outline: none; border-color: #d97706; box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.2);
+        }
+        .quick-filters { display: flex; gap: 0.5rem; }
+        .quick-filter {
+            padding: 0.375rem 0.75rem; border-radius: 0.375rem; font-size: 0.75rem;
+            background: #f3f4f6; color: #374151; border: none; cursor: pointer;
+            transition: all 0.15s;
+        }
+        .quick-filter:hover { background: #e5e7eb; }
+        .quick-filter.active { background: #d97706; color: white; }
+        .results-count { font-size: 0.875rem; color: #6b7280; margin-left: auto; }
+
+        .actions { margin-bottom: 1.5rem; display: flex; gap: 0.5rem; }
         .btn {
             display: inline-block; padding: 0.5rem 1rem; border-radius: 0.375rem;
             text-decoration: none; font-weight: 500; font-size: 0.875rem;
@@ -137,49 +188,78 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
             padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;
             background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7;
         }
-        .submissions { display: flex; flex-direction: column; gap: 1rem; }
-        .submission {
-            background: white; border-radius: 0.5rem; padding: 1.5rem;
+        .submissions { display: flex; flex-direction: column; gap: 0.5rem; }
+
+        /* Expandable row styles */
+        .submission-row {
+            background: white; border-radius: 0.5rem;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
-        .submission-header {
-            display: flex; justify-content: space-between; align-items: flex-start;
-            margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;
+        .submission-row.hidden { display: none; }
+        .submission-summary {
+            display: flex; align-items: center; padding: 0.75rem 1rem;
+            cursor: pointer; gap: 1rem; transition: background 0.15s;
         }
-        .submission-name { font-weight: 600; font-size: 1.125rem; }
-        .submission-email { color: #d97706; }
-        .submission-meta { font-size: 0.875rem; color: #6b7280; text-align: right; }
-        .submission-subject {
-            display: inline-block; background: #fef3c7; color: #92400e;
-            padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem;
-            font-weight: 500; margin-bottom: 0.75rem;
+        .submission-summary:hover { background: #f9fafb; }
+        .expand-icon {
+            font-size: 0.75rem; color: #9ca3af; transition: transform 0.2s;
+            flex-shrink: 0; width: 1rem;
         }
-        .submission-message {
-            background: #f9fafb; padding: 1rem; border-radius: 0.375rem;
-            white-space: pre-wrap; font-size: 0.875rem;
+        .submission-row.expanded .expand-icon { transform: rotate(90deg); }
+        .badge {
+            display: inline-block; padding: 0.125rem 0.5rem; border-radius: 9999px;
+            font-size: 0.625rem; font-weight: 600; text-transform: uppercase;
+            flex-shrink: 0;
         }
-        .submission-footer {
+        .badge-quote { background: #fef3c7; color: #92400e; }
+        .badge-message { background: #dbeafe; color: #1e40af; }
+        .summary-name { font-weight: 600; min-width: 120px; flex-shrink: 0; }
+        .summary-email { color: #d97706; min-width: 180px; flex-shrink: 0; }
+        .summary-phone { color: #6b7280; min-width: 120px; flex-shrink: 0; }
+        .summary-preview {
+            color: #6b7280; font-size: 0.875rem; flex: 1;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .summary-date { color: #9ca3af; font-size: 0.75rem; flex-shrink: 0; text-align: right; min-width: 80px; }
+
+        /* Expanded details */
+        .submission-details {
+            display: none; padding: 1rem 1.5rem; background: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+        }
+        .submission-row.expanded .submission-details { display: block; }
+        .details-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem; margin-bottom: 1rem;
+        }
+        .detail-item { }
+        .detail-label { font-size: 0.625rem; text-transform: uppercase; color: #9ca3af; font-weight: 600; margin-bottom: 0.125rem; }
+        .detail-value { font-size: 0.875rem; color: #1f2937; }
+        .detail-value:empty::after { content: '—'; color: #d1d5db; }
+        .message-section { margin-top: 1rem; }
+        .message-label { font-size: 0.625rem; text-transform: uppercase; color: #9ca3af; font-weight: 600; margin-bottom: 0.25rem; }
+        .message-content {
+            background: white; padding: 0.75rem; border-radius: 0.375rem;
+            white-space: pre-wrap; font-size: 0.875rem; border: 1px solid #e5e7eb;
+        }
+        .details-footer {
             display: flex; justify-content: space-between; align-items: center;
-            margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;
+            margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid #e5e7eb;
             font-size: 0.75rem; color: #9ca3af;
         }
-        .pagination {
-            display: flex; justify-content: center; gap: 0.5rem; margin-top: 2rem;
-        }
-        .pagination a, .pagination span {
-            padding: 0.5rem 1rem; border-radius: 0.375rem; text-decoration: none;
-        }
-        .pagination a { background: white; color: #374151; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .pagination a:hover { background: #f3f4f6; }
-        .pagination .current { background: #d97706; color: white; }
+
         .empty {
             text-align: center; padding: 3rem; background: white;
             border-radius: 0.5rem; color: #6b7280;
         }
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
             body { padding: 1rem; }
-            .submission-header { flex-direction: column; }
-            .submission-meta { text-align: left; }
+            .filter-bar { flex-direction: column; align-items: stretch; }
+            .filter-group { flex-wrap: wrap; }
+            .results-count { margin-left: 0; margin-top: 0.5rem; }
+            .summary-phone, .summary-preview { display: none; }
+            .details-grid { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
@@ -194,17 +274,52 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
 
         <div class="stats">
             <div class="stat">
-                <div class="stat-value"><?= $totalSubmissions ?></div>
+                <div class="stat-value" id="stat-total"><?= $totalSubmissions ?></div>
                 <div class="stat-label">Total Submissions</div>
             </div>
             <div class="stat">
-                <div class="stat-value"><?= count(array_filter($submissions, fn($s) => $s['date'] === date('Y-m-d'))) ?></div>
+                <div class="stat-value" id="stat-quotes"><?= $quoteCount ?></div>
+                <div class="stat-label">Quote Requests</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="stat-today"><?= $todayCount ?></div>
                 <div class="stat-label">Today</div>
             </div>
             <div class="stat">
-                <div class="stat-value"><?= count(array_filter($submissions, fn($s) => strtotime($s['date']) >= strtotime('-7 days'))) ?></div>
+                <div class="stat-value" id="stat-week"><?= $last7DaysCount ?></div>
                 <div class="stat-label">Last 7 Days</div>
             </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label>From:</label>
+                <input type="date" id="date-from" />
+            </div>
+            <div class="filter-group">
+                <label>To:</label>
+                <input type="date" id="date-to" />
+            </div>
+            <div class="filter-group">
+                <label>Type:</label>
+                <select id="type-filter">
+                    <option value="all">All</option>
+                    <option value="quote">Quotes</option>
+                    <option value="message">Messages</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Search:</label>
+                <input type="text" id="search-input" placeholder="Name, email, phone..." />
+            </div>
+            <div class="quick-filters">
+                <button class="quick-filter active" data-days="30">Last 30 Days</button>
+                <button class="quick-filter" data-days="7">Last 7 Days</button>
+                <button class="quick-filter" data-days="0">Today</button>
+                <button class="quick-filter" data-days="-1">All Time</button>
+            </div>
+            <span class="results-count"><span id="filtered-count">0</span> results</span>
         </div>
 
         <div class="actions">
@@ -212,66 +327,281 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
             <a href="?key=<?= urlencode($secretPath) ?>" class="btn btn-secondary">Refresh</a>
         </div>
 
-        <?php if (empty($pagedSubmissions)): ?>
-            <div class="empty">
-                <p>No submissions yet.</p>
-            </div>
-        <?php else: ?>
-            <div class="submissions">
-                <?php foreach ($pagedSubmissions as $sub): ?>
-                    <div class="submission">
-                        <div class="submission-header">
-                            <div>
-                                <div class="submission-name">
-                                    <?= htmlspecialchars($sub['firstName'] . ' ' . $sub['lastName']) ?>
-                                </div>
-                                <a href="mailto:<?= htmlspecialchars($sub['email']) ?>" class="submission-email">
-                                    <?= htmlspecialchars($sub['email']) ?>
-                                </a>
-                                <?php if (!empty($sub['phone'])): ?>
-                                    <span style="color: #6b7280;"> · <?= htmlspecialchars($sub['phone']) ?></span>
-                                <?php endif; ?>
-                            </div>
-                            <div class="submission-meta">
-                                <div><?= htmlspecialchars($sub['date']) ?></div>
-                                <div><?= htmlspecialchars($sub['time']) ?></div>
-                            </div>
+        <div class="submissions" id="submissions-container">
+            <!-- Submissions will be rendered by JavaScript -->
+        </div>
+
+        <div class="empty" id="empty-state" style="display: none;">
+            <p>No submissions match your filters.</p>
+        </div>
+    </div>
+
+    <script>
+        // All submissions data from PHP
+        const allSubmissions = <?= $submissionsJson ?>;
+        const secretPath = '<?= urlencode($secretPath) ?>';
+
+        // DOM elements
+        const dateFromInput = document.getElementById('date-from');
+        const dateToInput = document.getElementById('date-to');
+        const typeFilter = document.getElementById('type-filter');
+        const searchInput = document.getElementById('search-input');
+        const quickFilters = document.querySelectorAll('.quick-filter');
+        const container = document.getElementById('submissions-container');
+        const emptyState = document.getElementById('empty-state');
+        const filteredCountEl = document.getElementById('filtered-count');
+
+        // Set default dates (last 30 days)
+        function setDateRange(days) {
+            const today = new Date();
+            const toDate = today.toISOString().split('T')[0];
+            dateToInput.value = toDate;
+
+            if (days === -1) {
+                // All time
+                dateFromInput.value = '';
+            } else if (days === 0) {
+                // Today
+                dateFromInput.value = toDate;
+            } else {
+                const fromDate = new Date(today);
+                fromDate.setDate(fromDate.getDate() - days);
+                dateFromInput.value = fromDate.toISOString().split('T')[0];
+            }
+            filterSubmissions();
+        }
+
+        // Initialize with last 30 days
+        setDateRange(30);
+
+        // Helper: get display name
+        function getDisplayName(sub) {
+            if (sub.name) return sub.name;
+            return ((sub.firstName || '') + ' ' + (sub.lastName || '')).trim();
+        }
+
+        // Filter submissions based on current filters
+        function filterSubmissions() {
+            const fromDate = dateFromInput.value;
+            const toDate = dateToInput.value;
+            const type = typeFilter.value;
+            const search = searchInput.value.toLowerCase().trim();
+
+            const filtered = allSubmissions.filter(sub => {
+                // Date filter
+                if (fromDate && sub.date < fromDate) return false;
+                if (toDate && sub.date > toDate) return false;
+
+                // Type filter
+                const formType = sub.formType || 'message';
+                if (type !== 'all' && formType !== type) return false;
+
+                // Search filter
+                if (search) {
+                    const searchFields = [
+                        getDisplayName(sub),
+                        sub.email || '',
+                        sub.phone || '',
+                        sub.message || '',
+                        sub.containerSize || '',
+                        sub.city || '',
+                        sub.subject || ''
+                    ].join(' ').toLowerCase();
+                    if (!searchFields.includes(search)) return false;
+                }
+
+                return true;
+            });
+
+            renderSubmissions(filtered);
+            filteredCountEl.textContent = filtered.length;
+        }
+
+        // Render submissions to DOM
+        function renderSubmissions(submissions) {
+            if (submissions.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            container.innerHTML = submissions.map((sub, index) => {
+                const formType = sub.formType || 'message';
+                const isQuote = formType === 'quote';
+                const displayName = getDisplayName(sub);
+                const preview = isQuote
+                    ? [sub.containerSize, sub.condition, sub.intention].filter(Boolean).join(' · ')
+                    : (sub.subject || 'General Inquiry');
+
+                let detailsHtml = `
+                    <div class="detail-item">
+                        <div class="detail-label">Name</div>
+                        <div class="detail-value">${escapeHtml(displayName)}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Email</div>
+                        <div class="detail-value"><a href="mailto:${escapeHtml(sub.email)}">${escapeHtml(sub.email)}</a></div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Phone</div>
+                        <div class="detail-value">${escapeHtml(sub.phone || '')}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Date & Time</div>
+                        <div class="detail-value">${escapeHtml(sub.date + ' ' + sub.time)}</div>
+                    </div>
+                `;
+
+                if (isQuote) {
+                    detailsHtml += `
+                        <div class="detail-item">
+                            <div class="detail-label">Container Size</div>
+                            <div class="detail-value">${escapeHtml(sub.containerSize || '')}</div>
                         </div>
-                        <?php if (!empty($sub['subject'])): ?>
-                            <span class="submission-subject"><?= htmlspecialchars($sub['subject']) ?></span>
-                        <?php endif; ?>
-                        <div class="submission-message"><?= htmlspecialchars($sub['message']) ?></div>
-                        <div class="submission-footer">
-                            <span>ID: <?= htmlspecialchars($sub['id']) ?> · IP: <?= htmlspecialchars($sub['ip']) ?></span>
-                            <form method="POST" style="display: inline;" onsubmit="return confirm('Delete this submission?');">
-                                <input type="hidden" name="delete_id" value="<?= htmlspecialchars($sub['id']) ?>">
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                            </form>
+                        <div class="detail-item">
+                            <div class="detail-label">Condition</div>
+                            <div class="detail-value">${escapeHtml(sub.condition || '')}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Intention</div>
+                            <div class="detail-value">${escapeHtml(sub.intention || '')}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Delivery</div>
+                            <div class="detail-value">${escapeHtml(sub.delivery || '')}</div>
+                        </div>
+                    `;
+                    if (sub.locationType) {
+                        detailsHtml += `
+                            <div class="detail-item">
+                                <div class="detail-label">Location Type</div>
+                                <div class="detail-value">${escapeHtml(sub.locationType)}</div>
+                            </div>
+                        `;
+                        if (sub.locationType === 'Urban') {
+                            detailsHtml += `
+                                <div class="detail-item">
+                                    <div class="detail-label">Street Address</div>
+                                    <div class="detail-value">${escapeHtml(sub.streetAddress || '')}</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">City</div>
+                                    <div class="detail-value">${escapeHtml(sub.city || '')}</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Postal Code</div>
+                                    <div class="detail-value">${escapeHtml(sub.postalCode || '')}</div>
+                                </div>
+                            `;
+                        } else {
+                            detailsHtml += `
+                                <div class="detail-item">
+                                    <div class="detail-label">Land Location</div>
+                                    <div class="detail-value">${escapeHtml(sub.landLocation || '')}</div>
+                                </div>
+                            `;
+                            if (sub.additionalDirections) {
+                                detailsHtml += `
+                                    <div class="detail-item">
+                                        <div class="detail-label">Additional Directions</div>
+                                        <div class="detail-value">${escapeHtml(sub.additionalDirections)}</div>
+                                    </div>
+                                `;
+                            }
+                        }
+                    }
+                } else {
+                    detailsHtml += `
+                        <div class="detail-item">
+                            <div class="detail-label">Subject</div>
+                            <div class="detail-value">${escapeHtml(sub.subject || 'General Inquiry')}</div>
+                        </div>
+                    `;
+                }
+
+                let messageHtml = '';
+                if (sub.message) {
+                    messageHtml = `
+                        <div class="message-section">
+                            <div class="message-label">Message</div>
+                            <div class="message-content">${escapeHtml(sub.message)}</div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="submission-row" id="row-${index}">
+                        <div class="submission-summary" onclick="toggleRow(${index})">
+                            <span class="expand-icon">▶</span>
+                            <span class="badge ${isQuote ? 'badge-quote' : 'badge-message'}">
+                                ${isQuote ? 'Quote' : 'Message'}
+                            </span>
+                            <span class="summary-name">${escapeHtml(displayName)}</span>
+                            <span class="summary-email">${escapeHtml(sub.email)}</span>
+                            <span class="summary-phone">${escapeHtml(sub.phone || '')}</span>
+                            <span class="summary-preview">${escapeHtml(preview)}</span>
+                            <span class="summary-date">${escapeHtml(sub.date)}</span>
+                        </div>
+                        <div class="submission-details">
+                            <div class="details-grid">
+                                ${detailsHtml}
+                            </div>
+                            ${messageHtml}
+                            <div class="details-footer">
+                                <span>ID: ${escapeHtml(sub.id)} · IP: ${escapeHtml(sub.ip)}</span>
+                                <form method="POST" style="display: inline;" onsubmit="return confirm('Delete this submission?');">
+                                    <input type="hidden" name="delete_id" value="${escapeHtml(sub.id)}">
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                <?php endforeach; ?>
-            </div>
+                `;
+            }).join('');
+        }
 
-            <?php if ($totalPages > 1): ?>
-                <div class="pagination">
-                    <?php if ($page > 1): ?>
-                        <a href="?key=<?= urlencode($secretPath) ?>&page=<?= $page - 1 ?>">← Previous</a>
-                    <?php endif; ?>
+        // Toggle row expansion
+        function toggleRow(index) {
+            const row = document.getElementById('row-' + index);
+            row.classList.toggle('expanded');
+        }
 
-                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                        <?php if ($i === $page): ?>
-                            <span class="current"><?= $i ?></span>
-                        <?php else: ?>
-                            <a href="?key=<?= urlencode($secretPath) ?>&page=<?= $i ?>"><?= $i ?></a>
-                        <?php endif; ?>
-                    <?php endfor; ?>
+        // Escape HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
 
-                    <?php if ($page < $totalPages): ?>
-                        <a href="?key=<?= urlencode($secretPath) ?>&page=<?= $page + 1 ?>">Next →</a>
-                    <?php endif; ?>
-                </div>
-            <?php endif; ?>
-        <?php endif; ?>
-    </div>
+        // Event listeners
+        dateFromInput.addEventListener('change', () => {
+            clearQuickFilterActive();
+            filterSubmissions();
+        });
+        dateToInput.addEventListener('change', () => {
+            clearQuickFilterActive();
+            filterSubmissions();
+        });
+        typeFilter.addEventListener('change', filterSubmissions);
+        searchInput.addEventListener('input', filterSubmissions);
+
+        quickFilters.forEach(btn => {
+            btn.addEventListener('click', () => {
+                quickFilters.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                setDateRange(parseInt(btn.dataset.days));
+            });
+        });
+
+        function clearQuickFilterActive() {
+            quickFilters.forEach(b => b.classList.remove('active'));
+        }
+
+        // Initial render
+        filterSubmissions();
+    </script>
 </body>
 </html>
