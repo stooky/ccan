@@ -30,6 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Load configuration
 $configPath = dirname(__DIR__) . '/config.yaml';
+$localConfigPath = dirname(__DIR__) . '/config.local.yaml';
+
 if (!file_exists($configPath)) {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Configuration not found']);
@@ -40,6 +42,17 @@ $config = yaml_parse_file($configPath);
 if ($config === false) {
     // Fallback: parse YAML manually if yaml extension not available
     $config = parseSimpleYaml($configPath);
+}
+
+// Merge local overrides if they exist
+if (file_exists($localConfigPath)) {
+    $localConfig = yaml_parse_file($localConfigPath);
+    if ($localConfig === false) {
+        $localConfig = parseSimpleYaml($localConfigPath);
+    }
+    if ($localConfig) {
+        $config = array_replace_recursive($config, $localConfig);
+    }
 }
 
 /**

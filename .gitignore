@@ -36,6 +36,9 @@ backup/
 # Form submissions (sensitive data)
 data/submissions.json
 
+# Local config overrides (per-server settings)
+config.local.yaml
+
 # Claude Code local settings (machine-specific permissions)
 .claude/settings.local.json
 

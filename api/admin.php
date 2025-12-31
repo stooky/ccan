@@ -8,6 +8,7 @@
 
 // Load configuration
 $configPath = dirname(__DIR__) . '/config.yaml';
+$localConfigPath = dirname(__DIR__) . '/config.local.yaml';
 $config = null;
 
 if (file_exists($configPath)) {
@@ -26,6 +27,22 @@ if (file_exists($configPath)) {
         if (preg_match('/submissions_file:\s*["\']?([^"\'\n]+)["\']?/', $content, $matches)) {
             $config['logging']['submissions_file'] = trim($matches[1]);
         }
+    }
+}
+
+// Merge local overrides if they exist
+if (file_exists($localConfigPath)) {
+    if (function_exists('yaml_parse_file')) {
+        $localConfig = yaml_parse_file($localConfigPath);
+    } else {
+        $content = file_get_contents($localConfigPath);
+        $localConfig = [];
+        if (preg_match('/secret_path:\s*["\']?([^"\'\n]+)["\']?/', $content, $matches)) {
+            $localConfig['admin']['secret_path'] = trim($matches[1]);
+        }
+    }
+    if ($localConfig) {
+        $config = array_replace_recursive($config ?? [], $localConfig);
     }
 }
 
