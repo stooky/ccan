@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { getCollection, render } from 'astro:content';
+import { siteConfig } from '../../config/site';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -150,7 +151,7 @@ const imageSrcSet = post.data.image ? `
           <p class="text-gray-600 font-medium">Found this helpful? Share it:</p>
           <div class="flex gap-3">
             <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.data.title)}&url=${encodeURIComponent(`https://ccansam.com/blog/${post.id}`)}`}
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.data.title)}&url=${encodeURIComponent(`${siteConfig.url}/blog/${post.id}`)}`}
               target="_blank"
               rel="noopener noreferrer"
               class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
@@ -159,7 +160,7 @@ const imageSrcSet = post.data.image ? `
               Twitter
             </a>
             <a
-              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`https://ccansam.com/blog/${post.id}`)}`}
+              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${siteConfig.url}/blog/${post.id}`)}`}
               target="_blank"
               rel="noopener noreferrer"
               class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
