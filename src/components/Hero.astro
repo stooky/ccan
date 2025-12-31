@@ -7,10 +7,12 @@ interface Props {
   primaryCta?: {
     text: string;
     href: string;
+    variant?: 'primary' | 'whatsapp' | 'blue';
   };
   secondaryCta?: {
     text: string;
     href: string;
+    variant?: 'default' | 'blue' | 'primary';
   };
   centered?: boolean;
   size?: 'sm' | 'md' | 'lg';
@@ -78,11 +80,14 @@ const hasBackground = !!backgroundImage;
           {primaryCta && (
             <a
               href={primaryCta.href}
-              class={`inline-flex items-center justify-center rounded-lg px-6 py-3 text-base font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                hasBackground
+              class:list={[
+                'inline-flex items-center justify-center rounded-lg px-6 py-3 text-base font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2',
+                primaryCta.variant === 'whatsapp' && 'bg-[#25D366] text-white hover:bg-[#20BD5A] focus:ring-[#25D366]',
+                primaryCta.variant === 'blue' && 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
+                (!primaryCta.variant || primaryCta.variant === 'primary') && (hasBackground
                   ? 'bg-primary-500 text-white hover:bg-primary-400 focus:ring-primary-400'
-                  : 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500'
-              }`}
+                  : 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500'),
+              ]}
             >
               {primaryCta.text}
             </a>
@@ -90,11 +95,14 @@ const hasBackground = !!backgroundImage;
           {secondaryCta && (
             <a
               href={secondaryCta.href}
-              class={`inline-flex items-center justify-center rounded-lg px-6 py-3 text-base font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                hasBackground
+              class:list={[
+                'inline-flex items-center justify-center rounded-lg px-6 py-3 text-base font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2',
+                secondaryCta.variant === 'blue' && 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
+                secondaryCta.variant === 'primary' && 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500',
+                (!secondaryCta.variant || secondaryCta.variant === 'default') && (hasBackground
                   ? 'bg-white/10 text-white border border-white/30 hover:bg-white/20 focus:ring-white backdrop-blur-sm'
-                  : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-primary-500'
-              }`}
+                  : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-primary-500'),
+              ]}
             >
               {secondaryCta.text}
             </a>
