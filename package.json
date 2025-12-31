@@ -11,7 +11,10 @@
     "launch": "node scripts/launch.js",
     "validate": "node scripts/validate.js",
     "stash": "node scripts/stash.js",
-    "restore": "node scripts/restore.js"
+    "restore": "node scripts/restore.js",
+    "deploy": "node scripts/deploy.js staging",
+    "deploy:staging": "node scripts/deploy.js staging",
+    "deploy:prod": "node scripts/deploy.js production"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.2.1",
