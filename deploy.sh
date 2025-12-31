@@ -83,7 +83,7 @@ apt-get upgrade -y
 
 # Install required packages
 log_info "Installing dependencies..."
-apt-get install -y curl git nginx certbot python3-certbot-nginx ufw php-fpm php-yaml
+apt-get install -y curl git nginx certbot python3-certbot-nginx ufw php-fpm php-yaml php-curl
 
 # Install Node.js 20.x if not installed
 if ! command -v node &> /dev/null; then
