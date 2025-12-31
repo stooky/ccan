@@ -20,7 +20,7 @@ const ENVIRONMENTS = {
   },
   production: {
     name: 'Production',
-    host: 'ccansam.com',
+    host: '144.202.24.79',
     user: 'root',
     path: '/var/www/ccan',
     url: 'https://ccansam.com',
