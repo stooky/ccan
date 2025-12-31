@@ -141,7 +141,7 @@ analytics:
 # -----------------------------------------------------------------------------
 contact_form:
   # Email address to receive form submissions
-  recipient_email: "chris@fossenier.com"
+  recipient_email: "ccansam22@gmail.com"
 
   # Email subject prefix
   subject_prefix: "[C-Can Sam Contact]"
