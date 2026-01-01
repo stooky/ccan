@@ -2,13 +2,14 @@
 /**
  * C-Can Sam Admin Panel
  *
- * View contact form submissions
+ * View contact form submissions and Google reviews
  * Access via: /api/admin.php?key=YOUR_SECRET_PATH
  */
 
 // Load configuration
 $configPath = dirname(__DIR__) . '/config.yaml';
 $localConfigPath = dirname(__DIR__) . '/config.local.yaml';
+$reviewsPath = dirname(__DIR__) . '/data/reviews.json';
 $config = null;
 
 if (file_exists($configPath)) {
@@ -133,13 +134,27 @@ $quoteCount = count(array_filter($allSubmissions, fn($s) => ($s['formType'] ?? '
 $todayCount = count(array_filter($allSubmissions, fn($s) => ($s['date'] ?? '') === date('Y-m-d')));
 $last7DaysCount = count(array_filter($allSubmissions, fn($s) => strtotime($s['date'] ?? '1970-01-01') >= strtotime('-7 days')));
 
+// Load reviews
+$reviewsData = ['reviews' => [], 'lastSync' => null, 'totalCount' => 0, 'averageRating' => 0];
+if (file_exists($reviewsPath)) {
+    $reviewsContent = file_get_contents($reviewsPath);
+    $reviewsData = json_decode($reviewsContent, true) ?? $reviewsData;
+}
+$reviewsJson = json_encode($reviewsData['reviews'] ?? []);
+$reviewsLastSync = $reviewsData['lastSync'] ?? 'Never';
+$reviewsTotalCount = $reviewsData['totalCount'] ?? count($reviewsData['reviews'] ?? []);
+$reviewsAvgRating = $reviewsData['averageRating'] ?? 0;
+
+// Get current tab
+$currentTab = $_GET['tab'] ?? 'submissions';
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Submissions - Admin</title>
+    <title>Admin Panel - C-Can Sam</title>
     <meta name="robots" content="noindex, nofollow">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -278,16 +293,128 @@ $last7DaysCount = count(array_filter($allSubmissions, fn($s) => strtotime($s['da
             .summary-phone, .summary-preview { display: none; }
             .details-grid { grid-template-columns: 1fr 1fr; }
         }
+
+        /* Tab Navigation */
+        .tabs {
+            display: flex; gap: 0; margin-bottom: 1.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .tab {
+            padding: 0.75rem 1.5rem; font-weight: 500; font-size: 0.9375rem;
+            color: #6b7280; text-decoration: none; border-bottom: 2px solid transparent;
+            margin-bottom: -2px; transition: all 0.15s;
+        }
+        .tab:hover { color: #d97706; }
+        .tab.active { color: #d97706; border-bottom-color: #d97706; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Reviews styles */
+        .reviews-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;
+        }
+        .reviews-stats {
+            display: flex; gap: 1.5rem; align-items: center;
+        }
+        .reviews-stat {
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .reviews-stat-value { font-size: 1.25rem; font-weight: 700; color: #d97706; }
+        .reviews-stat-label { font-size: 0.875rem; color: #6b7280; }
+        .stars { color: #fbbf24; font-size: 1.125rem; }
+
+        .reviews-filter {
+            display: flex; gap: 0.5rem; align-items: center;
+        }
+        .reviews-filter input {
+            padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem;
+            font-size: 0.875rem; width: 250px;
+        }
+        .reviews-filter input:focus {
+            outline: none; border-color: #d97706; box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.2);
+        }
+
+        .reviews-list {
+            display: flex; flex-direction: column; gap: 0.75rem;
+        }
+        .review-card {
+            background: white; border-radius: 0.5rem; padding: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .review-card.hidden { display: none; }
+        .review-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+        .review-author {
+            display: flex; align-items: center; gap: 0.75rem;
+        }
+        .review-avatar {
+            width: 40px; height: 40px; border-radius: 50%; background: #d97706;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 600; font-size: 1rem;
+        }
+        .review-author-info { }
+        .review-author-name { font-weight: 600; color: #1f2937; }
+        .review-author-meta { font-size: 0.75rem; color: #9ca3af; display: flex; gap: 0.5rem; align-items: center; }
+        .review-rating { display: flex; gap: 0.125rem; }
+        .review-star { color: #fbbf24; font-size: 0.875rem; }
+        .review-star.empty { color: #e5e7eb; }
+        .review-date { font-size: 0.75rem; color: #9ca3af; text-align: right; }
+        .review-text { color: #374151; line-height: 1.6; margin-bottom: 0.75rem; }
+        .review-response {
+            background: #f9fafb; border-left: 3px solid #d97706; padding: 0.75rem 1rem;
+            margin-top: 0.75rem; border-radius: 0 0.375rem 0.375rem 0;
+        }
+        .review-response-header {
+            font-size: 0.75rem; font-weight: 600; color: #d97706; margin-bottom: 0.25rem;
+        }
+        .review-response-text { font-size: 0.875rem; color: #6b7280; }
+        .review-badges { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+        .review-badge {
+            font-size: 0.625rem; padding: 0.125rem 0.375rem; border-radius: 0.25rem;
+            background: #e5e7eb; color: #6b7280; text-transform: uppercase; font-weight: 600;
+        }
+        .review-badge.new { background: #dcfce7; color: #166534; }
+        .review-badge.photo { background: #dbeafe; color: #1e40af; }
+        .review-badge.guide { background: #fef3c7; color: #92400e; }
+
+        .reviews-pagination {
+            display: flex; justify-content: center; align-items: center; gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+        .page-btn {
+            padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem;
+            background: white; cursor: pointer; font-size: 0.875rem;
+        }
+        .page-btn:hover { background: #f3f4f6; }
+        .page-btn.active { background: #d97706; color: white; border-color: #d97706; }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .page-info { font-size: 0.875rem; color: #6b7280; margin: 0 0.5rem; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Contact Form Submissions</h1>
-        <p class="subtitle">C-Can Sam Admin Panel</p>
+        <h1>C-Can Sam Admin</h1>
+        <p class="subtitle">Manage submissions and reviews</p>
 
         <?php if (isset($_GET['deleted'])): ?>
             <div class="alert">Submission deleted successfully.</div>
         <?php endif; ?>
+
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <a href="?key=<?= urlencode($secretPath) ?>&tab=submissions" class="tab <?= $currentTab === 'submissions' ? 'active' : '' ?>">
+                Submissions (<?= $totalSubmissions ?>)
+            </a>
+            <a href="?key=<?= urlencode($secretPath) ?>&tab=reviews" class="tab <?= $currentTab === 'reviews' ? 'active' : '' ?>">
+                Reviews (<?= $reviewsTotalCount ?>)
+            </a>
+        </div>
+
+        <!-- Submissions Tab -->
+        <div class="tab-content <?= $currentTab === 'submissions' ? 'active' : '' ?>" id="submissions-tab">
 
         <div class="stats">
             <div class="stat">
@@ -351,6 +478,39 @@ $last7DaysCount = count(array_filter($allSubmissions, fn($s) => strtotime($s['da
         <div class="empty" id="empty-state" style="display: none;">
             <p>No submissions match your filters.</p>
         </div>
+
+        </div><!-- End Submissions Tab -->
+
+        <!-- Reviews Tab -->
+        <div class="tab-content <?= $currentTab === 'reviews' ? 'active' : '' ?>" id="reviews-tab">
+            <div class="reviews-header">
+                <div class="reviews-stats">
+                    <div class="reviews-stat">
+                        <span class="reviews-stat-value"><?= $reviewsTotalCount ?></span>
+                        <span class="reviews-stat-label">Reviews</span>
+                    </div>
+                    <div class="reviews-stat">
+                        <span class="stars">★★★★★</span>
+                        <span class="reviews-stat-value"><?= number_format($reviewsAvgRating, 2) ?></span>
+                    </div>
+                    <div class="reviews-stat">
+                        <span class="reviews-stat-label">Last sync: <?= htmlspecialchars($reviewsLastSync) ?></span>
+                    </div>
+                </div>
+                <div class="reviews-filter">
+                    <input type="text" id="reviews-search" placeholder="Search reviews..." />
+                </div>
+            </div>
+
+            <div class="reviews-list" id="reviews-container">
+                <!-- Reviews will be rendered by JavaScript -->
+            </div>
+
+            <div class="reviews-pagination" id="reviews-pagination">
+                <!-- Pagination will be rendered by JavaScript -->
+            </div>
+        </div><!-- End Reviews Tab -->
+
     </div>
 
     <script>
@@ -619,6 +779,163 @@ $last7DaysCount = count(array_filter($allSubmissions, fn($s) => strtotime($s['da
 
         // Initial render
         filterSubmissions();
+
+        // ============================================
+        // Reviews Tab Functionality
+        // ============================================
+        const allReviews = <?= $reviewsJson ?>;
+        const reviewsContainer = document.getElementById('reviews-container');
+        const reviewsPagination = document.getElementById('reviews-pagination');
+        const reviewsSearchInput = document.getElementById('reviews-search');
+
+        const REVIEWS_PER_PAGE = 10;
+        let currentReviewsPage = 1;
+        let filteredReviews = [...allReviews];
+
+        function getInitials(name) {
+            if (!name) return '?';
+            const parts = name.trim().split(' ');
+            if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+            return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+        }
+
+        function renderStars(rating) {
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                stars += `<span class="review-star ${i <= rating ? '' : 'empty'}">★</span>`;
+            }
+            return stars;
+        }
+
+        function filterReviews() {
+            const search = reviewsSearchInput.value.toLowerCase().trim();
+
+            filteredReviews = allReviews.filter(review => {
+                if (!search) return true;
+                const searchText = [
+                    review.author || '',
+                    review.text || '',
+                    review.ownerResponse?.text || ''
+                ].join(' ').toLowerCase();
+                return searchText.includes(search);
+            });
+
+            currentReviewsPage = 1;
+            renderReviews();
+            renderReviewsPagination();
+        }
+
+        function renderReviews() {
+            const start = (currentReviewsPage - 1) * REVIEWS_PER_PAGE;
+            const end = start + REVIEWS_PER_PAGE;
+            const pageReviews = filteredReviews.slice(start, end);
+
+            if (pageReviews.length === 0) {
+                reviewsContainer.innerHTML = '<div class="empty"><p>No reviews match your search.</p></div>';
+                return;
+            }
+
+            reviewsContainer.innerHTML = pageReviews.map(review => {
+                let badges = '';
+                if (review.isNew) badges += '<span class="review-badge new">New</span>';
+                if (review.hasPhoto) badges += '<span class="review-badge photo">Photo</span>';
+                if (review.isLocalGuide) badges += '<span class="review-badge guide">Local Guide</span>';
+                if (review.isEdited) badges += '<span class="review-badge">Edited</span>';
+
+                let responseHtml = '';
+                if (review.ownerResponse) {
+                    responseHtml = `
+                        <div class="review-response">
+                            <div class="review-response-header">Owner Response</div>
+                            <div class="review-response-text">${escapeHtml(review.ownerResponse.text)}</div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div class="review-author">
+                                <div class="review-avatar">${getInitials(review.author)}</div>
+                                <div class="review-author-info">
+                                    <div class="review-author-name">${escapeHtml(review.author)}</div>
+                                    <div class="review-author-meta">
+                                        <div class="review-rating">${renderStars(review.rating)}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="review-date">
+                                ${escapeHtml(review.relativeDate || review.date)}
+                            </div>
+                        </div>
+                        ${review.text ? `<div class="review-text">${escapeHtml(review.text)}</div>` : '<div class="review-text" style="color: #9ca3af; font-style: italic;">(No written review)</div>'}
+                        ${badges ? `<div class="review-badges">${badges}</div>` : ''}
+                        ${responseHtml}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderReviewsPagination() {
+            const totalPages = Math.ceil(filteredReviews.length / REVIEWS_PER_PAGE);
+
+            if (totalPages <= 1) {
+                reviewsPagination.innerHTML = '';
+                return;
+            }
+
+            let paginationHtml = `
+                <button class="page-btn" onclick="goToReviewsPage(${currentReviewsPage - 1})" ${currentReviewsPage === 1 ? 'disabled' : ''}>← Prev</button>
+            `;
+
+            const startPage = Math.max(1, currentReviewsPage - 2);
+            const endPage = Math.min(totalPages, startPage + 4);
+
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHtml += `
+                    <button class="page-btn ${i === currentReviewsPage ? 'active' : ''}" onclick="goToReviewsPage(${i})">${i}</button>
+                `;
+            }
+
+            paginationHtml += `
+                <span class="page-info">${filteredReviews.length} reviews</span>
+                <button class="page-btn" onclick="goToReviewsPage(${currentReviewsPage + 1})" ${currentReviewsPage === totalPages ? 'disabled' : ''}>Next →</button>
+            `;
+
+            reviewsPagination.innerHTML = paginationHtml;
+        }
+
+        function goToReviewsPage(page) {
+            const totalPages = Math.ceil(filteredReviews.length / REVIEWS_PER_PAGE);
+            if (page < 1 || page > totalPages) return;
+            currentReviewsPage = page;
+            renderReviews();
+            renderReviewsPagination();
+            reviewsContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Reviews event listeners
+        if (reviewsSearchInput) {
+            reviewsSearchInput.addEventListener('input', filterReviews);
+        }
+
+        // Initial reviews render (only if on reviews tab)
+        if (document.getElementById('reviews-tab').classList.contains('active')) {
+            renderReviews();
+            renderReviewsPagination();
+        }
+
+        // Render reviews when tab is clicked (for tabs without page reload)
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                setTimeout(() => {
+                    if (document.getElementById('reviews-tab').classList.contains('active')) {
+                        renderReviews();
+                        renderReviewsPagination();
+                    }
+                }, 0);
+            });
+        });
     </script>
 </body>
 </html>
