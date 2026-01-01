@@ -324,15 +324,30 @@ $currentTab = $_GET['tab'] ?? 'submissions';
         .reviews-stat-label { font-size: 0.875rem; color: #6b7280; }
         .stars { color: #fbbf24; font-size: 1.125rem; }
 
-        .reviews-filter {
-            display: flex; gap: 0.5rem; align-items: center;
+        .reviews-filters {
+            background: white; padding: 1rem 1.5rem; border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1.5rem;
+            display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;
         }
-        .reviews-filter input {
+        .reviews-filter-group {
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .reviews-filter-group label {
+            font-size: 0.875rem; font-weight: 500; color: #374151;
+        }
+        .reviews-filters input[type="date"],
+        .reviews-filters input[type="text"],
+        .reviews-filters select {
             padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem;
-            font-size: 0.875rem; width: 250px;
+            font-size: 0.875rem; background: white;
         }
-        .reviews-filter input:focus {
+        .reviews-filters input[type="text"] { width: 200px; }
+        .reviews-filters input:focus,
+        .reviews-filters select:focus {
             outline: none; border-color: #d97706; box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.2);
+        }
+        .reviews-results-count {
+            font-size: 0.875rem; color: #6b7280; margin-left: auto;
         }
 
         .reviews-list {
@@ -502,9 +517,30 @@ $currentTab = $_GET['tab'] ?? 'submissions';
                         <span class="reviews-stat-label">Last sync: <?= htmlspecialchars($reviewsLastSync) ?></span>
                     </div>
                 </div>
-                <div class="reviews-filter">
-                    <input type="text" id="reviews-search" placeholder="Search reviews..." />
+            </div>
+
+            <!-- Reviews Filter Bar -->
+            <div class="reviews-filters">
+                <div class="reviews-filter-group">
+                    <label>From:</label>
+                    <input type="date" id="reviews-date-from" />
                 </div>
+                <div class="reviews-filter-group">
+                    <label>To:</label>
+                    <input type="date" id="reviews-date-to" />
+                </div>
+                <div class="reviews-filter-group">
+                    <label>Sort:</label>
+                    <select id="reviews-sort">
+                        <option value="desc">Newest First</option>
+                        <option value="asc">Oldest First</option>
+                    </select>
+                </div>
+                <div class="reviews-filter-group">
+                    <label>Search:</label>
+                    <input type="text" id="reviews-search" placeholder="Name, review text..." />
+                </div>
+                <span class="reviews-results-count"><span id="reviews-count">0</span> reviews</span>
             </div>
 
             <div class="reviews-list" id="reviews-container">
@@ -792,10 +828,21 @@ $currentTab = $_GET['tab'] ?? 'submissions';
         const reviewsContainer = document.getElementById('reviews-container');
         const reviewsPagination = document.getElementById('reviews-pagination');
         const reviewsSearchInput = document.getElementById('reviews-search');
+        const reviewsDateFromInput = document.getElementById('reviews-date-from');
+        const reviewsDateToInput = document.getElementById('reviews-date-to');
+        const reviewsSortSelect = document.getElementById('reviews-sort');
+        const reviewsCountEl = document.getElementById('reviews-count');
 
         const REVIEWS_PER_PAGE = 10;
         let currentReviewsPage = 1;
         let filteredReviews = [...allReviews];
+
+        // Set default date range (all time - leave empty for no restriction)
+        function initReviewsDateRange() {
+            const today = new Date().toISOString().split('T')[0];
+            reviewsDateToInput.value = today;
+            // Leave from date empty to show all
+        }
 
         function getInitials(name) {
             if (!name) return '?';
@@ -832,20 +879,40 @@ $currentTab = $_GET['tab'] ?? 'submissions';
 
         function filterReviews() {
             const search = reviewsSearchInput.value.toLowerCase().trim();
+            const fromDate = reviewsDateFromInput.value;
+            const toDate = reviewsDateToInput.value;
+            const sortOrder = reviewsSortSelect.value;
 
+            // Filter
             filteredReviews = allReviews.filter(review => {
-                if (!search) return true;
-                const searchText = [
-                    review.author || '',
-                    review.text || '',
-                    review.ownerResponse?.text || ''
-                ].join(' ').toLowerCase();
-                return searchText.includes(search);
+                // Date filter
+                if (fromDate && review.date < fromDate) return false;
+                if (toDate && review.date > toDate) return false;
+
+                // Search filter
+                if (search) {
+                    const searchText = [
+                        review.author || '',
+                        review.text || '',
+                        review.ownerResponse?.text || ''
+                    ].join(' ').toLowerCase();
+                    if (!searchText.includes(search)) return false;
+                }
+
+                return true;
+            });
+
+            // Sort
+            filteredReviews.sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
             });
 
             currentReviewsPage = 1;
             renderReviews();
             renderReviewsPagination();
+            reviewsCountEl.textContent = filteredReviews.length;
         }
 
         function renderReviews() {
@@ -944,11 +1011,20 @@ $currentTab = $_GET['tab'] ?? 'submissions';
         if (reviewsSearchInput) {
             reviewsSearchInput.addEventListener('input', filterReviews);
         }
+        if (reviewsDateFromInput) {
+            reviewsDateFromInput.addEventListener('change', filterReviews);
+        }
+        if (reviewsDateToInput) {
+            reviewsDateToInput.addEventListener('change', filterReviews);
+        }
+        if (reviewsSortSelect) {
+            reviewsSortSelect.addEventListener('change', filterReviews);
+        }
 
         // Initial reviews render (only if on reviews tab)
         if (document.getElementById('reviews-tab').classList.contains('active')) {
-            renderReviews();
-            renderReviewsPagination();
+            initReviewsDateRange();
+            filterReviews();
         }
 
         // Render reviews when tab is clicked (for tabs without page reload)
@@ -956,8 +1032,8 @@ $currentTab = $_GET['tab'] ?? 'submissions';
             tab.addEventListener('click', () => {
                 setTimeout(() => {
                     if (document.getElementById('reviews-tab').classList.contains('active')) {
-                        renderReviews();
-                        renderReviewsPagination();
+                        initReviewsDateRange();
+                        filterReviews();
                     }
                 }, 0);
             });
