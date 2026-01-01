@@ -368,7 +368,12 @@ $currentTab = $_GET['tab'] ?? 'submissions';
             margin-top: 0.75rem; border-radius: 0 0.375rem 0.375rem 0;
         }
         .review-response-header {
-            font-size: 0.75rem; font-weight: 600; color: #d97706; margin-bottom: 0.25rem;
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 0.75rem; font-weight: 600; color: #d97706; margin-bottom: 0.5rem;
+        }
+        .review-response-avatar {
+            width: 24px; height: 24px; border-radius: 50%; object-fit: cover;
+            border: 1px solid #e5e7eb;
         }
         .review-response-text { font-size: 0.875rem; color: #6b7280; }
         .review-badges { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
@@ -807,6 +812,24 @@ $currentTab = $_GET['tab'] ?? 'submissions';
             return stars;
         }
 
+        function getRelativeTime(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 1) return 'today';
+            if (diffDays === 1) return 'yesterday';
+            if (diffDays < 7) return `${diffDays} days ago`;
+            if (diffDays < 14) return 'a week ago';
+            if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+            if (diffDays < 60) return 'a month ago';
+            if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+            if (diffDays < 730) return 'a year ago';
+            return `${Math.floor(diffDays / 365)} years ago`;
+        }
+
         function filterReviews() {
             const search = reviewsSearchInput.value.toLowerCase().trim();
 
@@ -846,7 +869,10 @@ $currentTab = $_GET['tab'] ?? 'submissions';
                 if (review.ownerResponse) {
                     responseHtml = `
                         <div class="review-response">
-                            <div class="review-response-header">Owner Response</div>
+                            <div class="review-response-header">
+                                <img src="/favicon-32.png" alt="C-Can Sam" class="review-response-avatar" />
+                                <span>C-Can Sam (Owner)</span>
+                            </div>
                             <div class="review-response-text">${escapeHtml(review.ownerResponse.text)}</div>
                         </div>
                     `;
@@ -865,7 +891,7 @@ $currentTab = $_GET['tab'] ?? 'submissions';
                                 </div>
                             </div>
                             <div class="review-date">
-                                ${escapeHtml(review.relativeDate || review.date)}
+                                ${getRelativeTime(review.date)}
                             </div>
                         </div>
                         ${review.text ? `<div class="review-text">${escapeHtml(review.text)}</div>` : '<div class="review-text" style="color: #9ca3af; font-style: italic;">(No written review)</div>'}
