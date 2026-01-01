@@ -66,17 +66,17 @@ const process = [
   {
     step: 1,
     title: 'Choose Your Container',
-    description: 'Select the right seacan size and rental or purchase option for your needs.',
+    description: 'Select the right seacan size and rental or purchase option for your needs. Browse the website or reach out to us for a fast, <a href="/contact" class="text-primary-600 hover:underline">friendly quote</a>.',
   },
   {
     step: 2,
     title: 'We Deliver',
-    description: 'We\'ll bring your container to your preferred location within Saskatchewan.',
+    description: 'We\'ll bring your container to your preferred location within Saskatchewan. We can deliver anywhere in Canada, <a href="/contact" class="text-primary-600 hover:underline">request a quote</a> for rates.',
   },
   {
     step: 3,
     title: 'Store Your Stuff',
-    description: 'Use your seacan to keep your belongings safe and secure, either on-site or off-site.',
+    description: 'Use your seacan to keep your belongings safe and secure, either on-site or off-site. You can purchase anti-theft locks for your container. We also sell lock boxes that can be fastened to the conatiner if not already equipped.',
   },
 ];
 ---
@@ -325,7 +325,7 @@ const process = [
             {item.step}
           </div>
           <h3 class="mt-4 text-lg font-semibold text-gray-900">{item.title}</h3>
-          <p class="mt-2 text-gray-600">{item.description}</p>
+          <p class="mt-2 text-gray-600" set:html={item.description} />
         </div>
       ))}
     </div>
@@ -335,7 +335,7 @@ const process = [
   <Section
     id="areas"
     title="Service Area"
-    subtitle="Proudly serving Saskatchewan."
+    subtitle="Proudly serving all of Saskatchewan."
   >
     <div class="mx-auto max-w-2xl text-center">
       <div class="flex items-center justify-center gap-2 rounded-lg bg-gray-50 p-6 shadow-sm">
@@ -343,7 +343,7 @@ const process = [
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
           <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
         </svg>
-        <span class="text-lg font-medium text-gray-900">Martensville, Saskatoon, Warman & Area</span>
+        <span class="text-lg font-medium text-gray-900">Located in the Martensville, Saskatoon, Warman & Area</span>
       </div>
       <p class="mt-4 text-gray-600">
         Delivery available throughout Saskatchewan. Not sure if we service your area? Give us a call at {siteConfig.contact.phone} and we'll let you know!
