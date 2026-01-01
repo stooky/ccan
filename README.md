@@ -109,6 +109,22 @@ npm run stash     # Save current config to backup/
 npm run restore   # Restore from backup/
 ```
 
+## Backup/restore data
+
+The site stores form submissions and reviews in JSON files under `data/`. Back these up periodically:
+
+```bash
+npm run backup    # Emails a zip to admin (requires Resend API key)
+```
+
+The email includes both files and a count summary. To restore:
+
+1. Unzip the attachment
+2. Upload to `/var/www/ccan/data/` on the server (or commit to `data/` in the repo)
+3. Files are immediately active — no restart needed
+
+**Manual backup:** Just copy `data/submissions.json` and `data/reviews.json` somewhere safe.
+
 ## Stack
 
 Astro 5, Tailwind 4, TypeScript, PHP 8, Resend, nginx, Let's Encrypt.

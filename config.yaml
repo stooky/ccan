@@ -160,7 +160,7 @@ email:
 
   # From email address
   # Must be from a verified domain in Resend, or use: onboarding@resend.dev
-  from_email: "C-Can Sam <onboarding@resend.dev>"
+  from_email: "C-Can Sam <hello@ccansam.com>"
 
 # -----------------------------------------------------------------------------
 # Admin Panel Settings
