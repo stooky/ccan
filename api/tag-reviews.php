@@ -65,11 +65,26 @@ foreach ($commands as $cmd) {
 }
 
 if ($success) {
-    echo json_encode([
-        'success' => true,
-        'message' => 'Reviews tagged successfully',
-        'output' => $finalOutput
-    ]);
+    // Rebuild the site so tagged reviews appear on pages
+    $buildOutput = [];
+    $buildCode = 0;
+    exec("cd \"$rootDir\" && npm run build 2>&1", $buildOutput, $buildCode);
+    $buildResult = implode("\n", $buildOutput);
+
+    if ($buildCode === 0) {
+        echo json_encode([
+            'success' => true,
+            'message' => 'Reviews tagged and site rebuilt successfully',
+            'output' => $finalOutput . "\n\n--- Build Output ---\n" . $buildResult
+        ]);
+    } else {
+        echo json_encode([
+            'success' => true,
+            'message' => 'Reviews tagged but site rebuild failed',
+            'output' => $finalOutput . "\n\n--- Build Error ---\n" . $buildResult,
+            'hint' => 'Run "npm run build" manually on the server'
+        ]);
+    }
 } else {
     echo json_encode([
         'success' => false,
