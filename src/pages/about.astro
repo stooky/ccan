@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import Section from '../components/Section.astro';
 import CTA from '../components/CTA.astro';
+import ReviewWidget from '../components/ReviewWidget.astro';
 import { siteConfig } from '../config/site';
 
 // Company values
@@ -175,6 +176,9 @@ const values = [
       </div>
     </div>
   </Section>
+
+  <!-- Google Reviews Widget -->
+  <ReviewWidget pagePath="/about" />
 
   <!-- CTA -->
   <CTA

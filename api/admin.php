@@ -412,6 +412,37 @@ $currentTab = $_GET['tab'] ?? 'submissions';
         .page-btn.active { background: #d97706; color: white; border-color: #d97706; }
         .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .page-info { font-size: 0.875rem; color: #6b7280; margin: 0 0.5rem; }
+
+        /* Modal styles */
+        .modal {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1000;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: white; border-radius: 0.5rem; width: 90%; max-width: 500px;
+            max-height: 80vh; overflow: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 1.5rem; border-bottom: 1px solid #e5e7eb;
+        }
+        .modal-header h3 { margin: 0; font-size: 1.125rem; }
+        .modal-close {
+            background: none; border: none; font-size: 1.5rem; cursor: pointer;
+            color: #9ca3af; line-height: 1;
+        }
+        .modal-close:hover { color: #6b7280; }
+        .modal-body { padding: 1.5rem; }
+        .spinner {
+            width: 40px; height: 40px; margin: 1rem auto;
+            border: 3px solid #e5e7eb; border-top-color: #d97706;
+            border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .tag-result { white-space: pre-wrap; font-family: monospace; font-size: 0.75rem; background: #f3f4f6; padding: 1rem; border-radius: 0.375rem; max-height: 300px; overflow: auto; }
+        .tag-success { color: #065f46; }
+        .tag-error { color: #dc2626; }
     </style>
 </head>
 <body>
@@ -515,6 +546,25 @@ $currentTab = $_GET['tab'] ?? 'submissions';
                     </div>
                     <div class="reviews-stat">
                         <span class="reviews-stat-label">Last sync: <?= htmlspecialchars($reviewsLastSync) ?></span>
+                    </div>
+                </div>
+                <div class="reviews-actions">
+                    <button type="button" class="btn btn-primary" id="tag-reviews-btn" onclick="tagReviews()">
+                        Tag Reviews with AI
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tag Reviews Modal -->
+            <div id="tag-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Tag Reviews with AI</h3>
+                        <button class="modal-close" onclick="closeTagModal()">&times;</button>
+                    </div>
+                    <div class="modal-body" id="tag-modal-body">
+                        <p>Analyzing reviews with OpenAI to determine which pages they should appear on...</p>
+                        <div class="spinner"></div>
                     </div>
                 </div>
             </div>
@@ -1037,6 +1087,69 @@ $currentTab = $_GET['tab'] ?? 'submissions';
                     }
                 }, 0);
             });
+        });
+
+        // ============================================
+        // Tag Reviews with AI
+        // ============================================
+        const tagModal = document.getElementById('tag-modal');
+        const tagModalBody = document.getElementById('tag-modal-body');
+
+        function tagReviews() {
+            tagModal.style.display = 'flex';
+            tagModalBody.innerHTML = `
+                <p>Analyzing reviews with OpenAI to determine which pages they should appear on...</p>
+                <div class="spinner"></div>
+                <p style="font-size: 0.75rem; color: #9ca3af; text-align: center;">This may take 30-60 seconds.</p>
+            `;
+
+            fetch(`/api/tag-reviews.php?key=${secretPath}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        tagModalBody.innerHTML = `
+                            <p class="tag-success"><strong>Reviews tagged successfully!</strong></p>
+                            <p style="margin-top: 0.5rem;">The config.yaml file has been updated with review-to-page mappings.</p>
+                            <p style="margin-top: 0.5rem; font-size: 0.875rem; color: #6b7280;">Rebuild the site to see reviews on pages.</p>
+                            <details style="margin-top: 1rem;">
+                                <summary style="cursor: pointer; font-size: 0.875rem;">Show output</summary>
+                                <div class="tag-result">${escapeHtml(data.output || '')}</div>
+                            </details>
+                        `;
+                    } else {
+                        tagModalBody.innerHTML = `
+                            <p class="tag-error"><strong>Failed to tag reviews</strong></p>
+                            <p style="margin-top: 0.5rem;">${escapeHtml(data.message || 'Unknown error')}</p>
+                            ${data.hint ? `<p style="margin-top: 0.5rem; font-size: 0.875rem; color: #6b7280;">${escapeHtml(data.hint)}</p>` : ''}
+                            <details style="margin-top: 1rem;">
+                                <summary style="cursor: pointer; font-size: 0.875rem;">Show output</summary>
+                                <div class="tag-result">${escapeHtml(data.output || '')}</div>
+                            </details>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    tagModalBody.innerHTML = `
+                        <p class="tag-error"><strong>Error</strong></p>
+                        <p style="margin-top: 0.5rem;">${escapeHtml(error.message)}</p>
+                        <p style="margin-top: 1rem; font-size: 0.875rem; color: #6b7280;">
+                            You can also run this manually:<br>
+                            <code style="background: #f3f4f6; padding: 0.25rem 0.5rem; border-radius: 0.25rem;">npm run tag-reviews</code>
+                        </p>
+                    `;
+                });
+        }
+
+        function closeTagModal() {
+            tagModal.style.display = 'none';
+        }
+
+        // Close modal on escape key or click outside
+        tagModal.addEventListener('click', (e) => {
+            if (e.target === tagModal) closeTagModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && tagModal.style.display !== 'none') closeTagModal();
         });
     </script>
 </body>

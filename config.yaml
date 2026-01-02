@@ -192,3 +192,58 @@ security:
 
   # Rate limiting: max submissions per IP per hour
   rate_limit: 10
+
+# -----------------------------------------------------------------------------
+# Review Widgets
+# -----------------------------------------------------------------------------
+# Display Google reviews on pages. Run "Tag Reviews" in admin to auto-assign
+# reviews to pages using AI, or manually edit the tagged section.
+#
+# Layouts:
+#   - featured: Large cards with prominent stars (Home, About)
+#   - standard: Medium cards with nav arrows (Service pages)
+#   - compact: Minimal inline style (Product pages)
+#
+reviews:
+  # Pages that display review widgets
+  pages:
+    - path: "/"
+      layout: "featured"
+      position: "before-cta"
+      max_reviews: 3
+    - path: "/about"
+      layout: "standard"
+      position: "before-cta"
+      max_reviews: 3
+    - path: "/storage-containers-for-sale"
+      layout: "standard"
+      position: "before-cta"
+      max_reviews: 2
+    - path: "/storage-container-rentals"
+      layout: "standard"
+      position: "before-cta"
+      max_reviews: 2
+    - path: "/storage-container-leasing"
+      layout: "standard"
+      position: "before-cta"
+      max_reviews: 2
+    - path: "/on-site-storage-rentals"
+      layout: "standard"
+      position: "before-cta"
+      max_reviews: 2
+    - path: "/containers/20ft-standard"
+      layout: "compact"
+      position: "before-cta"
+      max_reviews: 2
+    - path: "/containers/40ft-standard"
+      layout: "compact"
+      position: "before-cta"
+      max_reviews: 2
+    - path: "/containers/40ft-high-cube"
+      layout: "compact"
+      position: "before-cta"
+      max_reviews: 2
+
+  # Review-to-page mappings (auto-populated by "Tag Reviews" in admin)
+  # Format: review_id: ["/path1", "/path2"]
+  tagged: {}

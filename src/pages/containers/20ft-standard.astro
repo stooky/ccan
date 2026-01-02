@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import Section from '../../components/Section.astro';
 import CTA from '../../components/CTA.astro';
+import ReviewWidget from '../../components/ReviewWidget.astro';
 import { siteConfig } from '../../config/site';
 
 const whatsappLink = `${siteConfig.social.whatsapp}?text=${encodeURIComponent("Hi! I'm interested in the 20ft Standard Container.")}`;
@@ -225,6 +226,9 @@ const useCases = [
       </div>
     </div>
   </Section>
+
+  <!-- Google Reviews Widget -->
+  <ReviewWidget pagePath="/containers/20ft-standard" />
 
   <!-- CTA -->
   <CTA

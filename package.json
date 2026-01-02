@@ -15,7 +15,8 @@
     "deploy": "node scripts/deploy.js staging",
     "deploy:staging": "node scripts/deploy.js staging",
     "deploy:prod": "node scripts/deploy.js production",
-    "backup": "node scripts/backup.js"
+    "backup": "node scripts/backup.js",
+    "tag-reviews": "node scripts/tag-reviews.js"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.2.1",

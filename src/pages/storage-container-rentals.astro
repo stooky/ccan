@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import { Image } from 'astro:assets';
 import Section from '../components/Section.astro';
 import CTA from '../components/CTA.astro';
+import ReviewWidget from '../components/ReviewWidget.astro';
 import { siteConfig } from '../config/site';
 import heroImage from '../assets/images/sales-hero.webp';
 
@@ -362,6 +363,9 @@ const process = [
       </a>
     </div>
   </Section>
+
+  <!-- Google Reviews Widget -->
+  <ReviewWidget pagePath="/storage-container-rentals" />
 
   <!-- CTA -->
   <CTA

@@ -6,6 +6,7 @@ import FeatureGrid from '../components/FeatureGrid.astro';
 import Card from '../components/Card.astro';
 import Testimonial from '../components/Testimonial.astro';
 import CTA from '../components/CTA.astro';
+import ReviewWidget from '../components/ReviewWidget.astro';
 import { siteConfig } from '../config/site';
 import heroBg from '../assets/images/hero-bg.webp';
 
@@ -168,18 +169,8 @@ const testimonials = [
     </div>
   </Section>
 
-  <!-- Testimonials Section -->
-  <Section
-    title="What Our Customers Say"
-    subtitle="Hear from customers across Saskatchewan."
-    background="gray"
-  >
-    <div class="grid gap-8 md:grid-cols-3">
-      {testimonials.map((testimonial) => (
-        <Testimonial {...testimonial} />
-      ))}
-    </div>
-  </Section>
+  <!-- Google Reviews Widget -->
+  <ReviewWidget pagePath="/" />
 
   <!-- CTA Section -->
   <CTA

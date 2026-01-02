@@ -66,6 +66,27 @@ interface Analytics {
   };
 }
 
+interface ReviewPageConfig {
+  path: string;
+  layout: 'featured' | 'standard' | 'compact';
+  position: 'before-cta' | 'after-cta';
+  maxReviews: number;
+}
+
+interface ReviewsConfig {
+  pages: ReviewPageConfig[];
+  tagged: Record<string, string[]>;
+}
+
+export interface Review {
+  id: string;
+  author: string;
+  rating: number;
+  date: string;
+  text: string;
+  hasPhoto: boolean;
+}
+
 export interface SiteConfig {
   name: string;
   tagline: string;
@@ -78,6 +99,7 @@ export interface SiteConfig {
   footerLinks: FooterLinks;
   defaultOgImage: string;
   analytics: Analytics;
+  reviews: ReviewsConfig;
   copyright: string;
 }
 
@@ -146,9 +168,64 @@ function loadConfig(): SiteConfig {
       },
     },
 
+    // Reviews config
+    reviews: {
+      pages: (config.reviews?.pages || []).map((p: any) => ({
+        path: p.path,
+        layout: p.layout || 'standard',
+        position: p.position || 'before-cta',
+        maxReviews: p.max_reviews || 3,
+      })),
+      tagged: config.reviews?.tagged || {},
+    },
+
     // Generated
     copyright: `© ${new Date().getFullYear()} ${config.site.name}. All rights reserved.`,
   };
+}
+
+// Load reviews from JSON file
+function loadReviews(): Review[] {
+  try {
+    const reviewsPath = path.join(process.cwd(), 'data', 'reviews.json');
+    const reviewsFile = fs.readFileSync(reviewsPath, 'utf-8');
+    const data = JSON.parse(reviewsFile);
+    return (data.reviews || []).map((r: any) => ({
+      id: r.id,
+      author: r.author,
+      rating: r.rating,
+      date: r.date,
+      text: r.text,
+      hasPhoto: r.hasPhoto || false,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+// Get reviews for a specific page path
+export function getReviewsForPage(pagePath: string): {
+  reviews: Review[];
+  config: ReviewPageConfig | null;
+} {
+  const pageConfig = siteConfig.reviews.pages.find(p => p.path === pagePath);
+  if (!pageConfig) {
+    return { reviews: [], config: null };
+  }
+
+  const allReviews = loadReviews();
+  const tagged = siteConfig.reviews.tagged;
+
+  // Find reviews tagged for this page
+  const taggedReviewIds = Object.entries(tagged)
+    .filter(([_, pages]) => pages.includes(pagePath))
+    .map(([id]) => id);
+
+  const pageReviews = allReviews
+    .filter(r => taggedReviewIds.includes(r.id))
+    .slice(0, pageConfig.maxReviews);
+
+  return { reviews: pageReviews, config: pageConfig };
 }
 
 // Export the loaded config
