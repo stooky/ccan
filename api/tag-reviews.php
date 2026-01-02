@@ -44,10 +44,13 @@ $rootDir = dirname(__DIR__);
 $output = [];
 $returnCode = 0;
 
+// Set PATH for npm/node (required for PHP exec)
+$env = "export PATH=/usr/bin:/usr/local/bin:\$PATH && ";
+
 // Try npm run tag-reviews first, fall back to node directly
 $commands = [
-    "cd \"$rootDir\" && npm run tag-reviews 2>&1",
-    "cd \"$rootDir\" && node scripts/tag-reviews.js 2>&1"
+    "{$env}cd \"$rootDir\" && /usr/bin/npm run tag-reviews 2>&1",
+    "{$env}cd \"$rootDir\" && /usr/bin/node scripts/tag-reviews.js 2>&1"
 ];
 
 $success = false;
@@ -68,7 +71,7 @@ if ($success) {
     // Rebuild the site so tagged reviews appear on pages
     $buildOutput = [];
     $buildCode = 0;
-    exec("cd \"$rootDir\" && npm run build 2>&1", $buildOutput, $buildCode);
+    exec("{$env}cd \"$rootDir\" && /usr/bin/npm run build 2>&1", $buildOutput, $buildCode);
     $buildResult = implode("\n", $buildOutput);
 
     if ($buildCode === 0) {
