@@ -203,6 +203,11 @@ security:
 #   - featured: Large cards with prominent stars (Home, About)
 #   - standard: Medium cards with nav arrows (Service pages)
 #   - compact: Minimal inline style (Product pages)
+#   - 3-row: Three cards side by side, scroll one at a time
+#
+# Positions:
+#   - before-cta: Above the call-to-action section
+#   - after-hero: Right after the hero section
 #
 reviews:
   # Pages that display review widgets
@@ -216,17 +221,21 @@ reviews:
       position: "before-cta"
       max_reviews: 3
     - path: "/storage-containers-for-sale"
-      layout: "standard"
-      position: "before-cta"
-      max_reviews: 2
+      layout: "3-row"
+      position: "after-hero"
+      max_reviews: 6
     - path: "/storage-container-rentals"
-      layout: "standard"
-      position: "before-cta"
-      max_reviews: 2
+      layout: "3-row"
+      position: "after-hero"
+      max_reviews: 6
     - path: "/storage-container-leasing"
-      layout: "standard"
-      position: "before-cta"
-      max_reviews: 2
+      layout: "3-row"
+      position: "after-hero"
+      max_reviews: 6
+    - path: "/storage-container-sales-and-rentals"
+      layout: "3-row"
+      position: "after-hero"
+      max_reviews: 6
     - path: "/on-site-storage-rentals"
       layout: "standard"
       position: "before-cta"

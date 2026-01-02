@@ -68,8 +68,8 @@ interface Analytics {
 
 interface ReviewPageConfig {
   path: string;
-  layout: 'featured' | 'standard' | 'compact';
-  position: 'before-cta' | 'after-cta';
+  layout: 'featured' | 'standard' | 'compact' | '3-row';
+  position: 'before-cta' | 'after-cta' | 'after-hero';
   maxReviews: number;
 }
 

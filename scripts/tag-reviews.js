@@ -34,6 +34,7 @@ const TAGGABLE_PAGES = [
   { path: '/storage-containers-for-sale', description: 'Sales page - reviews about buying/purchasing containers' },
   { path: '/storage-container-rentals', description: 'Rentals page - reviews about renting containers' },
   { path: '/storage-container-leasing', description: 'Leasing page - reviews about leasing or long-term rental' },
+  { path: '/storage-container-sales-and-rentals', description: 'Sales & Rentals overview page - general container reviews for sales or rentals' },
   { path: '/on-site-storage-rentals', description: 'On-site storage - reviews about storing at their facility' },
   { path: '/containers/20ft-standard', description: '20ft container product page - reviews mentioning 20ft containers' },
   { path: '/containers/40ft-standard', description: '40ft container product page - reviews mentioning 40ft containers' },
