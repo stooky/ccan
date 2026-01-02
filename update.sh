@@ -55,6 +55,7 @@ npm run build
 
 echo -e "${GREEN}[INFO]${NC} Setting permissions..."
 chown -R www-data:www-data "$INSTALL_DIR"
+chmod 664 "$INSTALL_DIR/config.yaml"  # Writable by www-data for tag-reviews
 
 echo -e "${GREEN}[INFO]${NC} Reloading nginx..."
 systemctl reload nginx

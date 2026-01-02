@@ -134,6 +134,7 @@ chown -R www-data:www-data "$INSTALL_DIR"
 chmod -R 755 "$INSTALL_DIR"
 chmod 775 "$INSTALL_DIR/data"
 chmod 664 "$INSTALL_DIR/data/submissions.json"
+chmod 664 "$INSTALL_DIR/config.yaml"  # Writable by www-data for tag-reviews
 
 # ============================================
 # Step 5: Configure nginx
