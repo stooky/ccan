@@ -1,0 +1,9 @@
+# robots.txt for ccansam.com
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://ccansam.com/sitemap-index.xml
+
+# Block admin and API endpoints
+Disallow: /api/
