@@ -203,12 +203,11 @@ security:
 redirects:
   # Old WordPress pages
   /homepage/: /
-  /shipping-containers/: /
-  /shipping-containers-draft/: /
+  /shipping-containers/: /storage-container-sales-and-rentals/
   /rentals/: /storage-container-rentals/
   /sales/: /storage-containers-for-sale/
   /off-site-storage/: /on-site-storage-rentals/
-  /our-containers/: /storage-containers-for-sale/
+  /our-containers/: /storage-container-sales-and-rentals/
   /our-containers/20ft-standard-container/: /containers/20ft-standard/
   /our-containers/40ft-standard-container/: /containers/40ft-standard/
   /our-containers/40ft-high-cube/: /containers/40ft-high-cube/
@@ -275,7 +274,7 @@ reviews:
       layout: "3-row"
       position: "after-hero"
       max_reviews: 6
-      ai_prompt: "Reviews about renting containers, rental experience, or short-term storage"
+      ai_prompt: "Reviews about renting containers, rental experience, or short-term storage are first priority, after that general reviews about a quality experience."
     - path: "/storage-container-leasing"
       layout: "3-row"
       position: "after-hero"

@@ -15,22 +15,36 @@ const phoneLink = `tel:${siteConfig.contact.phone.replace(/\D/g, '')}`;
 // C-Can Sam Container Types
 const containers = [
   {
+    size: "9' Standard",
+    dimensions: "9' L × 7' W × 7'6\" H",
+    capacity: "390 cubic feet",
+    ideal: "Backyard storage, small workshops, tools & garden equipment",
+    image: "/images/containers/9-standard.png",
+    popular: false,
+  },
+  {
     size: "20' Standard",
     dimensions: "20' L × 8' W × 8'6\" H",
     capacity: "1,172 cubic feet",
     ideal: "Residential storage, small business inventory, tools & equipment",
+    image: "/images/containers/20-standard.png",
+    popular: false,
   },
   {
     size: "40' Standard",
     dimensions: "40' L × 8' W × 8'6\" H",
     capacity: "2,390 cubic feet",
     ideal: "Business inventory, construction sites, pop-up shops",
+    image: "/images/containers/40-standard.png",
+    popular: true,
   },
   {
     size: "40' High Cube",
     dimensions: "40' L × 8' W × 9'6\" H",
     capacity: "2,694 cubic feet",
     ideal: "Oversized items, workshops, studios, maximum storage",
+    image: "/images/containers/40-high-cube.png",
+    popular: false,
   },
 ];
 
@@ -172,71 +186,24 @@ const process = [
     subtitle="New inventory arriving weekly. Available for purchase or flexible rental terms."
     background="gray"
   >
-    <div class="grid gap-6 lg:grid-cols-3">
-      {containers.map((container, index) => (
-        <div class={`relative rounded-2xl bg-white p-6 shadow-sm transition-shadow hover:shadow-lg ${index === 1 ? 'ring-2 ring-primary-500' : ''}`}>
-          {index === 1 && (
+    <div class="grid gap-8 sm:grid-cols-2">
+      {containers.map((container) => (
+        <div class={`relative rounded-2xl bg-white p-6 shadow-sm transition-shadow hover:shadow-lg ${container.popular ? 'ring-2 ring-primary-500' : ''}`}>
+          {container.popular && (
             <span class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary-500 px-4 py-1 text-sm font-semibold text-white">
               Most Popular
             </span>
           )}
 
           <!-- Container Visual -->
-          <div class="aspect-[3/2] overflow-hidden rounded-xl bg-gray-100">
-            {index === 0 && (
-              <picture>
-                <source
-                  srcset="/images/containers/20ft-standard-400w.webp 400w, /images/containers/20ft-standard-600w.webp 600w, /images/containers/20ft-standard-800w.webp 800w"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  type="image/webp"
-                />
-                <img
-                  src="/images/containers/20ft-standard.jpg"
-                  alt="20 foot standard shipping container with C-Can Sam branding in Saskatchewan winter"
-                  class="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
-                  loading="lazy"
-                  decoding="async"
-                  width="600"
-                  height="400"
-                />
-              </picture>
-            )}
-            {index === 1 && (
-              <picture>
-                <source
-                  srcset="/images/containers/40ft-standard-400w.webp 400w, /images/containers/40ft-standard-600w.webp 600w, /images/containers/40ft-standard-800w.webp 800w"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  type="image/webp"
-                />
-                <img
-                  src="/images/containers/40ft-standard-new.jpg"
-                  alt="40 foot standard shipping container in Saskatchewan winter snow"
-                  class="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
-                  loading="lazy"
-                  decoding="async"
-                  width="600"
-                  height="400"
-                />
-              </picture>
-            )}
-            {index === 2 && (
-              <picture>
-                <source
-                  srcset="/images/containers/40ft-highcube-400w.webp 400w, /images/containers/40ft-highcube-600w.webp 600w, /images/containers/40ft-highcube-800w.webp 800w"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  type="image/webp"
-                />
-                <img
-                  src="/images/containers/40ft-highcube-new.jpg"
-                  alt="40 foot high cube shipping container with C-Can Sam branding in Saskatchewan winter"
-                  class="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
-                  loading="lazy"
-                  decoding="async"
-                  width="600"
-                  height="400"
-                />
-              </picture>
-            )}
+          <div class="flex items-center justify-center bg-transparent p-4">
+            <img
+              src={container.image}
+              alt={`${container.size} shipping container - C-Can Sam Saskatchewan`}
+              class="h-auto w-full max-h-64 object-contain"
+              loading="lazy"
+              decoding="async"
+            />
           </div>
 
           <h3 class="mt-4 text-xl font-bold text-gray-900">{container.size}</h3>
