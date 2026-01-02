@@ -209,6 +209,11 @@ security:
 #   - before-cta: Above the call-to-action section
 #   - after-hero: Right after the hero section
 #
+# AI Tagging:
+#   - ai_prompt: (optional) Custom prompt for AI to determine which reviews
+#     belong on this page. Overrides default logic. Be specific about what
+#     keywords or topics make a review relevant.
+#
 reviews:
   # Pages that display review widgets
   pages:
@@ -216,43 +221,103 @@ reviews:
       layout: "featured"
       position: "before-cta"
       max_reviews: 3
+      ai_prompt: "General positive reviews about the company, service quality, or overall experience"
     - path: "/about"
       layout: "standard"
       position: "before-cta"
       max_reviews: 3
+      ai_prompt: "Reviews mentioning trust, family business, local service, or personal experience with the team"
     - path: "/storage-containers-for-sale"
       layout: "3-row"
       position: "after-hero"
       max_reviews: 6
+      ai_prompt: "Reviews about buying or purchasing containers, sales experience, or container quality"
     - path: "/storage-container-rentals"
       layout: "3-row"
       position: "after-hero"
       max_reviews: 6
+      ai_prompt: "Reviews about renting containers, rental experience, or short-term storage"
     - path: "/storage-container-leasing"
       layout: "3-row"
       position: "after-hero"
       max_reviews: 6
+      ai_prompt: "Reviews about leasing, long-term rentals, or extended storage arrangements"
     - path: "/storage-container-sales-and-rentals"
       layout: "3-row"
       position: "after-hero"
       max_reviews: 6
+      ai_prompt: "Any reviews mentioning containers, storage, buying, renting, or general positive experiences - this is the main landing page so include broadly relevant reviews"
     - path: "/on-site-storage-rentals"
       layout: "standard"
       position: "before-cta"
       max_reviews: 2
+      ai_prompt: "Reviews specifically about on-site storage at their facility or storing items at their location"
     - path: "/containers/20ft-standard"
       layout: "compact"
       position: "before-cta"
       max_reviews: 2
+      ai_prompt: "Reviews mentioning 20ft containers, 20 foot, or smaller containers"
     - path: "/containers/40ft-standard"
       layout: "compact"
       position: "before-cta"
       max_reviews: 2
+      ai_prompt: "Reviews mentioning 40ft containers, 40 foot, or larger standard containers"
     - path: "/containers/40ft-high-cube"
       layout: "compact"
       position: "before-cta"
       max_reviews: 2
+      ai_prompt: "Reviews mentioning high cube, extra height, tall containers, or 40ft HC"
 
   # Review-to-page mappings (auto-populated by "Tag Reviews" in admin)
   # Format: review_id: ["/path1", "/path2"]
-  tagged: {}
+  tagged:
+    review_001: ["/","/about","/storage-containers-for-sale"]
+    review_002: ["/"]
+    review_003: ["/storage-containers-for-sale","/containers/20ft-standard"]
+    review_004: ["/"]
+    review_005: ["/storage-containers-for-sale"]
+    review_006: ["/"]
+    review_007: ["/"]
+    review_008: ["/storage-containers-for-sale"]
+    review_009: ["/storage-containers-for-sale"]
+    review_010: ["/storage-containers-for-sale"]
+    review_011: ["/storage-containers-for-sale","/storage-container-rentals"]
+    review_012: ["/"]
+    review_013: ["/"]
+    review_014: ["/"]
+    review_015: ["/storage-containers-for-sale","/containers/20ft-standard"]
+    review_016: ["/storage-containers-for-sale"]
+    review_017: ["/"]
+    review_018: ["/storage-containers-for-sale","/containers/40ft-standard"]
+    review_019: ["/"]
+    review_020: ["/"]
+    review_021: ["/"]
+    review_022: ["/"]
+    review_023: ["/about","/storage-containers-for-sale"]
+    review_024: ["/"]
+    review_026: ["/storage-containers-for-sale","/on-site-storage-rentals"]
+    review_027: ["/storage-containers-for-sale"]
+    review_028: ["/storage-containers-for-sale","/containers/40ft-standard"]
+    review_029: ["/storage-containers-for-sale"]
+    review_030: ["/"]
+    review_031: ["/storage-containers-for-sale"]
+    review_032: ["/storage-containers-for-sale"]
+    review_033: ["/"]
+    review_034: ["/storage-containers-for-sale"]
+    review_035: ["/storage-containers-for-sale"]
+    review_036: ["/about"]
+    review_037: ["/storage-containers-for-sale"]
+    review_038: ["/"]
+    review_039: ["/"]
+    review_040: ["/"]
+    review_041: ["/"]
+    review_042: ["/storage-containers-for-sale"]
+    review_043: ["/"]
+    review_047: ["/storage-containers-for-sale"]
+    review_048: ["/"]
+    review_049: ["/storage-containers-for-sale"]
+    review_050: ["/storage-containers-for-sale"]
+    review_051: ["/about"]
+    review_052: ["/storage-container-rentals","/containers/20ft-standard"]
+    review_053: ["/"]
+    review_054: ["/on-site-storage-rentals"]

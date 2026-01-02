@@ -27,19 +27,67 @@ const CONFIG_PATH = path.join(ROOT, 'config.yaml');
 const REVIEWS_PATH = path.join(ROOT, 'data', 'reviews.json');
 const ENV_PATH = path.join(ROOT, '.env.local');
 
-// Pages we want to tag reviews for
-const TAGGABLE_PAGES = [
-  { path: '/', description: 'Homepage - general positive reviews about the company' },
-  { path: '/about', description: 'About page - reviews mentioning trust, family business, local service' },
-  { path: '/storage-containers-for-sale', description: 'Sales page - reviews about buying/purchasing containers' },
-  { path: '/storage-container-rentals', description: 'Rentals page - reviews about renting containers' },
-  { path: '/storage-container-leasing', description: 'Leasing page - reviews about leasing or long-term rental' },
-  { path: '/storage-container-sales-and-rentals', description: 'Sales & Rentals overview page - general container reviews for sales or rentals' },
-  { path: '/on-site-storage-rentals', description: 'On-site storage - reviews about storing at their facility' },
-  { path: '/containers/20ft-standard', description: '20ft container product page - reviews mentioning 20ft containers' },
-  { path: '/containers/40ft-standard', description: '40ft container product page - reviews mentioning 40ft containers' },
-  { path: '/containers/40ft-high-cube', description: '40ft high cube product page - reviews mentioning high cube or extra height' },
-];
+// Simple YAML parser for our config
+function parseYamlConfig(content) {
+  const pages = [];
+  const lines = content.split('\n');
+  let inPagesSection = false;
+  let currentPage = null;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    // Detect pages section
+    if (trimmed === 'pages:') {
+      inPagesSection = true;
+      continue;
+    }
+
+    // Detect end of pages section (tagged: or another top-level key)
+    if (inPagesSection && !line.startsWith(' ') && !line.startsWith('\t') && trimmed.endsWith(':')) {
+      inPagesSection = false;
+      if (currentPage) pages.push(currentPage);
+      continue;
+    }
+
+    if (!inPagesSection) continue;
+
+    // New page entry
+    if (trimmed.startsWith('- path:')) {
+      if (currentPage) pages.push(currentPage);
+      const pathMatch = trimmed.match(/path:\s*["']?([^"'\n]+)["']?/);
+      currentPage = { path: pathMatch ? pathMatch[1].trim() : '' };
+      continue;
+    }
+
+    // Page properties
+    if (currentPage && trimmed.startsWith('ai_prompt:')) {
+      const promptMatch = trimmed.match(/ai_prompt:\s*["']?(.+?)["']?\s*$/);
+      if (promptMatch) {
+        currentPage.ai_prompt = promptMatch[1].trim();
+      }
+    }
+  }
+
+  // Don't forget the last page
+  if (currentPage) pages.push(currentPage);
+
+  return pages;
+}
+
+// Load taggable pages from config.yaml
+function loadTaggablePages() {
+  const content = fs.readFileSync(CONFIG_PATH, 'utf-8');
+  const pages = parseYamlConfig(content);
+
+  // Filter to only pages with ai_prompt defined
+  return pages
+    .filter(p => p.path && p.ai_prompt)
+    .map(p => ({
+      path: p.path,
+      description: p.ai_prompt
+    }));
+}
 
 // Load environment variables from .env.local
 function loadEnv() {
@@ -162,13 +210,23 @@ async function main() {
   // Load env
   loadEnv();
 
+  // Load taggable pages from config
+  console.log('Loading page configs...');
+  const taggablePages = loadTaggablePages();
+  console.log(`Found ${taggablePages.length} pages with ai_prompt\n`);
+
+  if (taggablePages.length === 0) {
+    console.error('No pages with ai_prompt found in config.yaml');
+    process.exit(1);
+  }
+
   // Load reviews
   console.log('Loading reviews...');
   const reviews = loadReviews();
   console.log(`Found ${reviews.length} reviews\n`);
 
   // Build prompt
-  const pagesDescription = TAGGABLE_PAGES
+  const pagesDescription = taggablePages
     .map(p => `  - "${p.path}": ${p.description}`)
     .join('\n');
 
