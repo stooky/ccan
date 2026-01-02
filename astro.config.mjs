@@ -5,8 +5,12 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://fireandfrostmechanical.ca',
+  site: 'https://ccansam.com',
   integrations: [sitemap()],
+  build: {
+    // Inline CSS to eliminate render-blocking stylesheet requests
+    inlineStylesheets: 'always',
+  },
   vite: {
     plugins: [tailwindcss()],
   },
