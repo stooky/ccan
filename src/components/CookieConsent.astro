@@ -357,9 +357,12 @@ import { siteConfig } from '../config/site';
   // Show banner with animation
   function showBanner() {
     banner.classList.remove('hidden');
-    // Trigger reflow for animation
-    banner.offsetHeight;
-    banner.classList.remove('translate-y-full');
+    // Use requestAnimationFrame to avoid forced reflow
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        banner.classList.remove('translate-y-full');
+      });
+    });
   }
 
   // Hide banner with animation

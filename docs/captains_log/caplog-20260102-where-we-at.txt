@@ -1,0 +1,207 @@
+================================================================================
+                              CAPTAIN'S LOG
+================================================================================
+Entry:        caplog-20260102-where-we-at.txt
+Created:      2026-01-02
+Author:       Claude (AI Assistant)
+Project:      C-Can Sam - Storage Container Website
+Repository:   stooky/ccan (git@github-stooky:stooky/ccan.git)
+Branch:       storage-containers
+Previous Log: caplog-20251230-140000-from-the-beginning.txt
+================================================================================
+
+## Summary
+
+Major feature push since last log: Google reviews system with AI-powered
+page tagging, transparent container images, and deployment refinements.
+Site is live and operational at ccansam.com.
+
+--------------------------------------------------------------------------------
+## What Changed Since Last Log (Dec 30 - Jan 2)
+--------------------------------------------------------------------------------
+
+### Reviews System (Big Feature)
+- Built Google reviews management into admin panel
+- AI tagging: reviews auto-assigned to relevant pages based on content
+- Four layout options: featured, standard, 3-row, compact
+- Configurable positions: before-cta, after-hero
+- Custom ai_prompt per page for fine-grained matching
+- Dynamic relative dates ("2 months ago" vs static dates)
+- Date range filtering and sorting in admin
+- Auto-rebuild site after tagging changes
+
+### Visual Updates
+- Rebuilt Sea Cans section with transparent PNG images
+- New product imagery for containers
+
+### Deployment Improvements
+- Use domain name instead of IP for production deploys
+- Added reload-nginx.sh script for SSL-safe config reloads
+- Moved URL redirects from deploy.sh to config.yaml (easier to manage)
+- Fixed PATH for npm/node in PHP scripts
+- Fixed config.yaml permissions on deploy
+- Added php-curl to dependencies (required for Resend API)
+
+### Bug Fixes
+- Fixed on-site vs off-site storage terminology
+- Corrected recipient_email to ccansam22@gmail.com
+- Fixed review dates (shifted forward 1 year to match current)
+- Added favicon and links to admin panel
+
+### Content Updates
+- Added links to quote form in How It Works section
+- README rewritten in Will Larson style (direct, practical, opinionated)
+
+--------------------------------------------------------------------------------
+## Current State
+--------------------------------------------------------------------------------
+
+### Live Sites
+- Production: https://ccansam.com
+- Staging: https://ccan.crkid.com
+
+### Server
+- Ubuntu 24 on DigitalOcean (64.23.162.180)
+- SSH: `ssh root@ccansam.com` (or root@ccan.crkid.com)
+- Deploy: `cd /var/www/ccan && git pull && npm run build`
+
+### Key Features Operational
+- [x] Contact form with Resend email delivery
+- [x] Admin panel for submissions
+- [x] Google reviews with AI tagging
+- [x] Cookie consent (GDPR compliant)
+- [x] GA4 + GTM analytics
+- [x] 27 WordPress URL redirects
+- [x] Data backup system
+
+--------------------------------------------------------------------------------
+## Recent Commits (since last log)
+--------------------------------------------------------------------------------
+
+ab55d88 Rebuild Sea Cans section with new transparent images
+ec5db43 Use domain name instead of IP for production deploy
+ada9869 Fix reload-nginx.sh to preserve SSL config
+4d341a4 Add reload-nginx.sh script
+1c9a7b7 Move redirects from deploy.sh to config.yaml
+aafe940 Fix PATH for npm/node in tag-reviews PHP
+848716c Auto-rebuild site after tagging reviews
+4cb07b1 Fix config.yaml permissions in deploy scripts
+31d56fd Add ai_prompt config for review tagging
+e00ffac Add 3-row review layout and after-hero position
+e440268 Add review widget system with AI tagging
+e1fc4f1 Add backup script for submissions and reviews data
+16c94cf Fix review dates - shift forward 1 year
+368c1b2 Add date range filter and sort to reviews tab
+c326148 Add Google reviews management to admin panel
+52f79a6 Add links to quote form in How It Works section
+3c1752b Fix on-site/off-site storage definitions
+d631279 Fix recipient_email
+cf2109c Add php-curl to deploy.sh dependencies
+
+--------------------------------------------------------------------------------
+## Architecture Notes
+--------------------------------------------------------------------------------
+
+### Review System Design
+Reviews are stored in `data/reviews.json`. The admin panel has a "Tag Reviews"
+button that sends review content to Claude API, which returns page assignments
+based on ai_prompt rules in config.yaml. Tagged mappings live in config.yaml
+under `reviews.tagged`.
+
+Components load reviews by reading both files, matching IDs, and filtering
+by current page path. Four layout components render different visual styles.
+
+### Why ai_prompt Per Page
+Generic matching wasn't good enough. "Great service" could go anywhere.
+Custom prompts like "Reviews mentioning 40ft containers, 40 foot, or larger
+standard containers" produce better matches. The AI sees both the review
+text and the prompt, makes a judgment call.
+
+### Config-Driven Redirects
+URL redirects moved from deploy.sh (shell script) to config.yaml (data).
+deploy.sh reads config.yaml and generates nginx location blocks. Easier
+to add new redirects—no shell escaping, no nginx syntax to remember.
+
+--------------------------------------------------------------------------------
+## Known Issues / Technical Debt
+--------------------------------------------------------------------------------
+
+1. Review tagging requires manual trigger from admin panel
+   - Could be automatic on review import, but adds complexity
+
+2. No review import from Google Places API
+   - Currently manual JSON file
+   - Would need API key and rate limiting
+
+3. Backup script sends email but no off-site storage
+   - Relies on email for DR, not ideal
+   - Should probably push to S3 or similar
+
+--------------------------------------------------------------------------------
+## What's Working Well
+--------------------------------------------------------------------------------
+
+1. **Single config.yaml** - Still paying dividends. Adding reviews config
+   was trivial because the pattern was already established.
+
+2. **Admin panel** - Growing organically. Started with submissions, now
+   handles reviews. PHP is ugly but works everywhere.
+
+3. **Static + PHP split** - Build times stay under 3 seconds. No complex
+   build pipelines. Forms work without JavaScript.
+
+4. **AI tagging** - Surprisingly good at matching reviews to pages.
+   Custom prompts handle edge cases that rules-based systems would miss.
+
+--------------------------------------------------------------------------------
+## Deployment Commands (Quick Reference)
+--------------------------------------------------------------------------------
+
+# SSH to server
+ssh root@ccansam.com
+
+# Deploy updates
+cd /var/www/ccan && git pull && npm run build
+
+# Reload nginx (preserves SSL)
+bash reload-nginx.sh
+
+# View submissions
+https://ccansam.com/api/admin.php?key=ccan-admin-2024
+
+# Tag reviews (in admin panel, or manually)
+https://ccansam.com/api/tag-reviews.php?key=ccan-admin-2024
+
+--------------------------------------------------------------------------------
+## Files Changed This Sprint
+--------------------------------------------------------------------------------
+
+Modified:
+- README.md (rewritten)
+- config.yaml (reviews config, ai_prompts)
+- deploy.sh (php-curl, domain-based deploy)
+- api/admin.php (reviews tab, tagging)
+- api/tag-reviews.php (AI tagging endpoint)
+- src/components/ReviewWidget.astro
+- src/components/ReviewCard.astro
+- public/images/containers/* (transparent PNGs)
+
+Added:
+- reload-nginx.sh
+- api/backup.php
+- src/components/Review3Row.astro
+- src/components/ReviewCompact.astro
+
+--------------------------------------------------------------------------------
+## Next Steps
+--------------------------------------------------------------------------------
+
+1. [ ] Monitor review tagging accuracy over time
+2. [ ] Add more container images (interior shots, modified units)
+3. [ ] Consider Google Places API integration for auto-import
+4. [ ] Set up automated backups to external storage
+5. [ ] Review Search Console for any crawl issues
+
+================================================================================
+END OF LOG
+================================================================================
