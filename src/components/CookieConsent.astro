@@ -283,10 +283,11 @@ import { siteConfig } from '../config/site';
     // Dispatch custom event for other scripts to listen to
     window.dispatchEvent(new CustomEvent('cookieConsentUpdated', { detail: consent }));
 
-    // Analytics cookies - load GA and/or GTM
+    // Analytics cookies - load GTM only (GA4 configured through GTM)
     if (consent.analytics) {
       loadGoogleTagManager();
-      loadGoogleAnalytics();
+      // Note: GA4 is configured through GTM, not loaded separately
+      // This saves ~150KB of redundant JavaScript
     }
 
     // Marketing cookies

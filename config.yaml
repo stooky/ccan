@@ -123,13 +123,13 @@ navigation:
 #
 analytics:
   # Google Analytics 4
-  # Get your ID from: Google Analytics > Admin > Data Streams > Measurement ID
-  # Format: G-XXXXXXXXXX
+  # Note: GA4 is configured through GTM to avoid loading ~150KB of redundant JS
+  # If you need standalone GA4, set enabled: true
   google_analytics:
-    enabled: true
+    enabled: false
     measurement_id: "G-LZZQSG5ZL7"
 
-  # Google Tag Manager
+  # Google Tag Manager (handles GA4 + other tags)
   # Get your ID from: tagmanager.google.com > Container ID
   # Format: GTM-XXXXXXX
   google_tag_manager:
