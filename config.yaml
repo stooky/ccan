@@ -194,6 +194,45 @@ security:
   rate_limit: 10
 
 # -----------------------------------------------------------------------------
+# URL Redirects (301 Permanent)
+# -----------------------------------------------------------------------------
+# These redirects are applied by nginx during deployment.
+# Format: old_path: new_path
+# All redirects are 301 (permanent) redirects.
+#
+redirects:
+  # Old WordPress pages
+  /homepage/: /
+  /shipping-containers/: /
+  /shipping-containers-draft/: /
+  /rentals/: /storage-container-rentals/
+  /sales/: /storage-containers-for-sale/
+  /off-site-storage/: /on-site-storage-rentals/
+  /our-containers/: /storage-containers-for-sale/
+  /our-containers/20ft-standard-container/: /containers/20ft-standard/
+  /our-containers/40ft-standard-container/: /containers/40ft-standard/
+  /our-containers/40ft-high-cube/: /containers/40ft-high-cube/
+  /blogpage/: /blog/
+  /frequently-asked-questions/: /
+  /sitemap/: /sitemap-index.xml
+  /terms-and-conditions/: /terms/
+  /privacy-policy/: /privacy/
+
+  # Old blog posts
+  /eco-friendly-uses-of-sea-can-for-summer-projects/: /blog/eco-friendly-seacan-uses/
+  /buy-used-shipping-containers-in-canada/: /blog/buy-used-shipping-containers-canada/
+  /shipping-container-for-sale-5-smart-tips/: /blog/5-smart-tips-buying-containers/
+  /7-things-you-need-to-know-before-buying-a-used-shipping-container/: /blog/7-things-buying-used-container/
+  /renovating-shipping-containers-turning-steel-into-homes/: /blog/container-homes-steel-into-living/
+  /what-is-a-seacan-one-tripper-sustainable-solutions/: /blog/what-is-one-trip-container/
+  /portable-storage-solutions-rent-containers-today/: /storage-container-rentals/
+  /invest-in-a-seacan-for-sale/: /storage-containers-for-sale/
+  /shipping-containers-offices-and-retail-spaces/: /blog/
+  /should-you-rent-or-buy-a-container/: /blog/
+  /optimize-your-dorm-space-practical-storage-solutions/: /blog/
+  /maximizing-efficiency-in-construction-and-renovation-projects/: /blog/
+
+# -----------------------------------------------------------------------------
 # Review Widgets
 # -----------------------------------------------------------------------------
 # Display Google reviews on pages. Run "Tag Reviews" in admin to auto-assign
@@ -221,7 +260,7 @@ reviews:
       layout: "featured"
       position: "before-cta"
       max_reviews: 3
-      ai_prompt: "General positive reviews about the company, service quality, or overall experience"
+      ai_prompt: "All 5 star reviews"
     - path: "/about"
       layout: "standard"
       position: "before-cta"

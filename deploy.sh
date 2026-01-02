@@ -141,6 +141,30 @@ chmod 664 "$INSTALL_DIR/config.yaml"  # Writable by www-data for tag-reviews
 # ============================================
 log_info "Configuring nginx..."
 
+# Generate redirects from config.yaml
+log_info "Reading redirects from config.yaml..."
+REDIRECTS=""
+in_redirects=false
+while IFS= read -r line; do
+    # Check if we're entering the redirects section
+    if [[ "$line" =~ ^redirects: ]]; then
+        in_redirects=true
+        continue
+    fi
+    # Check if we've left the redirects section (new top-level key)
+    if [[ "$in_redirects" == true ]] && [[ "$line" =~ ^[a-z] ]] && [[ ! "$line" =~ ^[[:space:]] ]]; then
+        in_redirects=false
+        continue
+    fi
+    # Parse redirect lines (format: "  /old/path/: /new/path/")
+    if [[ "$in_redirects" == true ]] && [[ "$line" =~ ^[[:space:]]+(/[^:]*):\ (.+)$ ]]; then
+        old_path="${BASH_REMATCH[1]}"
+        new_path="${BASH_REMATCH[2]}"
+        REDIRECTS+="    location = $old_path { return 301 $new_path; }"$'\n'
+    fi
+done < "$INSTALL_DIR/config.yaml"
+log_info "Loaded $(echo "$REDIRECTS" | grep -c 'location') redirects from config.yaml"
+
 # Create nginx configuration
 cat > "$NGINX_CONF" << EOF
 server {
@@ -191,40 +215,9 @@ server {
     }
 
     # ============================================
-    # URL Redirects (old WordPress -> new Astro)
+    # URL Redirects (from config.yaml)
     # ============================================
-
-    # Page redirects
-    location = /homepage/ { return 301 /; }
-    location = /shipping-containers/ { return 301 /; }
-    location = /shipping-containers-draft/ { return 301 /; }
-    location = /rentals/ { return 301 /storage-container-rentals/; }
-    location = /sales/ { return 301 /storage-containers-for-sale/; }
-    location = /off-site-storage/ { return 301 /on-site-storage-rentals/; }
-    location = /our-containers/ { return 301 /storage-containers-for-sale/; }
-    location = /our-containers/20ft-standard-container/ { return 301 /containers/20ft-standard/; }
-    location = /our-containers/40ft-standard-container/ { return 301 /containers/40ft-standard/; }
-    location = /our-containers/40ft-high-cube/ { return 301 /containers/40ft-high-cube/; }
-    location = /blogpage/ { return 301 /blog/; }
-    location = /frequently-asked-questions/ { return 301 /; }
-    location = /sitemap/ { return 301 /sitemap-index.xml; }
-    location = /terms-and-conditions/ { return 301 /terms/; }
-    location = /privacy-policy/ { return 301 /privacy/; }
-
-    # Blog post redirects
-    location = /eco-friendly-uses-of-sea-can-for-summer-projects/ { return 301 /blog/eco-friendly-seacan-uses/; }
-    location = /buy-used-shipping-containers-in-canada/ { return 301 /blog/buy-used-shipping-containers-canada/; }
-    location = /shipping-container-for-sale-5-smart-tips/ { return 301 /blog/5-smart-tips-buying-containers/; }
-    location = /7-things-you-need-to-know-before-buying-a-used-shipping-container/ { return 301 /blog/7-things-buying-used-container/; }
-    location = /renovating-shipping-containers-turning-steel-into-homes/ { return 301 /blog/container-homes-steel-into-living/; }
-    location = /what-is-a-seacan-one-tripper-sustainable-solutions/ { return 301 /blog/what-is-one-trip-container/; }
-    location = /portable-storage-solutions-rent-containers-today/ { return 301 /storage-container-rentals/; }
-    location = /invest-in-a-seacan-for-sale/ { return 301 /storage-containers-for-sale/; }
-    location = /shipping-containers-offices-and-retail-spaces/ { return 301 /blog/; }
-    location = /should-you-rent-or-buy-a-container/ { return 301 /blog/; }
-    location = /optimize-your-dorm-space-practical-storage-solutions/ { return 301 /blog/; }
-    location = /maximizing-efficiency-in-construction-and-renovation-projects/ { return 301 /blog/; }
-
+$REDIRECTS
     # Handle Astro routes (clean URLs)
     location / {
         try_files \$uri \$uri/ \$uri.html /index.html;
