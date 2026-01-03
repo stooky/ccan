@@ -214,6 +214,7 @@ redirects:
   /blogpage/: /blog/
   /frequently-asked-questions/: /
   /sitemap/: /sitemap-index.xml
+  /sitemap_index.xml: /sitemap-index.xml
   /terms-and-conditions/: /terms/
   /privacy-policy/: /privacy/
 
