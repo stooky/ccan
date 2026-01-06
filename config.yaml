@@ -203,7 +203,7 @@ security:
 redirects:
   # Old WordPress pages
   /homepage/: /
-  /shipping-containers/: /storage-container-sales-and-rentals/
+  # /shipping-containers/ now has its own SEO-optimized page
   /rentals/: /storage-container-rentals/
   /sales/: /storage-containers-for-sale/
   /off-site-storage/: /on-site-storage-rentals/

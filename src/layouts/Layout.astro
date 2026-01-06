@@ -1,7 +1,6 @@
 ---
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/Footer.astro';
-import CookieConsent from '../components/CookieConsent.astro';
 import { siteConfig } from '../config/site';
 import '../styles/global.css';
 
@@ -33,13 +32,7 @@ const fullTitle = `${title} | ${siteConfig.name}`;
 ---
 
 <!doctype html>
-<html
-  lang="en"
-  data-ga-enabled={siteConfig.analytics.googleAnalytics.enabled.toString()}
-  data-ga-id={siteConfig.analytics.googleAnalytics.measurementId}
-  data-gtm-enabled={siteConfig.analytics.googleTagManager.enabled.toString()}
-  data-gtm-id={siteConfig.analytics.googleTagManager.containerId}
->
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -126,15 +119,34 @@ const fullTitle = `${title} | ${siteConfig.name}`;
       }
     })} />
 
-    <!-- Google Analytics loaded conditionally after cookie consent -->
+    <!-- Google Tag Manager -->
+    {siteConfig.analytics.googleTagManager.enabled && (
+      <script is:inline define:vars={{ gtmId: siteConfig.analytics.googleTagManager.containerId }}>
+        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer',gtmId);
+      </script>
+    )}
   </head>
   <body class="min-h-screen flex flex-col bg-white text-gray-900 antialiased">
+    <!-- Google Tag Manager (noscript) -->
+    {siteConfig.analytics.googleTagManager.enabled && (
+      <noscript>
+        <iframe
+          src={`https://www.googletagmanager.com/ns.html?id=${siteConfig.analytics.googleTagManager.containerId}`}
+          height="0"
+          width="0"
+          style="display:none;visibility:hidden">
+        </iframe>
+      </noscript>
+    )}
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <Navigation />
     <main id="main-content" class="flex-1">
       <slot />
     </main>
     <Footer />
-    <CookieConsent />
   </body>
 </html>

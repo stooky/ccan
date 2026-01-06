@@ -1,0 +1,28 @@
+31 Dec 2025
+  Your checklist when ready for prod:
+
+  | Step      | Command/Action                                                |
+  |-----------|---------------------------------------------------------------|
+  | 1. DNS    | Add A record: ccansam.com → server IP                         |
+  | 2. Resend | Verify domain at resend.com, update from_email in config.yaml |
+  | 3. Deploy | DOMAIN=ccansam.com EMAIL=your@email.com sudo bash deploy.sh   |
+
+  The deploy script handles nginx, SSL, PHP, firewall — everything. One command, zero errors.
+
+  ------
+
+    Deploy System
+
+  | Command                | Target                   |
+  |------------------------|--------------------------|
+  | npm run deploy         | Staging (ccan.crkid.com) |
+  | npm run deploy:staging | Staging (ccan.crkid.com) |
+  | npm run deploy:prod    | Production (ccansam.com) |
+
+  Both use the same SSH key (~/.ssh/id_rsa) and same server path (/var/www/ccan).
+
+  Staging is live: https://ccan.crkid.com
+
+  When ccansam.com DNS is ready, you'll need to run deploy.sh on that server first (initial setup), then npm run deploy:prod works for updates.
+
+  
