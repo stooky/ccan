@@ -1,0 +1,266 @@
+================================================================================
+                              CAPTAIN'S LOG
+================================================================================
+Entry:        caplog-20260106-195508-inventory-and-more-blogs.txt
+Created:      2026-01-06 19:55:08
+Author:       Claude (AI Assistant)
+Project:      C-Can Sam - Storage Container Website
+Repository:   stooky/ccan (git@github-stooky:stooky/ccan.git)
+Branch:       storage-containers
+Previous Log: caplog-20260102-where-we-at.txt
+================================================================================
+
+## Summary
+
+Major feature session: Built a complete inventory checker system with hidden
+pricing and quote requests, created the /shipping-containers/ SEO landing page,
+added a customer story blog with interior photos and styled FAQ section,
+removed GDPR cookie consent for Canadian market, and updated documentation.
+
+--------------------------------------------------------------------------------
+## What Changed Since Last Log (Jan 2 - Jan 6)
+--------------------------------------------------------------------------------
+
+### Inventory Checker System (Big Feature)
+- Created /inventory-checker/ page showing live container stock
+- 80 containers from Calgary, Edmonton, Regina, Vancouver
+- Prices HIDDEN from public - only visible in owner's email
+- "Get Quote" button opens modal form (name, email, phone optional)
+- Quote requests sent via Resend API with full pricing details
+- All requests logged to data/quote-requests.json
+- Filterable by location, unit size, condition
+- Desktop table view + mobile card view
+- Condition badges: green (One Tripper), blue (CW)
+
+### /shipping-containers/ SEO Landing Page
+- Replaced redirect with dedicated content page
+- 677 lines of comprehensive container education
+- Targets "shipping containers saskatoon/saskatchewan" keywords
+- Container sizes with detailed specs (20', 40', 40' HC)
+- Use cases: Farm, Construction, Renovation, Business
+- Buy vs Rent comparison with links
+- 8 SEO-optimized FAQs
+- Multiple CTAs throughout
+
+### New Blog Post: High Cube Customer Story
+- "Why I Chose a 40ft High Cube Shipping Container for Storage"
+- Customer testimonial format (Q&A style)
+- Hero image + 3 interior shelving photos
+- 10-question FAQ section with modern accordion styling
+- CTAs linking to inventory checker and contact
+- Internal links to /containers/40ft-high-cube/
+- Image processing: converted "HEIC" files (actually PNGs) to optimized WebP
+
+### Cookie Consent Removed
+- Deleted CookieConsent.astro component entirely
+- GTM now loads directly in Layout.astro head
+- Removed "Cookie Settings" from footer
+- Reason: Canada operates under PIPEDA, not GDPR
+- PIPEDA doesn't require opt-in consent for analytics
+- Old component preserved in git history if needed for EU deployment
+
+### Analytics Fix
+- GA4 was blocked by cookie consent - now loads immediately
+- GTM container GTM-MTTG4KTT active
+- GA4 Measurement ID G-LZZQSG5ZL7 configured inside GTM
+
+### Documentation
+- README.md rewritten with inventory system docs
+- Added deploy:staging and deploy:prod commands
+- Documented PIPEDA compliance decision
+- Added "What's not here" section (Will Larson style)
+- Explained hidden pricing architecture
+
+--------------------------------------------------------------------------------
+## Current State
+--------------------------------------------------------------------------------
+
+### Live Sites
+- Production: https://ccansam.com
+- Staging: https://ccan.crkid.com
+
+### Pages
+- 24 total pages (was 17)
+- 7 blog posts (was 6)
+- New: /inventory-checker/, /shipping-containers/
+
+### Key Features Operational
+- [x] Contact form with Resend email delivery
+- [x] Inventory checker with hidden pricing
+- [x] Quote request system with logging
+- [x] Admin panel for submissions and quotes
+- [x] Google reviews with AI tagging
+- [x] GA4 + GTM analytics (no consent barrier)
+- [x] 27 WordPress URL redirects
+- [x] Data backup system
+
+--------------------------------------------------------------------------------
+## Recent Commits
+--------------------------------------------------------------------------------
+
+1e6d5e9 Update README with inventory system and current architecture
+a336e2a Add hero image and FAQ section to High Cube blog post
+903d322 Add High Cube seacan storage blog post with customer story
+92bd85b Add inventory checker page with quote request system
+2427ee7 Add /shipping-containers/ SEO landing page + fix analytics
+5e54471 Add backlink research tool to admin panel
+9da5177 Add redirect for old WordPress sitemap URL
+66dda95 Add robots.txt for SEO crawling
+85a8573 Optimize performance: compress hero, remove redundant GA4
+2407c27 Improve Lighthouse performance scores
+
+--------------------------------------------------------------------------------
+## Architecture Decisions
+--------------------------------------------------------------------------------
+
+### Hidden Pricing Model
+The business needed to show inventory without revealing supplier costs. Solution:
+- data/inventory.json contains full pricing data
+- Frontend JavaScript filters out price field before rendering
+- api/quote.php reads full JSON, includes price in owner email only
+- Owner calculates markup + delivery before responding to customer
+
+This avoids a database, keeps pricing updatable via JSON, and gives the
+business flexibility on margin without exposing wholesale costs.
+
+### No Cookie Consent for Canada
+PIPEDA (Canadian privacy law) differs from GDPR:
+- Analytics don't require opt-in consent
+- Only need privacy policy explaining data collection
+- Cookie banners create friction without legal necessity
+- Removed entirely rather than making it region-conditional
+
+If deploying in EU later, restore CookieConsent.astro from git history
+(commit before 2427ee7).
+
+### Blog FAQ as Native HTML
+FAQ sections use <details>/<summary> elements with scoped <style> blocks:
+- No JavaScript required
+- Works in all browsers including no-JS
+- Styling via CSS-in-Markdown (Astro renders it correctly)
+- Accordion behavior built into HTML spec
+
+--------------------------------------------------------------------------------
+## Files Changed This Session
+--------------------------------------------------------------------------------
+
+Added:
+- api/quote.php (quote request handler)
+- data/inventory.json (80 container listings)
+- src/pages/inventory-checker.astro
+- src/pages/shipping-containers.astro
+- src/content/blog/high-cube-seacan-storage-solution.md
+- public/images/blog/high-cube-seacan-storage*.webp
+- public/images/blog/seacan-shelving-*.webp
+- public/robots.txt
+
+Modified:
+- README.md (comprehensive rewrite)
+- config.yaml (removed /shipping-containers/ redirect)
+- src/layouts/Layout.astro (GTM direct, removed cookie check)
+- src/components/Footer.astro (removed cookie settings button)
+- package.json (added heic-convert dev dependency)
+
+Deleted:
+- src/components/CookieConsent.astro
+
+--------------------------------------------------------------------------------
+## Issues Encountered & Resolved
+--------------------------------------------------------------------------------
+
+1. **nginx redirect override**
+   - /shipping-containers/ kept redirecting even after removing from config
+   - Root cause: nginx had hardcoded redirect rule
+   - Fix: SSH in, remove line from /etc/nginx/sites-available/ccan, reload
+
+2. **Browser cached 301 redirect**
+   - User couldn't load new /shipping-containers/ page
+   - Cause: Browser cached permanent redirect
+   - Fix: Hard refresh (Ctrl+Shift+R) or incognito window
+
+3. **Production deploy failed**
+   - Server had local changes to config.yaml
+   - Fix: git stash && git pull && git stash pop && npm run build
+
+4. **HEIC files weren't HEIC**
+   - Files named .heic.unknown were actually PNGs
+   - Discovered via file header inspection (89504e47 = PNG magic number)
+   - Fix: Processed directly with Sharp, skipped heic-convert
+
+5. **File write race condition**
+   - Edit tool kept failing with "file modified since read"
+   - Workaround: Used Node.js fs.writeFileSync via Bash
+
+--------------------------------------------------------------------------------
+## Lessons Learned
+--------------------------------------------------------------------------------
+
+1. **Check nginx config separately from app config**
+   - Application-level redirects don't override server-level
+   - Always verify with curl -I before declaring "fixed"
+
+2. **301 redirects are cached aggressively**
+   - Browsers cache permanent redirects for extended periods
+   - Test in incognito to avoid cache confusion
+
+3. **File extensions lie**
+   - .heic.unknown files were PNGs
+   - Always check magic numbers when processing images
+
+4. **PIPEDA vs GDPR matters for consent UX**
+   - Canadian sites don't need cookie banners
+   - Removing friction improves analytics accuracy
+
+--------------------------------------------------------------------------------
+## What's Working Well
+--------------------------------------------------------------------------------
+
+1. **JSON-based inventory** - Edit file, deploy, done. No database migrations,
+   no admin interface needed yet. Good for 80 items updated weekly.
+
+2. **Quote request flow** - Customer sees unit, clicks quote, owner gets full
+   details including cost. Simple, effective, no pricing games visible.
+
+3. **Native HTML FAQ** - <details> elements just work. No accordion library,
+   no JavaScript, no accessibility concerns.
+
+4. **Deploy scripts** - npm run deploy:prod is one command. No CI/CD to debug,
+   no preview environments to manage. SSH → pull → build → done.
+
+--------------------------------------------------------------------------------
+## Deployment Commands (Quick Reference)
+--------------------------------------------------------------------------------
+
+# Local development
+npm run dev
+
+# Deploy to staging
+npm run deploy:staging
+
+# Deploy to production
+npm run deploy:prod
+
+# SSH to server
+ssh root@ccansam.com
+
+# View admin panel
+https://ccansam.com/api/admin.php?key=ccan-admin-2024
+
+# Update inventory
+# Edit data/inventory.json, then:
+npm run deploy:prod
+
+--------------------------------------------------------------------------------
+## Next Steps
+--------------------------------------------------------------------------------
+
+1. [ ] Monitor quote request volume and conversion
+2. [ ] Add inventory update workflow to admin panel (optional)
+3. [ ] Consider adding delivery calculator to inventory checker
+4. [ ] Review Search Console for new page indexing
+5. [ ] Track GA4 data now that consent barrier is removed
+6. [ ] More customer story blog posts with real photos
+
+================================================================================
+END OF LOG
+================================================================================
