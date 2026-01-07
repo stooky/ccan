@@ -1,15 +1,15 @@
 # C-Can Sam
 
-A marketing site for a shipping container business. Astro generates static HTML. PHP handles forms. That's the whole thing.
+A marketing site for a shipping container business. Astro generates static HTML. PHP handles forms and APIs. That is the whole thing.
 
-**Production:** https://ccansam.com
+**Production:** https://ccansam.com  
 **Staging:** https://ccan.crkid.com
 
 ## The philosophy
 
-Most small business sites are over-engineered. This one isn't. It's static HTML with a PHP form handler, deployed to a $6/month server. Lighthouse scores are 100 across the board because there's nothing to optimize away—no client-side framework, no hydration, no JavaScript bundles.
+Most small business sites are over-engineered. This one is not. It is static HTML with PHP endpoints, deployed to a $6/month server. Lighthouse scores are 100 across the board because there is nothing to optimize away—no client-side framework, no hydration, no JavaScript bundles.
 
-The entire site rebuilds in under 3 seconds. Deploys take 10 seconds. There's no build queue, no CI pipeline to debug, no Docker containers. You push to git, SSH in, run two commands, done.
+The entire site rebuilds in under 3 seconds. Deploys take 15 seconds. There is no build queue, no CI pipeline to debug, no Docker containers. You run one command, it SSHs in, pulls, builds, done.
 
 ## Running locally
 
@@ -19,57 +19,14 @@ npm run dev      # localhost:4321
 npm run build    # outputs to dist/
 ```
 
-## How it's organized
-
-```
-config.yaml          ← Everything lives here
-├── src/             ← Astro components, pages, content
-├── api/             ← PHP (forms, admin, reviews)
-├── public/          ← Images, favicons, static files
-├── data/            ← Form submissions, review data (JSON)
-└── deploy.sh        ← One-command server bootstrap
-```
-
-The `config.yaml` file is the single source of truth. Site name, phone number, analytics IDs, API keys, URL redirects—all in one place. The Astro frontend reads it through `src/config/site.ts`. The PHP backend reads it directly. Change something once, it changes everywhere.
-
-This matters more than it sounds. Most sites have config scattered across environment variables, admin panels, hardcoded strings, and database rows. When the phone number changes, you're hunting through five different places. Here, you edit one line.
-
-## What you'll change
-
-**Business info** — `config.yaml` has the name, tagline, contact details, hours, and social links. Start here.
-
-**Pages** — File-based routing. `src/pages/about.astro` becomes `/about/`. The three product pages are separate files because there are only three products—no need for dynamic routes or a CMS.
-
-**Blog** — Markdown files in `src/content/blog/`. Astro's content collections handle frontmatter validation and rendering.
-
-**Analytics** — GA4 and GTM IDs in `config.yaml`. Both respect cookie consent—scripts only load after the user accepts.
-
-**Email** — Uses Resend API (free tier: 3,000 emails/month). Add your API key to config. Falls back to PHP `mail()` if no key, but that usually lands in spam.
-
-**Admin** — Set `admin.secret_path` to something unguessable. View submissions at `/api/admin.php?key=YOUR_SECRET`. Manage reviews from the same panel.
-
-## The form system
-
-Contact forms are a solved problem, but most solutions are either expensive (Formspree, Netlify Forms) or unreliable (PHP mail). This one:
-
-1. Validates client-side (immediate feedback)
-2. Checks honeypot field (catches bots)
-3. Rate limits by IP (10/hour)
-4. Sends via Resend API (actually reaches inboxes)
-5. Logs to JSON (you own your data)
-
-Test locally without sending email:
-```bash
-node api/contact-local.js
-```
-
-## Reviews
-
-Google reviews display on relevant pages. The admin panel has a "Tag Reviews" feature that uses AI to match reviews to pages based on content. A review mentioning "40ft container" goes on the 40ft product page. A review about the rental experience goes on the rentals page.
-
-Review layouts: `featured` (large cards), `standard` (with nav), `3-row` (three across), `compact` (minimal). Configure per-page in `config.yaml`.
-
 ## Deploying
+
+```bash
+npm run deploy:staging   # ccan.crkid.com
+npm run deploy:prod      # ccansam.com
+```
+
+Both commands SSH into the server, pull latest changes, and rebuild. If there are local changes on the server (happens occasionally with config tweaks), it will fail—SSH in and `git stash` first.
 
 First time on a fresh Ubuntu 24 server:
 ```bash
@@ -77,79 +34,153 @@ curl -O https://raw.githubusercontent.com/stooky/ccan/storage-containers/deploy.
 DOMAIN=ccansam.com EMAIL=you@example.com sudo bash deploy.sh
 ```
 
-This installs Node 20, nginx, PHP-FPM, Certbot. Configures SSL, firewall, redirects. Takes about 2 minutes.
+## How it is organized
 
-Updates:
-```bash
-ssh root@ccansam.com "cd /var/www/ccan && git pull && npm run build"
+```
+config.yaml          <- Single source of truth
+src/
+  pages/             <- File-based routing
+  content/blog/      <- Markdown blog posts
+  components/        <- Reusable Astro components
+  layouts/           <- Page layouts
+  config/site.ts     <- TypeScript interface to config.yaml
+api/
+  contact.php        <- Contact form handler
+  quote.php          <- Inventory quote requests
+  admin.php          <- Admin panel
+data/
+  inventory.json     <- Live container inventory
+  submissions.json   <- Contact form logs
+  quote-requests.json <- Quote request logs
+public/              <- Images, favicons, static files
 ```
 
-The deploy script handles 27 redirects from the old WordPress URL structure. They're in nginx config via `config.yaml`, not application code. Old links and search results keep working.
+The `config.yaml` file is the single source of truth. Site name, phone number, analytics IDs, API keys, email settings—all in one place. Change something once, it changes everywhere.
 
-## Cookie consent
+## Inventory system
 
-GDPR-compliant. Four categories: necessary, analytics, marketing, preferences. Analytics scripts inject dynamically after consent. Preferences persist in localStorage. Users can change anytime via footer link.
+The inventory checker at `/inventory-checker/` displays live container stock from `data/inventory.json`. Key design decisions:
 
-The implementation is simpler than most cookie solutions because it's built into the site rather than loaded as a third-party script. No external requests, no GDPR-violating irony.
+**Prices are hidden from customers.** The JSON contains supplier pricing, but the frontend only shows unit, condition, location, and quantity. When a customer clicks "Get Quote," they fill out name/email, and the business owner receives an email with the full details including cost—so they can calculate markup and delivery.
+
+**No database.** Inventory is a flat JSON file. For 80 containers updated weekly, this is simpler than Postgres. Edit it directly or build an admin interface later.
+
+**Quote requests are logged.** Every request saves to `data/quote-requests.json` with timestamp, customer info, and item details. Analytics without complexity.
+
+## Blog
+
+Markdown files in `src/content/blog/`. Frontmatter schema:
+
+```yaml
+---
+title: "Your Title"
+description: "SEO description"
+pubDate: 2026-01-06
+author: "C-Can Sam"
+tags: ["shipping containers", "storage"]
+image: "/images/blog/your-image.jpg"
+imageAlt: "Descriptive alt text"
+draft: false
+---
+```
+
+Blog posts support embedded HTML for custom components. The FAQ sections use native `<details>` elements with scoped `<style>` blocks—no JavaScript required, works everywhere.
+
+**Image processing:** Blog images need multiple sizes. The `heic-convert` dev dependency handles iPhone photos. Sharp (bundled with Astro) handles resizing.
+
+## Analytics
+
+GTM handles everything. The container ID is in `config.yaml`. GA4 runs inside GTM, not as a separate script—this gives you one tag to manage and better control over what fires when.
+
+**No cookie consent banner.** This site operates in Canada under PIPEDA, which does not require opt-in consent for analytics. The GDPR-style cookie banner was removed to avoid asking permission we do not legally need. If you are deploying in the EU, you will need to add it back—the old `CookieConsent.astro` component is in git history.
+
+## The form system
+
+Contact forms POST to `api/contact.php`. The quote system uses `api/quote.php`. Both:
+
+1. Validate server-side (never trust the client)
+2. Check honeypot field (catches most bots)
+3. Rate limit by IP (10 requests/hour)
+4. Send via Resend API (actually reaches inboxes)
+5. Log to JSON (you own your data)
+
+Falls back to PHP `mail()` if no Resend key, but that usually lands in spam.
+
+## Admin panel
+
+Access at `/api/admin.php?key=YOUR_SECRET` (set `admin.secret_path` in config). From here you can:
+
+- View contact form submissions
+- View quote requests
+- Manage Google reviews
+- Tag reviews to pages using AI matching
+
+The admin is intentionally minimal. It is a PHP file that reads JSON, not a React dashboard with auth flows. For a site with one admin, this is plenty.
+
+## Reviews
+
+Google reviews display on relevant pages. The admin panel "Tag Reviews" feature uses AI to match reviews to pages based on content. A review mentioning "40ft container" goes on the 40ft product page.
+
+Layouts: `featured`, `standard`, `3-row`, `compact`. Configure per-page in `config.yaml`.
+
+## Multi-tenant support
+
+This codebase supports multiple business verticals. Stash the current config, restore another:
+
+```bash
+npm run stash     # Archives current config to backup/stash/
+npm run restore   # Interactive restore from backup
+```
+
+The HVAC vertical (Fire & Frost Mechanical) lives in `backup/stash/`. Same codebase, different branding, instant swap.
 
 ## Performance
 
-Lighthouse 100s aren't a goal, they're a side effect. When you serve static HTML with responsive images and no JavaScript framework, there's nothing to slow down. The approach is:
+Lighthouse 100s are not a goal, they are a side effect of not doing stupid things:
 
-- Static HTML (no hydration)
-- Responsive images with lazy loading
-- Font preloading
-- Gzip compression
-- No third-party scripts until consent
+- Static HTML (no hydration overhead)
+- Responsive images with lazy loading and WebP
+- System font stack (no web font requests)
+- No third-party scripts blocking render
+- Gzip compression via nginx
 
-GTM handles conditional loading for heavy widgets. The Vendasta chat widget, for example, only loads on desktop—mobile users never download it.
-
-## Stash/restore
-
-This codebase supports multiple business verticals. The HVAC version (Fire & Frost Mechanical) is stashed in `backup/stash/fireandfrostmechanical.ca/`. Swap configs:
-
-```bash
-npm run stash     # Archive current config
-npm run restore   # Restore from backup
-```
-
-Useful when one codebase serves multiple clients with different brandings.
-
-## Data backup
-
-Form submissions and reviews live in `data/` as JSON. Back them up:
-
-```bash
-npm run backup    # Emails a zip to admin
-```
-
-Or just copy `data/submissions.json` and `data/reviews.json` manually. They're plain text files.
+Total JavaScript shipped to the client: ~2KB for mobile nav toggle. Everything else is HTML and CSS.
 
 ## Stack
 
 | Layer | Choice | Why |
 |-------|--------|-----|
 | Framework | Astro 5 | Static output, zero JS by default |
-| Styling | Tailwind 4 | Utility classes, no CSS files to maintain |
+| Styling | Tailwind 4 | Utility classes, purged in production |
 | Types | TypeScript | Catches config errors at build time |
 | Backend | PHP 8 | Runs anywhere, no runtime to manage |
 | Email | Resend | Actually delivers, generous free tier |
-| Server | nginx + Ubuntu 24 | Boring, reliable, cheap |
-| SSL | Let's Encrypt | Free, auto-renewing |
-| Analytics | GA4 + GTM | Industry standard, conditional loading |
+| Server | nginx + Ubuntu 24 | Boring, reliable, $6/month |
+| SSL | Let's Encrypt | Free, auto-renewing via Certbot |
 
 ## Security
 
-Not comprehensive, but covers the basics:
+Covers the basics without pretending to be Fort Knox:
 
-- Honeypot field catches form bots
-- Rate limiting prevents abuse
-- Input sanitization in PHP
-- Secret URL for admin panel
-- nginx blocks access to `data/` and `config.yaml`
-- HTTPS with HSTS
+- Honeypot fields catch form bots
+- Rate limiting prevents abuse (10 req/hour/IP)
+- Input sanitization in all PHP endpoints
+- Secret URL for admin (not auth, but sufficient for single-user)
+- nginx blocks direct access to `data/`, `config.yaml`, `.git/`
+- HTTPS with HSTS headers
+- No user accounts = no passwords to leak
 
-The philosophy: make the obvious attacks fail, don't pretend you're defending against nation-states.
+## What is not here
+
+Things intentionally omitted:
+
+- **CMS** — Three product pages do not need a database. Markdown is fine.
+- **User auth** — One admin, one secret URL. Simple.
+- **Client-side routing** — Every page is a full HTML document. Fast, accessible, works without JS.
+- **Build pipeline** — No GitHub Actions, no Vercel, no preview deployments. SSH and `npm run build` is the pipeline.
+- **Database** — JSON files for everything. At this scale, SQLite would be over-engineering.
+
+The goal is a site that works reliably for years with minimal maintenance. Every dependency is a future liability. Every abstraction is complexity to debug at 2am.
 
 ---
 
