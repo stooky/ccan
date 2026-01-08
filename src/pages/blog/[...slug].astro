@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import ArticleSchema from '../../components/schema/ArticleSchema.astro';
 import { getCollection, render } from 'astro:content';
 import { siteConfig } from '../../config/site';
 
@@ -53,6 +54,15 @@ const imageSrcSet = post.data.image ? `
   modifiedTime={post.data.updatedDate}
   author={post.data.author}
 >
+  <ArticleSchema
+    title={post.data.title}
+    description={post.data.description}
+    image={post.data.image}
+    publishedDate={post.data.pubDate}
+    modifiedDate={post.data.updatedDate}
+    author={post.data.author}
+  />
+
   <!-- Article Header with Featured Image -->
   <header class="relative">
     <!-- Featured Image Background -->

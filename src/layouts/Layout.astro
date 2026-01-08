@@ -1,8 +1,18 @@
 ---
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/Footer.astro';
+import BreadcrumbSchema from '../components/schema/BreadcrumbSchema.astro';
 import { siteConfig } from '../config/site';
 import '../styles/global.css';
+
+// Build sameAs array for LocalBusiness schema (social profiles)
+const sameAsLinks = [
+  siteConfig.social.facebook,
+  siteConfig.social.instagram,
+  siteConfig.social.googleBusiness,
+  siteConfig.social.linkedin,
+  siteConfig.social.youtube,
+].filter(Boolean);
 
 interface Props {
   title: string;
@@ -100,14 +110,36 @@ const fullTitle = `${title} | ${siteConfig.name}`;
       "url": siteConfig.url,
       "telephone": siteConfig.contact.phone,
       "email": siteConfig.contact.email,
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${siteConfig.url}/images/logo.png`,
+        "width": "512",
+        "height": "512"
+      },
+      "image": `${siteConfig.url}/images/logo.png`,
       "address": {
         "@type": "PostalAddress",
+        "streetAddress": siteConfig.contact.address.street,
         "addressLocality": siteConfig.contact.address.city,
         "addressRegion": siteConfig.contact.address.state,
+        "postalCode": siteConfig.contact.address.zip,
         "addressCountry": "CA"
       },
-      "openingHours": "Mo-Su 07:30-19:30",
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 52.2614082,
+        "longitude": -106.6082841
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+          "opens": "09:00",
+          "closes": "17:00"
+        }
+      ],
       "priceRange": "$$",
+      "sameAs": sameAsLinks,
       "serviceArea": {
         "@type": "GeoCircle",
         "geoMidpoint": {
@@ -115,9 +147,12 @@ const fullTitle = `${title} | ${siteConfig.name}`;
           "latitude": 52.1579,
           "longitude": -106.6702
         },
-        "geoRadius": "50000"
+        "geoRadius": "200000"
       }
     })} />
+
+    <!-- Breadcrumb Schema -->
+    <BreadcrumbSchema />
 
     <!-- Google Tag Manager -->
     {siteConfig.analytics.googleTagManager.enabled && (

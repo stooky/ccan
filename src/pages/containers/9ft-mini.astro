@@ -6,40 +6,40 @@ import ReviewWidget from '../../components/ReviewWidget.astro';
 import ProductSchema from '../../components/schema/ProductSchema.astro';
 import { siteConfig } from '../../config/site';
 
-const whatsappLink = `${siteConfig.social.whatsapp}?text=${encodeURIComponent("Hi! I'm interested in the 40ft High Cube Container.")}`;
+const whatsappLink = `${siteConfig.social.whatsapp}?text=${encodeURIComponent("Hi! I'm interested in the 9ft Mini Container.")}`;
 const phoneLink = `tel:${siteConfig.contact.phone.replace(/\D/g, '')}`;
 
 const specs = [
-  { label: "Length", value: "40 feet (12.2m)" },
-  { label: "Width", value: "8 feet (2.44m)" },
-  { label: "Height", value: "9 feet 6 inches (2.9m)" },
-  { label: "Interior Capacity", value: "2,694 cubic feet" },
-  { label: "Max Payload", value: "58,598 lbs (26,580 kg)" },
-  { label: "Tare Weight", value: "8,775 lbs (3,980 kg)" },
+  { label: "Length", value: "9 feet (2.74m)" },
+  { label: "Width", value: "7 feet (2.13m)" },
+  { label: "Height", value: "7 feet 2 inches (2.18m)" },
+  { label: "Interior Capacity", value: "390 cubic feet" },
+  { label: "Door Opening", value: "6'2\" W x 6'6\" H" },
+  { label: "Tare Weight", value: "~2,200 lbs (1,000 kg)" },
 ];
 
 const features = [
-  "Extra 1 foot of vertical space",
+  "Compact footprint for tight spaces",
   "Wind and watertight construction",
   "Secure lockbox for padlocks",
-  "Marine-grade plywood flooring",
   "Forklift pockets for easy transport",
-  "Double cargo doors with rubber seals",
+  "Single cargo door with rubber seals",
+  "Corrugated steel construction",
 ];
 
 const useCases = [
-  { title: "Oversized Equipment", description: "Extra height for tall machinery, vehicles, and industrial equipment." },
-  { title: "Workshops & Studios", description: "Transform into spacious workshops, art studios, or creative spaces." },
-  { title: "Retail Spaces", description: "Extra headroom creates comfortable retail and dining environments." },
-  { title: "Living Conversions", description: "Popular choice for container homes and office conversions." },
+  { title: "Urban Properties", description: "Fits in driveways, backyards, and tight city lots where larger containers won't fit." },
+  { title: "Garden Storage", description: "Perfect for garden tools, lawn equipment, and outdoor furniture storage." },
+  { title: "Small Business", description: "Compact storage for tools, inventory, or a small workshop setup." },
+  { title: "Cabin & Cottage", description: "Ideal for seasonal properties with limited space for storage." },
 ];
 ---
 
 <Layout
-  title="40ft High Cube Container"
-  description="40ft high cube shipping container for sale or rent in Saskatchewan. Extra height: 40ft L x 8ft W x 9ft 6in H. Perfect for oversized items, workshops, studios, and container conversions."
+  title="9ft Mini Container"
+  description="9ft mini shipping container for sale in Saskatchewan. Compact dimensions: 9ft L x 7ft W x 7ft 2in H. Perfect for tight spaces, urban properties, and small storage needs."
 >
-  <ProductSchema slug="40ft-high-cube" image="/images/containers/40ft-highcube-new.jpg" />
+  <ProductSchema slug="9ft-mini" condition="new" image="/images/containers/9ft-mini.jpg" />
 
   <!-- Hero Section -->
   <section class="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-primary-900 py-20 sm:py-28">
@@ -54,29 +54,29 @@ const useCases = [
             Back to All Containers
           </a>
           <span class="inline-flex items-center rounded-full bg-primary-500/10 px-4 py-1.5 text-sm font-medium text-primary-300 ring-1 ring-inset ring-primary-500/20">
-            +1 Foot Extra Height
+            Compact Size
           </span>
           <h1 class="mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-            40ft High Cube
+            9ft Mini
             <span class="text-green-400">Container</span>
           </h1>
           <p class="mt-6 text-lg leading-8 text-gray-300">
-            The 40ft high cube container is the go-to solution for those who need added vertical space. With an extra foot of height compared to standard containers, it's ideal for oversized items, machinery, and creative conversions like workshops, studios, or retail spaces.
+            The 9ft mini container is the perfect solution when space is at a premium. Compact enough to fit in most driveways and backyards while still providing secure, weatherproof storage for your belongings.
           </p>
 
           <!-- Quick Specs -->
           <div class="mt-8 flex flex-wrap gap-4">
             <div class="rounded-lg bg-white/10 px-4 py-2">
               <span class="text-gray-400 text-sm">Length</span>
-              <p class="text-white font-semibold">40 feet</p>
+              <p class="text-white font-semibold">9 feet</p>
             </div>
             <div class="rounded-lg bg-white/10 px-4 py-2">
               <span class="text-gray-400 text-sm">Width</span>
-              <p class="text-white font-semibold">8 feet</p>
+              <p class="text-white font-semibold">7 feet</p>
             </div>
-            <div class="rounded-lg bg-primary-500/20 px-4 py-2 ring-2 ring-primary-400">
-              <span class="text-primary-300 text-sm">Height</span>
-              <p class="text-white font-semibold">9'6" (+1')</p>
+            <div class="rounded-lg bg-white/10 px-4 py-2">
+              <span class="text-gray-400 text-sm">Height</span>
+              <p class="text-white font-semibold">7'2"</p>
             </div>
           </div>
 
@@ -108,48 +108,43 @@ const useCases = [
         <!-- Container Image -->
         <div class="relative">
           <div class="overflow-hidden rounded-2xl shadow-2xl bg-gray-800">
-            <picture>
-              <source
-                srcset="/images/containers/40ft-highcube-400w.webp 400w, /images/containers/40ft-highcube-600w.webp 600w, /images/containers/40ft-highcube-800w.webp 800w"
-                sizes="(max-width: 768px) 100vw, 50vw"
-                type="image/webp"
-              />
-              <img
-                src="/images/containers/40ft-highcube-new.jpg"
-                alt="40ft high cube shipping container"
-                class="w-full h-auto object-cover"
-                loading="eager"
-                width="800"
-                height="600"
-              />
-            </picture>
+            <!-- Placeholder for 9ft container image -->
+            <div class="aspect-[4/3] bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+              <div class="text-center text-gray-400">
+                <svg class="mx-auto h-24 w-24 mb-4" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                </svg>
+                <p class="text-sm">9ft Mini Container</p>
+                <p class="text-xs mt-1">Image coming soon</p>
+              </div>
+            </div>
           </div>
-          <!-- Extra Height Badge -->
+          <!-- Compact Badge -->
           <div class="absolute -top-4 -right-4 rounded-xl bg-primary-600 px-4 py-3 shadow-lg">
-            <p class="text-sm font-semibold text-white">Extra Height</p>
-            <p class="text-lg font-bold text-white">+1 Foot Taller</p>
+            <p class="text-sm font-semibold text-white">Compact</p>
+            <p class="text-lg font-bold text-white">Space Saver</p>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Height Comparison -->
+  <!-- Size Comparison -->
   <div class="bg-primary-600 py-6">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-center text-white">
         <div class="flex items-center gap-3">
-          <span class="text-primary-200">Standard Container:</span>
-          <span class="font-bold">8'6" height</span>
+          <span class="text-primary-200">9ft Mini:</span>
+          <span class="font-bold">390 cu ft</span>
         </div>
         <svg class="h-6 w-6 hidden sm:block" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
         </svg>
         <div class="flex items-center gap-3">
-          <span class="text-primary-200">High Cube:</span>
-          <span class="font-bold text-lg">9'6" height</span>
-          <span class="rounded-full bg-white/20 px-3 py-1 text-sm font-semibold">+12 inches</span>
+          <span class="text-primary-200">20ft Standard:</span>
+          <span class="font-bold">1,172 cu ft</span>
         </div>
+        <span class="rounded-full bg-white/20 px-3 py-1 text-sm font-semibold">Perfect for tight spaces</span>
       </div>
     </div>
   </div>
@@ -157,7 +152,7 @@ const useCases = [
   <!-- Specifications -->
   <Section
     title="Container Specifications"
-    subtitle="Detailed dimensions and capacity information for the 40ft high cube container."
+    subtitle="Detailed dimensions and capacity information for the 9ft mini container."
   >
     <div class="grid gap-8 lg:grid-cols-2">
       <div class="rounded-2xl bg-gray-50 p-8">
@@ -191,7 +186,7 @@ const useCases = [
   <!-- Use Cases -->
   <Section
     title="Perfect For"
-    subtitle="The extra vertical space opens up possibilities not available with standard containers."
+    subtitle="The compact 9ft container fits where larger containers can't."
     background="gray"
   >
     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -204,67 +199,52 @@ const useCases = [
     </div>
   </Section>
 
-  <!-- Buy or Rent -->
+  <!-- Purchase Only (no rental for 9ft) -->
   <Section
-    title="Buy or Rent"
-    subtitle="Flexible options to suit your storage needs."
+    title="Purchase Your 9ft Container"
+    subtitle="Own a compact storage solution outright."
   >
-    <div class="grid gap-8 lg:grid-cols-2">
+    <div class="max-w-2xl mx-auto">
       <div class="rounded-2xl bg-white p-8 shadow-lg border-2 border-green-500">
-        <h3 class="text-2xl font-bold text-gray-900">Purchase</h3>
-        <p class="mt-2 text-gray-600">Own your container outright. High cubes are popular for conversions and permanent installations.</p>
-        <ul class="mt-4 space-y-2 text-sm text-gray-700">
-          <li class="flex items-center gap-2">
-            <svg class="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+        <div class="text-center">
+          <span class="inline-flex items-center rounded-full bg-green-100 px-4 py-1.5 text-sm font-medium text-green-700">
+            New Containers Only
+          </span>
+          <h3 class="mt-4 text-2xl font-bold text-gray-900">Purchase</h3>
+          <p class="mt-2 text-gray-600">Own your container outright with a one-time purchase. The 9ft mini is available in new condition.</p>
+        </div>
+        <ul class="mt-6 space-y-3 text-gray-700">
+          <li class="flex items-center gap-3">
+            <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
             No monthly payments
           </li>
-          <li class="flex items-center gap-2">
-            <svg class="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-            Ideal for conversions
+          <li class="flex items-center gap-3">
+            <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+            Fits in most driveways
           </li>
-          <li class="flex items-center gap-2">
-            <svg class="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-            New & used available
-          </li>
-        </ul>
-        <a href="/storage-containers-for-sale/" class="mt-6 inline-flex items-center gap-2 font-semibold text-green-600 hover:text-green-700">
-          View Purchase Options
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-        </a>
-      </div>
-
-      <div class="rounded-2xl bg-white p-8 shadow-lg border-2 border-primary-500">
-        <h3 class="text-2xl font-bold text-gray-900">Rental</h3>
-        <p class="mt-2 text-gray-600">Flexible monthly rentals when you need extra height temporarily. Delivery and pickup included.</p>
-        <ul class="mt-4 space-y-2 text-sm text-gray-700">
-          <li class="flex items-center gap-2">
-            <svg class="h-4 w-4 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-            Flexible terms
-          </li>
-          <li class="flex items-center gap-2">
-            <svg class="h-4 w-4 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-            Delivery included
-          </li>
-          <li class="flex items-center gap-2">
-            <svg class="h-4 w-4 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-            On-site or off-site options
+          <li class="flex items-center gap-3">
+            <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+            Delivery available throughout Saskatchewan
           </li>
         </ul>
-        <a href="/storage-container-rentals/" class="mt-6 inline-flex items-center gap-2 font-semibold text-primary-600 hover:text-primary-700">
-          View Rental Options
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-        </a>
+        <div class="mt-8 text-center">
+          <a
+            href={whatsappLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:bg-green-500 hover:shadow-xl"
+          >
+            Get a Quote
+          </a>
+        </div>
       </div>
     </div>
   </Section>
 
-  <!-- Google Reviews Widget -->
-  <ReviewWidget pagePath="/containers/40ft-high-cube" />
-
   <!-- CTA -->
   <CTA
-    title="Ready for Extra Height?"
-    description="Contact us today for pricing and availability on 40ft high cube containers. Delivery available throughout Saskatchewan."
+    title="Need Compact Storage?"
+    description="Contact us today for pricing and availability on 9ft mini containers. Delivery available throughout Saskatchewan."
     primaryButton={{ text: "Get a Quote", href: whatsappLink }}
     secondaryButton={{ text: "Call Us", href: phoneLink }}
   />

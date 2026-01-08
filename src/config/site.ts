@@ -43,6 +43,26 @@ interface Social {
   linkedin: string;
   youtube: string;
   whatsapp: string;
+  googleBusiness: string;
+}
+
+interface PriceRange {
+  min: number;
+  max: number;
+}
+
+export interface ContainerProduct {
+  size: string;
+  slug: string;
+  name: string;
+  description: string;
+  new: PriceRange | null;
+  used: PriceRange | null;
+}
+
+interface Products {
+  currency: string;
+  containers: ContainerProduct[];
 }
 
 interface Hours {
@@ -100,6 +120,7 @@ export interface SiteConfig {
   defaultOgImage: string;
   analytics: Analytics;
   reviews: ReviewsConfig;
+  products: Products;
   copyright: string;
 }
 
@@ -140,6 +161,7 @@ function loadConfig(): SiteConfig {
       linkedin: config.social.linkedin || '',
       youtube: config.social.youtube || '',
       whatsapp: config.social.whatsapp || '',
+      googleBusiness: config.social.google_business || '',
     },
 
     // Business hours
@@ -179,9 +201,27 @@ function loadConfig(): SiteConfig {
       tagged: config.reviews?.tagged || {},
     },
 
+    // Products config
+    products: {
+      currency: config.products?.currency || 'CAD',
+      containers: (config.products?.containers || []).map((c: any) => ({
+        size: c.size,
+        slug: c.slug,
+        name: c.name,
+        description: c.description,
+        new: c.new ? { min: c.new.min, max: c.new.max } : null,
+        used: c.used ? { min: c.used.min, max: c.used.max } : null,
+      })),
+    },
+
     // Generated
     copyright: `© ${new Date().getFullYear()} ${config.site.name}. All rights reserved.`,
   };
+}
+
+// Get container product by slug
+export function getContainerBySlug(slug: string): ContainerProduct | undefined {
+  return siteConfig.products.containers.find(c => c.slug === slug);
 }
 
 // Load reviews from JSON file

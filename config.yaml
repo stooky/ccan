@@ -16,6 +16,42 @@ site:
   default_og_image: "/images/logo.png"
 
 # -----------------------------------------------------------------------------
+# Product Pricing (Sale prices in CAD)
+# -----------------------------------------------------------------------------
+# Prices are controlled here and used for:
+# - Display on container pages
+# - Product schema for Google rich results
+# Set to null if not available
+#
+products:
+  currency: "CAD"
+  containers:
+    - size: "9ft"
+      slug: "9ft-mini"
+      name: "9ft Mini Container"
+      description: "Compact 9ft shipping container, perfect for tight spaces and small storage needs."
+      new: { min: 4000, max: 4500 }
+      used: null
+    - size: "20ft"
+      slug: "20ft-standard"
+      name: "20ft Standard Container"
+      description: "20ft standard shipping container for sale. Versatile storage solution for residential, commercial, and construction needs."
+      new: { min: 4450, max: 4700 }
+      used: { min: 3000, max: 3600 }
+    - size: "40ft"
+      slug: "40ft-standard"
+      name: "40ft Standard Container"
+      description: "40ft standard shipping container for sale. Maximum storage capacity for commercial and industrial applications."
+      new: null
+      used: { min: 4750, max: 5000 }
+    - size: "40ft HC"
+      slug: "40ft-high-cube"
+      name: "40ft High Cube Container"
+      description: "40ft high cube shipping container with extra height. Ideal for oversized items and commercial storage."
+      new: { min: 6500, max: 6900 }
+      used: { min: 4750, max: 5000 }
+
+# -----------------------------------------------------------------------------
 # Contact Information
 # -----------------------------------------------------------------------------
 contact:
@@ -51,6 +87,7 @@ social:
   linkedin: ""
   youtube: ""
   whatsapp: "https://wa.me/13062814100"
+  google_business: "https://www.google.com/maps/place/Ccansam+Container+Sales+and+Rental/@52.2614082,-106.610859,17z"
 
 # -----------------------------------------------------------------------------
 # Navigation
@@ -92,6 +129,8 @@ navigation:
         href: "/on-site-storage-rentals"
     # Products - specific container types (product SEO)
     products:
+      - name: "9ft Mini Container"
+        href: "/containers/9ft-mini"
       - name: "20ft Standard Container"
         href: "/containers/20ft-standard"
       - name: "40ft Standard Container"

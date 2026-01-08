@@ -3,6 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import Section from '../../components/Section.astro';
 import CTA from '../../components/CTA.astro';
 import ReviewWidget from '../../components/ReviewWidget.astro';
+import ProductSchema from '../../components/schema/ProductSchema.astro';
 import { siteConfig } from '../../config/site';
 
 const whatsappLink = `${siteConfig.social.whatsapp}?text=${encodeURIComponent("Hi! I'm interested in the 40ft Standard Container.")}`;
@@ -38,6 +39,8 @@ const useCases = [
   title="40ft Standard Container"
   description="40ft standard shipping container for sale or rent in Saskatchewan. Dimensions: 40ft L x 8ft W x 8ft 6in H. Ideal for business inventory, construction sites, and commercial applications."
 >
+  <ProductSchema slug="40ft-standard" condition="used" image="/images/containers/40ft-standard-new.jpg" />
+
   <!-- Hero Section -->
   <section class="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-primary-900 py-20 sm:py-28">
     <div class="absolute inset-0 bg-[url('/images/grid-pattern.svg')] opacity-10"></div>
