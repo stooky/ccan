@@ -148,6 +148,70 @@ $reviewsAvgRating = $reviewsData['averageRating'] ?? 0;
 // Get current tab
 $currentTab = $_GET['tab'] ?? 'submissions';
 
+// Load products config for Rich Snippets tab
+$productsConfig = [];
+if ($config && isset($config['products']['containers'])) {
+    $productsConfig = $config['products']['containers'];
+}
+
+// Handle Rich Snippets form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_products') {
+    // Build updated products array from POST data
+    $updatedProducts = [];
+    foreach ($_POST['products'] as $index => $product) {
+        $updatedProducts[] = [
+            'size' => $product['size'],
+            'slug' => $product['slug'],
+            'name' => $product['name'],
+            'description' => $product['description'],
+            'new' => !empty($product['new_min']) ? [
+                'min' => (int)$product['new_min'],
+                'max' => (int)$product['new_max']
+            ] : null,
+            'used' => !empty($product['used_min']) ? [
+                'min' => (int)$product['used_min'],
+                'max' => (int)$product['used_max']
+            ] : null,
+        ];
+    }
+
+    // Read config file and update products section
+    $configContent = file_get_contents($configPath);
+
+    // Build YAML for products
+    $productsYaml = "products:\n  currency: \"CAD\"\n  containers:\n";
+    foreach ($updatedProducts as $product) {
+        $productsYaml .= "    - size: \"{$product['size']}\"\n";
+        $productsYaml .= "      slug: \"{$product['slug']}\"\n";
+        $productsYaml .= "      name: \"{$product['name']}\"\n";
+        $productsYaml .= "      description: \"{$product['description']}\"\n";
+        if ($product['new']) {
+            $productsYaml .= "      new: { min: {$product['new']['min']}, max: {$product['new']['max']} }\n";
+        } else {
+            $productsYaml .= "      new: null\n";
+        }
+        if ($product['used']) {
+            $productsYaml .= "      used: { min: {$product['used']['min']}, max: {$product['used']['max']} }\n";
+        } else {
+            $productsYaml .= "      used: null\n";
+        }
+    }
+
+    // Replace products section in config
+    $pattern = '/products:\s*\n\s+currency:.*?(?=\n# |\n[a-z]+:|\z)/s';
+    $configContent = preg_replace($pattern, $productsYaml, $configContent);
+
+    file_put_contents($configPath, $configContent);
+
+    // Reload config
+    if (function_exists('yaml_parse_file')) {
+        $config = yaml_parse_file($configPath);
+    }
+    $productsConfig = $config['products']['containers'] ?? [];
+
+    $productsSaved = true;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -465,6 +529,9 @@ $currentTab = $_GET['tab'] ?? 'submissions';
             <a href="?key=<?= urlencode($secretPath) ?>&tab=backlinks" class="tab <?= $currentTab === 'backlinks' ? 'active' : '' ?>">
                 Backlink Research
             </a>
+            <a href="?key=<?= urlencode($secretPath) ?>&tab=rich-snippets" class="tab <?= $currentTab === 'rich-snippets' ? 'active' : '' ?>">
+                Rich Snippets
+            </a>
         </div>
 
         <!-- Submissions Tab -->
@@ -686,6 +753,125 @@ $currentTab = $_GET['tab'] ?? 'submissions';
                 </p>
             </div>
         </div><!-- End Backlinks Tab -->
+
+        <!-- Rich Snippets Tab -->
+        <div class="tab-content <?= $currentTab === 'rich-snippets' ? 'active' : '' ?>" id="rich-snippets-tab">
+            <?php if (isset($productsSaved) && $productsSaved): ?>
+                <div class="alert">Product pricing saved successfully! <strong>Rebuild and deploy to apply changes.</strong></div>
+            <?php endif; ?>
+
+            <div class="rich-snippets-header" style="margin-bottom: 1.5rem;">
+                <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">Rich Snippets Configuration</h2>
+                <p style="color: #6b7280; font-size: 0.875rem;">Manage product pricing and structured data that appears in Google search results.</p>
+            </div>
+
+            <!-- Review Stats Card -->
+            <div style="background: white; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1.5rem;">
+                <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="color: #fbbf24;">★</span> Aggregate Rating
+                </h3>
+                <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                    <div>
+                        <div style="font-size: 2rem; font-weight: 700; color: #d97706;"><?= number_format($reviewsAvgRating, 1) ?></div>
+                        <div style="font-size: 0.75rem; color: #6b7280;">Average Rating</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 2rem; font-weight: 700; color: #d97706;"><?= $reviewsTotalCount ?></div>
+                        <div style="font-size: 0.75rem; color: #6b7280;">Total Reviews</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.25rem;">Last Sync</div>
+                        <div style="font-size: 0.875rem; font-weight: 500;"><?= htmlspecialchars($reviewsLastSync) ?></div>
+                    </div>
+                </div>
+                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 1rem;">
+                    This rating appears on all product pages in search results. Update reviews in the Reviews tab.
+                </p>
+            </div>
+
+            <!-- Products Form -->
+            <form method="POST" action="?key=<?= urlencode($secretPath) ?>&tab=rich-snippets">
+                <input type="hidden" name="action" value="save_products">
+
+                <div style="background: white; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3 style="font-size: 1rem; font-weight: 600;">Container Products</h3>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; min-width: 800px;">
+                            <thead>
+                                <tr style="background: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+                                    <th style="padding: 0.75rem 1rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #6b7280; text-transform: uppercase;">Size</th>
+                                    <th style="padding: 0.75rem 1rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #6b7280; text-transform: uppercase;">Name</th>
+                                    <th style="padding: 0.75rem 1rem; text-align: center; font-size: 0.75rem; font-weight: 600; color: #6b7280; text-transform: uppercase; background: #ecfdf5;">New Price Range</th>
+                                    <th style="padding: 0.75rem 1rem; text-align: center; font-size: 0.75rem; font-weight: 600; color: #6b7280; text-transform: uppercase; background: #fef3c7;">Used Price Range</th>
+                                    <th style="padding: 0.75rem 1rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #6b7280; text-transform: uppercase;">Page</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($productsConfig as $index => $product): ?>
+                                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                                        <td style="padding: 0.75rem 1rem;">
+                                            <input type="hidden" name="products[<?= $index ?>][size]" value="<?= htmlspecialchars($product['size'] ?? '') ?>">
+                                            <input type="hidden" name="products[<?= $index ?>][slug]" value="<?= htmlspecialchars($product['slug'] ?? '') ?>">
+                                            <input type="hidden" name="products[<?= $index ?>][description]" value="<?= htmlspecialchars($product['description'] ?? '') ?>">
+                                            <span style="font-weight: 600;"><?= htmlspecialchars($product['size'] ?? '') ?></span>
+                                        </td>
+                                        <td style="padding: 0.75rem 1rem;">
+                                            <input type="text" name="products[<?= $index ?>][name]" value="<?= htmlspecialchars($product['name'] ?? '') ?>" style="width: 100%; padding: 0.375rem 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem; font-size: 0.875rem;">
+                                        </td>
+                                        <td style="padding: 0.75rem 0.5rem; background: #ecfdf5;">
+                                            <div style="display: flex; gap: 0.25rem; align-items: center; justify-content: center;">
+                                                <span style="font-size: 0.75rem; color: #6b7280;">$</span>
+                                                <input type="number" name="products[<?= $index ?>][new_min]" value="<?= htmlspecialchars($product['new']['min'] ?? '') ?>" placeholder="Min" style="width: 70px; padding: 0.375rem 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem; font-size: 0.875rem; text-align: right;">
+                                                <span style="font-size: 0.75rem; color: #6b7280;">-</span>
+                                                <input type="number" name="products[<?= $index ?>][new_max]" value="<?= htmlspecialchars($product['new']['max'] ?? '') ?>" placeholder="Max" style="width: 70px; padding: 0.375rem 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem; font-size: 0.875rem; text-align: right;">
+                                            </div>
+                                        </td>
+                                        <td style="padding: 0.75rem 0.5rem; background: #fef3c7;">
+                                            <div style="display: flex; gap: 0.25rem; align-items: center; justify-content: center;">
+                                                <span style="font-size: 0.75rem; color: #6b7280;">$</span>
+                                                <input type="number" name="products[<?= $index ?>][used_min]" value="<?= htmlspecialchars($product['used']['min'] ?? '') ?>" placeholder="Min" style="width: 70px; padding: 0.375rem 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem; font-size: 0.875rem; text-align: right;">
+                                                <span style="font-size: 0.75rem; color: #6b7280;">-</span>
+                                                <input type="number" name="products[<?= $index ?>][used_max]" value="<?= htmlspecialchars($product['used']['max'] ?? '') ?>" placeholder="Max" style="width: 70px; padding: 0.375rem 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem; font-size: 0.875rem; text-align: right;">
+                                            </div>
+                                        </td>
+                                        <td style="padding: 0.75rem 1rem;">
+                                            <a href="/containers/<?= htmlspecialchars($product['slug'] ?? '') ?>" target="_blank" style="color: #d97706; font-size: 0.75rem;">
+                                                /containers/<?= htmlspecialchars($product['slug'] ?? '') ?>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 1rem;">
+                        Leave price fields empty if that condition is not available. Prices shown are the starting prices that appear in Google search results.
+                    </p>
+                </div>
+
+                <div style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+
+            <!-- Testing Links -->
+            <div style="background: #fffbeb; border: 1px solid #fcd34d; border-radius: 0.5rem; padding: 1rem; margin-top: 1.5rem;">
+                <p style="font-size: 0.875rem; font-weight: 500; color: #92400e; margin-bottom: 0.75rem;">
+                    🔍 Test Your Rich Snippets
+                </p>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                    <a href="https://search.google.com/test/rich-results?url=https://ccansam.com" target="_blank" rel="noopener" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">Test Homepage</a>
+                    <?php foreach ($productsConfig as $product): ?>
+                        <a href="https://search.google.com/test/rich-results?url=https://ccansam.com/containers/<?= urlencode($product['slug'] ?? '') ?>" target="_blank" rel="noopener" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">Test <?= htmlspecialchars($product['size'] ?? '') ?></a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div><!-- End Rich Snippets Tab -->
 
     </div>
 
