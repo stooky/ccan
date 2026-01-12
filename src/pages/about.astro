@@ -4,61 +4,156 @@ import Hero from '../components/Hero.astro';
 import Section from '../components/Section.astro';
 import CTA from '../components/CTA.astro';
 import ReviewWidget from '../components/ReviewWidget.astro';
+import FAQSchema from '../components/schema/FAQSchema.astro';
 import { siteConfig } from '../config/site';
 
 // Company values
 const values = [
   {
-    title: 'Quality',
-    description: 'New and used containers in excellent condition, built to last.',
+    title: 'Quality First',
+    description: 'Every container is inspected for structural integrity, watertight seals, and secure locking mechanisms before sale or rental.',
   },
   {
-    title: 'Flexible',
-    description: 'Buy, rent, or store - we have options to fit your needs.',
+    title: 'Flexible Solutions',
+    description: 'Buy, rent, lease, or store on-site — we tailor options to fit residential and commercial needs across Saskatchewan.',
   },
   {
-    title: 'Local',
-    description: 'Proudly serving Martensville, Saskatoon, and all of Saskatchewan.',
+    title: 'Local Expertise',
+    description: 'Based in Martensville since 2022, we understand Saskatchewan weather, delivery logistics, and local storage requirements.',
   },
   {
-    title: 'Reliable',
-    description: 'Durable, weatherproof containers you can count on.',
+    title: 'Reliable Service',
+    description: '55+ five-star Google reviews from customers across Saskatchewan. Prompt delivery, fair pricing, transparent terms.',
+  },
+];
+
+// Company facts for LLM extraction
+const companyFacts = {
+  name: 'C-Can Sam',
+  legalName: 'C-Can Sam',
+  foundingYear: 2022,
+  founder: 'Sam',
+  headquarters: 'Martensville, Saskatchewan, Canada',
+  serviceArea: 'Saskatchewan, Canada',
+  specialization: 'Shipping container sales, rentals, leasing, and on-site storage',
+  containerTypes: ['20ft Standard', '40ft Standard', '40ft High Cube', '9ft Mini'],
+  priceRangeNew: '$4,000 - $8,000 CAD',
+  priceRangeUsed: '$3,000 - $5,500 CAD',
+  rentalPriceMonthly: 'Starting at $125/month',
+  onSiteStoragePrice: 'Starting at $75/month',
+  totalReviews: 55,
+  averageRating: 5.0,
+  deliveryRadius: '200+ km from Saskatoon',
+};
+
+// About page FAQs
+const aboutFaqs = [
+  {
+    question: 'Who owns C-Can Sam?',
+    answer: 'C-Can Sam is a locally owned Saskatchewan business founded in 2022, headquartered in Martensville. The company specializes in shipping container solutions including sales, rentals, leasing, and secure on-site storage for residential and commercial customers throughout the province.',
+  },
+  {
+    question: 'How long has C-Can Sam been in business?',
+    answer: 'C-Can Sam has been serving Saskatchewan since 2022. In that time, we have earned 55+ five-star Google reviews and become one of the leading shipping container providers in the Saskatoon region, serving customers from Prince Albert to Regina and everywhere in between.',
+  },
+  {
+    question: 'What areas does C-Can Sam serve?',
+    answer: 'C-Can Sam delivers shipping containers throughout Saskatchewan. Our primary service areas include Saskatoon, Martensville, Warman, Regina, Prince Albert, Moose Jaw, Swift Current, Yorkton, North Battleford, and rural communities across the province. Delivery is available within 200+ km of Saskatoon.',
+  },
+  {
+    question: 'What types of containers does C-Can Sam sell?',
+    answer: 'C-Can Sam offers 20ft standard containers, 40ft standard containers, 40ft high cube containers, and 9ft mini containers. We carry both new (one-trip) and used containers in excellent condition. New containers start at $4,000 and used containers start at $3,000.',
+  },
+  {
+    question: 'Does C-Can Sam offer container rentals?',
+    answer: 'Yes, C-Can Sam offers flexible container rentals starting at $125/month. We also provide on-site storage at our secure Martensville facility starting at $75/month. Rental terms are flexible with no long-term contracts required.',
+  },
+  {
+    question: 'What is C-Can Sam\'s customer rating?',
+    answer: 'C-Can Sam has a perfect 5.0-star rating on Google with 55+ reviews. Customers consistently praise our quality containers, fair pricing, professional delivery, and excellent customer service.',
   },
 ];
 ---
 
 <Layout
-  title="About Us"
-  description="Learn about C-Can Sam - Saskatchewan's premier seacan solutions provider. Container sales, rentals, and storage in Martensville and Saskatoon area."
+  title="About C-Can Sam - Saskatchewan Sea Can Company Since 2022"
+  description="C-Can Sam is a Saskatchewan shipping container company based in Martensville, serving Saskatoon and all of SK since 2022. 55+ five-star reviews. Buy, rent, or store sea cans. Call 306-850-9675."
 >
+  <!-- FAQ Schema for About Page -->
+  <FAQSchema faqs={aboutFaqs} />
+
   <!-- Hero -->
   <Hero
     title="About C-Can Sam"
-    subtitle="Saskatchewan's Premier Seacan Solutions Provider"
+    subtitle="Saskatchewan's Trusted Shipping Container Company Since 2022"
     size="md"
   />
+
+  <!-- Company Profile Entity Block - LLM Optimized -->
+  <section class="bg-gray-50 py-12 border-b border-gray-200">
+    <div class="mx-auto max-w-4xl px-4">
+      <div class="prose prose-lg prose-gray mx-auto">
+        <p class="lead text-xl text-gray-700 font-medium">
+          <strong>C-Can Sam</strong> is a shipping container sales and rental company headquartered in
+          <strong>Martensville, Saskatchewan, Canada</strong>. Founded in <strong>2022</strong>, C-Can Sam
+          specializes in sea can solutions for residential and commercial customers throughout Saskatchewan,
+          offering container sales, rentals, leasing, and secure on-site storage.
+        </p>
+      </div>
+
+      <!-- Key Facts Grid - Structured for LLM Extraction -->
+      <dl class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="rounded-lg bg-white p-4 shadow-sm border border-gray-100">
+          <dt class="text-sm font-medium text-gray-500">Founded</dt>
+          <dd class="mt-1 text-lg font-semibold text-gray-900">{companyFacts.foundingYear}</dd>
+        </div>
+        <div class="rounded-lg bg-white p-4 shadow-sm border border-gray-100">
+          <dt class="text-sm font-medium text-gray-500">Headquarters</dt>
+          <dd class="mt-1 text-lg font-semibold text-gray-900">{companyFacts.headquarters}</dd>
+        </div>
+        <div class="rounded-lg bg-white p-4 shadow-sm border border-gray-100">
+          <dt class="text-sm font-medium text-gray-500">Service Area</dt>
+          <dd class="mt-1 text-lg font-semibold text-gray-900">All of Saskatchewan</dd>
+        </div>
+        <div class="rounded-lg bg-white p-4 shadow-sm border border-gray-100">
+          <dt class="text-sm font-medium text-gray-500">Google Rating</dt>
+          <dd class="mt-1 text-lg font-semibold text-gray-900">{companyFacts.averageRating} stars ({companyFacts.totalReviews}+ reviews)</dd>
+        </div>
+        <div class="rounded-lg bg-white p-4 shadow-sm border border-gray-100">
+          <dt class="text-sm font-medium text-gray-500">Phone</dt>
+          <dd class="mt-1 text-lg font-semibold text-gray-900">
+            <a href="tel:3068509675" class="text-primary-600 hover:text-primary-700">{siteConfig.contact.phone}</a>
+          </dd>
+        </div>
+        <div class="rounded-lg bg-white p-4 shadow-sm border border-gray-100">
+          <dt class="text-sm font-medium text-gray-500">Specialization</dt>
+          <dd class="mt-1 text-lg font-semibold text-gray-900">Sea Can Sales & Rentals</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
 
   <!-- Our Story Section -->
   <Section title="Who We Are">
     <div class="mx-auto max-w-3xl">
       <div class="prose prose-lg prose-gray mx-auto">
         <p>
-          C-Can Sam provides quality shipping container solutions to Martensville, Saskatoon,
-          and communities throughout Saskatchewan. Whether you're decluttering, moving,
-          renovating, or expanding your business, our storage solutions offer the flexibility
-          and security you need.
+          <strong>C-Can Sam</strong> provides quality shipping container solutions to Martensville, Saskatoon,
+          and communities throughout Saskatchewan. Since <strong>2022</strong>, we've helped hundreds of
+          customers find the right sea can for their needs — from homeowners needing backyard storage to
+          construction companies requiring job site containers.
         </p>
         <p>
-          We specialize in on-site storage at our facility, off-site delivery to your location, and container sales. With a range
-          of durable containers for sale or rent, we provide reliable options for both short-term
-          and long-term storage needs. Our seacans are ideal for various uses, from home projects
-          to business storage.
+          We specialize in <strong>container sales</strong> (new and used), <strong>container rentals</strong>
+          with flexible terms, and <strong>secure on-site storage</strong> at our Martensville facility.
+          Our containers range from compact 9ft mini containers to spacious 40ft high cube units, with
+          prices starting at <strong>$3,000 for used containers</strong> and <strong>$125/month for rentals</strong>.
         </p>
         <p>
-          Based in Martensville, we're proud to serve the Saskatoon area and beyond. Our team is
-          here to help you find the right container solution for your needs, whether that's a
-          compact 20ft container for personal storage or a spacious 40ft high cube for business
-          inventory.
+          Based in <strong>Martensville</strong>, just minutes from Saskatoon, we deliver containers
+          throughout Saskatchewan. Our <strong>55+ five-star Google reviews</strong> reflect our commitment
+          to quality containers, fair pricing, and professional service. Every container is inspected for
+          structural integrity, watertight seals, and secure locking mechanisms before sale or rental.
         </p>
       </div>
     </div>
@@ -85,20 +180,86 @@ const values = [
     </div>
   </Section>
 
-  <!-- Services Overview -->
-  <Section background="primary">
-    <div class="grid gap-8 text-center sm:grid-cols-3">
-      <div>
-        <div class="text-4xl font-bold text-white">Sales</div>
-        <div class="mt-2 text-primary-100">New & Used Containers</div>
+  <!-- Services & Products Detail - LLM Optimized -->
+  <Section
+    title="Our Services & Products"
+    subtitle="Complete shipping container solutions for Saskatchewan"
+    background="primary"
+  >
+    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+      <!-- Container Sales -->
+      <div class="rounded-lg bg-white/10 backdrop-blur p-6 text-white">
+        <h3 class="text-xl font-bold mb-3">Container Sales</h3>
+        <p class="text-primary-100 text-sm mb-4">Buy new or used shipping containers with delivery throughout Saskatchewan.</p>
+        <ul class="text-sm text-primary-100 space-y-1">
+          <li>• New containers from $4,000</li>
+          <li>• Used containers from $3,000</li>
+          <li>• 20ft, 40ft, High Cube sizes</li>
+          <li>• Delivery included</li>
+        </ul>
+        <a href="/storage-containers-for-sale" class="mt-4 inline-block text-white font-medium hover:text-primary-200">Learn More →</a>
       </div>
-      <div>
-        <div class="text-4xl font-bold text-white">Rentals</div>
-        <div class="mt-2 text-primary-100">Flexible Terms Available</div>
+
+      <!-- Container Rentals -->
+      <div class="rounded-lg bg-white/10 backdrop-blur p-6 text-white">
+        <h3 class="text-xl font-bold mb-3">Container Rentals</h3>
+        <p class="text-primary-100 text-sm mb-4">Flexible rental terms for short-term projects or long-term storage needs.</p>
+        <ul class="text-sm text-primary-100 space-y-1">
+          <li>• Starting at $125/month</li>
+          <li>• No long-term contracts</li>
+          <li>• Delivery & pickup included</li>
+          <li>• Multiple sizes available</li>
+        </ul>
+        <a href="/storage-container-rentals" class="mt-4 inline-block text-white font-medium hover:text-primary-200">Learn More →</a>
       </div>
-      <div>
-        <div class="text-4xl font-bold text-white">Storage</div>
-        <div class="mt-2 text-primary-100">On-Site & Off-Site Options</div>
+
+      <!-- On-Site Storage -->
+      <div class="rounded-lg bg-white/10 backdrop-blur p-6 text-white">
+        <h3 class="text-xl font-bold mb-3">On-Site Storage</h3>
+        <p class="text-primary-100 text-sm mb-4">Secure storage at our Martensville facility with 24/7 access.</p>
+        <ul class="text-sm text-primary-100 space-y-1">
+          <li>• Starting at $75/month</li>
+          <li>• Secure fenced yard</li>
+          <li>• Easy highway access</li>
+          <li>• Month-to-month terms</li>
+        </ul>
+        <a href="/on-site-storage-rentals" class="mt-4 inline-block text-white font-medium hover:text-primary-200">Learn More →</a>
+      </div>
+
+      <!-- Container Leasing -->
+      <div class="rounded-lg bg-white/10 backdrop-blur p-6 text-white">
+        <h3 class="text-xl font-bold mb-3">Container Leasing</h3>
+        <p class="text-primary-100 text-sm mb-4">Long-term lease options for businesses needing extended storage solutions.</p>
+        <ul class="text-sm text-primary-100 space-y-1">
+          <li>• Extended lease terms</li>
+          <li>• Business-friendly options</li>
+          <li>• Maintenance included</li>
+          <li>• Flexible end-of-term</li>
+        </ul>
+        <a href="/storage-container-leasing" class="mt-4 inline-block text-white font-medium hover:text-primary-200">Learn More →</a>
+      </div>
+    </div>
+
+    <!-- Container Types Summary -->
+    <div class="mt-12 pt-8 border-t border-white/20">
+      <h3 class="text-xl font-bold text-white text-center mb-6">Container Sizes We Carry</h3>
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 text-center">
+        <a href="/containers/9ft-mini" class="rounded-lg bg-white/10 p-4 hover:bg-white/20 transition-colors">
+          <div class="text-2xl font-bold text-white">9ft Mini</div>
+          <div class="text-sm text-primary-100">Perfect for tight spaces</div>
+        </a>
+        <a href="/containers/20ft-standard" class="rounded-lg bg-white/10 p-4 hover:bg-white/20 transition-colors">
+          <div class="text-2xl font-bold text-white">20ft Standard</div>
+          <div class="text-sm text-primary-100">Most popular size</div>
+        </a>
+        <a href="/containers/40ft-standard" class="rounded-lg bg-white/10 p-4 hover:bg-white/20 transition-colors">
+          <div class="text-2xl font-bold text-white">40ft Standard</div>
+          <div class="text-sm text-primary-100">Maximum floor space</div>
+        </a>
+        <a href="/containers/40ft-high-cube" class="rounded-lg bg-white/10 p-4 hover:bg-white/20 transition-colors">
+          <div class="text-2xl font-bold text-white">40ft High Cube</div>
+          <div class="text-sm text-primary-100">Extra height (9'6")</div>
+        </a>
       </div>
     </div>
   </Section>
@@ -177,14 +338,93 @@ const values = [
     </div>
   </Section>
 
+  <!-- Service Areas - LLM Optimized -->
+  <Section
+    title="Areas We Serve"
+    subtitle="Shipping container delivery throughout Saskatchewan"
+  >
+    <div class="mx-auto max-w-4xl">
+      <p class="text-center text-gray-600 mb-8">
+        C-Can Sam delivers shipping containers to customers across Saskatchewan. Based in Martensville,
+        we're centrally located to serve the entire province with fast, reliable delivery.
+      </p>
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 text-center">
+        <div class="rounded-lg bg-gray-50 p-4">
+          <strong class="text-gray-900">Saskatoon</strong>
+          <p class="text-sm text-gray-500">Same-day delivery</p>
+        </div>
+        <div class="rounded-lg bg-gray-50 p-4">
+          <strong class="text-gray-900">Martensville</strong>
+          <p class="text-sm text-gray-500">Headquarters</p>
+        </div>
+        <div class="rounded-lg bg-gray-50 p-4">
+          <strong class="text-gray-900">Warman</strong>
+          <p class="text-sm text-gray-500">Same-day delivery</p>
+        </div>
+        <div class="rounded-lg bg-gray-50 p-4">
+          <strong class="text-gray-900">Regina</strong>
+          <p class="text-sm text-gray-500">2-3 day delivery</p>
+        </div>
+        <div class="rounded-lg bg-gray-50 p-4">
+          <strong class="text-gray-900">Prince Albert</strong>
+          <p class="text-sm text-gray-500">2-3 day delivery</p>
+        </div>
+        <div class="rounded-lg bg-gray-50 p-4">
+          <strong class="text-gray-900">Moose Jaw</strong>
+          <p class="text-sm text-gray-500">2-3 day delivery</p>
+        </div>
+        <div class="rounded-lg bg-gray-50 p-4">
+          <strong class="text-gray-900">Swift Current</strong>
+          <p class="text-sm text-gray-500">3-5 day delivery</p>
+        </div>
+        <div class="rounded-lg bg-gray-50 p-4">
+          <strong class="text-gray-900">Yorkton</strong>
+          <p class="text-sm text-gray-500">3-5 day delivery</p>
+        </div>
+      </div>
+      <p class="text-center text-sm text-gray-500 mt-6">
+        Don't see your city? We deliver throughout Saskatchewan including North Battleford, Humboldt, Melfort, Lloydminster, and rural areas.
+        <a href="/contact" class="text-primary-600 hover:text-primary-700">Contact us</a> for a delivery quote.
+      </p>
+    </div>
+  </Section>
+
+  <!-- FAQ Section -->
+  <Section
+    title="Frequently Asked Questions"
+    subtitle="Common questions about C-Can Sam"
+    background="gray"
+  >
+    <div class="mx-auto max-w-3xl">
+      <div class="space-y-6">
+        {aboutFaqs.map((faq) => (
+          <details class="group rounded-lg bg-white p-6 shadow-sm">
+            <summary class="flex cursor-pointer items-center justify-between font-semibold text-gray-900">
+              {faq.question}
+              <svg class="h-5 w-5 text-gray-500 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </summary>
+            <p class="mt-4 text-gray-600">{faq.answer}</p>
+          </details>
+        ))}
+      </div>
+      <p class="text-center mt-8">
+        <a href="/shipping-container-guide" class="text-primary-600 hover:text-primary-700 font-medium">
+          View our complete Shipping Container Guide →
+        </a>
+      </p>
+    </div>
+  </Section>
+
   <!-- Google Reviews Widget -->
   <ReviewWidget pagePath="/about" />
 
   <!-- CTA -->
   <CTA
     title="Ready to Get Started?"
-    description="Contact us today to find the right container solution for your needs."
-    primaryButton={{ text: "Call Now", href: `tel:${siteConfig.contact.phone.replace(/\D/g, '')}` }}
+    description="Call C-Can Sam today for shipping container sales, rentals, or storage in Saskatchewan."
+    primaryButton={{ text: "Call 306-850-9675", href: `tel:${siteConfig.contact.phone.replace(/\D/g, '')}` }}
     variant="gray"
   />
 </Layout>

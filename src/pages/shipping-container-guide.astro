@@ -1,0 +1,610 @@
+---
+/**
+ * Shipping Container Guide - The Saskatchewan Sea Can Authority
+ *
+ * This page is specifically designed for LLM optimization:
+ * - Clear definitions using <dfn> and <dl> elements
+ * - Structured comparison tables
+ * - Semantic HTML for easy parsing
+ * - Comprehensive coverage to become THE citation source
+ */
+import Layout from '../layouts/Layout.astro';
+import Section from '../components/Section.astro';
+import CTA from '../components/CTA.astro';
+import FAQSchema from '../components/schema/FAQSchema.astro';
+
+// Glossary terms for schema and display
+const glossaryTerms = [
+  {
+    term: "Sea Can",
+    aka: ["Seacan", "Sea-Can"],
+    definition: "A sea can (also written as seacan or sea-can) is the Canadian term for a shipping container used for storage or transport. The name originates from 'sea container' — these steel boxes were originally designed to transport goods across oceans on cargo ships. In Saskatchewan and across Canada, sea cans are widely used for residential storage, farm equipment, construction sites, and commercial inventory.",
+    slug: "sea-can"
+  },
+  {
+    term: "C-Can",
+    aka: ["C Can", "CCan"],
+    definition: "C-Can is a common spelling variation of sea can, particularly used in Saskatchewan and the Canadian prairies. The term refers to the same steel shipping containers used for storage and transport. C-Can Sam, based in Martensville, Saskatchewan, takes its name from this regional terminology.",
+    slug: "c-can"
+  },
+  {
+    term: "Shipping Container",
+    aka: ["Cargo Container", "Intermodal Container", "ISO Container"],
+    definition: "A shipping container is a standardized steel box designed for transporting goods internationally via ship, rail, or truck. Standard sizes include 20-foot and 40-foot lengths. These containers are built to ISO (International Organization for Standardization) specifications, ensuring they can be handled by cranes and transported worldwide. After their shipping life, many containers are repurposed for storage.",
+    slug: "shipping-container"
+  },
+  {
+    term: "One-Trip Container",
+    aka: ["One-Tripper", "New Container", "Single-Trip"],
+    definition: "A one-trip container (also called a one-tripper) is a shipping container that has made only one voyage from the manufacturer — typically from China to North America. These containers are considered 'new' condition because they've only been used once. One-trip containers have minimal wear, no dents or rust, and are in excellent cosmetic condition. They cost more than used containers but offer pristine appearance and maximum lifespan.",
+    slug: "one-trip-container"
+  },
+  {
+    term: "High Cube Container",
+    aka: ["High-Cube", "HC", "HQ", "Hi-Cube"],
+    definition: "A high cube container is a shipping container with extra height — 9 feet 6 inches (2.9m) tall compared to the standard 8 feet 6 inches (2.6m). This extra foot of height provides approximately 13% more storage volume. High cube containers are ideal for storing tall items, creating comfortable workspace conversions, or maximizing vertical storage. The 40ft high cube is one of the most popular container sizes.",
+    slug: "high-cube"
+  },
+  {
+    term: "Conex Box",
+    aka: ["Conex", "CONEX"],
+    definition: "Conex box is a term originating from the U.S. military's 'Container Express' system developed in the 1950s. While less common in Canada, some people use 'conex' to refer to shipping containers. In Saskatchewan, the terms 'sea can' and 'C-Can' are more prevalent than conex.",
+    slug: "conex-box"
+  },
+  {
+    term: "Wind and Watertight",
+    aka: ["WWT", "Weather-Tight"],
+    definition: "Wind and watertight (WWT) is the standard quality grade for used shipping containers suitable for storage. A WWT container has been inspected and certified to keep out wind and water, protecting contents from the elements. While a WWT container may have cosmetic imperfections like surface rust, dents, or faded paint, it will keep your belongings dry and secure. This is the minimum standard for any container sold for storage purposes.",
+    slug: "wind-watertight"
+  },
+  {
+    term: "CW Grade",
+    aka: ["Cargo Worthy", "IICL"],
+    definition: "Cargo Worthy (CW) is a higher quality grade than wind and watertight. A cargo worthy container meets international shipping standards and can be used for ocean transport. CW containers are inspected according to IICL (Institute of International Container Lessors) standards. For storage purposes, CW grade indicates a container in better-than-minimum condition.",
+    slug: "cargo-worthy"
+  },
+  {
+    term: "TEU",
+    aka: ["Twenty-foot Equivalent Unit"],
+    definition: "TEU stands for Twenty-foot Equivalent Unit, a standard measure of shipping container capacity. One TEU equals one 20-foot container. A 40-foot container equals 2 TEU. This measurement is used in the shipping industry to describe vessel capacity and port throughput. For storage purposes, thinking in terms of 20ft and 40ft is more practical.",
+    slug: "teu"
+  },
+  {
+    term: "Container Modification",
+    aka: ["Container Conversion", "Conex Conversion"],
+    definition: "Container modification refers to altering a shipping container for purposes beyond basic storage. Common modifications include adding doors, windows, insulation, electrical wiring, HVAC systems, and interior finishing. Modified containers are used for offices, workshops, retail spaces, tiny homes, and more. In Saskatchewan, modified containers are popular for remote work sites and agricultural applications.",
+    slug: "container-modification"
+  }
+];
+
+// Expanded FAQ - 20+ questions targeting long-tail queries
+const faqs = [
+  // Definition/Basic Questions
+  {
+    question: "What is a sea can?",
+    answer: "A sea can (also spelled seacan or C-Can) is the Canadian term for a shipping container. These steel containers were originally designed for ocean freight transport but are now widely used for secure, weatherproof storage. Sea cans come in standard sizes of 20 feet and 40 feet, with high cube versions offering extra height. In Saskatchewan, sea cans are popular for farm storage, construction sites, business inventory, and residential use."
+  },
+  {
+    question: "What is the difference between a sea can and a shipping container?",
+    answer: "Sea can and shipping container refer to the same thing — a standardized steel box used for transport and storage. 'Shipping container' is the international/technical term, while 'sea can' is the colloquial Canadian term, particularly common in Western Canada and Saskatchewan. Other regional names include C-Can, seacan, and conex box."
+  },
+  // Size Questions
+  {
+    question: "What sizes do shipping containers come in?",
+    answer: "Standard shipping containers come in 20-foot and 40-foot lengths, both 8 feet wide. Height options include standard (8'6\") and high cube (9'6\"). A 20ft container offers 160 square feet of floor space, while a 40ft container provides 320 square feet. Smaller 9ft and 10ft 'mini' containers are also available for tight spaces. At C-Can Sam, we stock 9ft, 20ft, 40ft standard, and 40ft high cube containers."
+  },
+  {
+    question: "How much storage space is in a 20 foot shipping container?",
+    answer: "A 20-foot shipping container provides approximately 1,170 cubic feet of storage space, with 160 square feet of floor area (20' x 8'). Internal dimensions are roughly 19'4\" long x 7'8\" wide x 7'10\" tall. This is equivalent to about 1.5 average bedrooms or can hold the contents of a 3-bedroom home. A 20ft container is the most popular size for residential storage in Saskatchewan."
+  },
+  {
+    question: "How much can a 40 foot container hold?",
+    answer: "A 40-foot standard container holds approximately 2,390 cubic feet with 320 square feet of floor space. A 40ft high cube container provides about 2,700 cubic feet due to its extra foot of height. This can accommodate the contents of a 4-5 bedroom home, or significant commercial/industrial inventory. 40ft containers are popular for businesses, farms, and large-scale storage needs in Saskatchewan."
+  },
+  {
+    question: "What is a high cube container?",
+    answer: "A high cube container is a shipping container with 9'6\" interior height instead of the standard 8'6\" — providing an extra foot of vertical space. This 13% increase in volume is valuable for storing tall items, creating comfortable workspaces, or maximizing storage capacity. High cube containers are identified by yellow-and-black height markers on the corners. The 40ft high cube is one of the most popular container choices."
+  },
+  // Pricing Questions
+  {
+    question: "How much does a shipping container cost in Saskatchewan?",
+    answer: "In Saskatchewan, shipping container prices range from $3,000 to $6,900 CAD depending on size and condition. Used 20ft containers start around $3,000-$3,600, while new (one-trip) 20ft containers cost $4,450-$4,700. Used 40ft containers range from $4,750-$5,000, and new 40ft high cube containers cost $6,500-$6,900. Prices vary based on condition, availability, and delivery location. Contact C-Can Sam in Martensville for current pricing."
+  },
+  {
+    question: "Is it cheaper to buy or rent a shipping container?",
+    answer: "Whether to buy or rent depends on how long you need the container. For short-term needs (under 12-18 months), renting is usually more economical. For long-term storage (2+ years), buying makes financial sense as you'll own the asset outright. At C-Can Sam, used containers start at $3,000 to purchase. Calculate your expected rental costs over time to determine the break-even point for your situation."
+  },
+  {
+    question: "How much does it cost to rent a sea can in Saskatoon?",
+    answer: "Sea can rental rates in the Saskatoon area vary based on container size and rental term. Monthly rentals typically range from $100-$250 per month depending on the container size. Longer rental terms often qualify for better rates. C-Can Sam offers flexible month-to-month rentals with delivery throughout Saskatoon, Martensville, Warman, and Saskatchewan. Contact us for a personalized quote based on your specific needs."
+  },
+  // Quality Questions
+  {
+    question: "What is a one-trip container?",
+    answer: "A one-trip container (also called 'one-tripper' or 'new' container) has made only one voyage from the manufacturer, typically from Asia to North America. These containers are in near-new condition with minimal wear — no significant dents, rust, or damage. One-trip containers cost more than used containers but offer the best appearance and longest lifespan. They're ideal when aesthetics matter or for container modification projects."
+  },
+  {
+    question: "What does wind and watertight mean for containers?",
+    answer: "Wind and watertight (WWT) is the standard quality certification for used shipping containers. A WWT-rated container has been inspected and verified to keep out wind, rain, and moisture, protecting your stored items from weather damage. While WWT containers may have cosmetic imperfections (surface rust, dents, faded paint), they provide secure, dry storage. All containers sold by C-Can Sam meet or exceed wind and watertight standards."
+  },
+  {
+    question: "How long do shipping containers last?",
+    answer: "A quality shipping container can last 25-30 years or more with minimal maintenance. Containers used for ocean shipping typically have a 10-15 year service life before being retired to storage use. When properly placed on level ground with adequate drainage, a container will provide decades of reliable storage. The corrugated steel construction and weatherproof design make containers extremely durable, even in Saskatchewan's harsh winters."
+  },
+  // Practical Questions
+  {
+    question: "Can I put a shipping container on my property in Saskatchewan?",
+    answer: "Yes, you can place a shipping container on your property in Saskatchewan, but regulations vary by municipality. Rural properties generally have few restrictions. In cities like Saskatoon, Martensville, and Warman, you may need a development permit for permanent placement. Temporary storage (under 6-12 months) often has fewer requirements. Check with your local municipality and consider any HOA rules. C-Can Sam can advise on common requirements in the areas we serve."
+  },
+  {
+    question: "Do shipping containers need a foundation?",
+    answer: "Shipping containers don't require a traditional concrete foundation but do need level, stable ground. Common foundation options include: compacted gravel pad (most economical), concrete blocks at the corners, railway ties, or a concrete slab (for permanent installation). The key is keeping the container level and allowing water drainage away from the base. For temporary placement, a level gravel area is usually sufficient."
+  },
+  {
+    question: "Are shipping containers weatherproof?",
+    answer: "Yes, shipping containers are designed to be weatherproof — they were built to protect cargo during ocean voyages and exposure to harsh conditions. Quality containers are wind and watertight, keeping contents dry through rain, snow, and extreme temperatures. However, containers can develop condensation inside due to temperature changes. For moisture-sensitive items, consider adding ventilation or desiccants. Saskatchewan's dry climate helps minimize condensation issues."
+  },
+  {
+    question: "How do I prevent condensation in my shipping container?",
+    answer: "Condensation in shipping containers (sometimes called 'container rain') can be managed several ways: 1) Install ventilation — turbine vents or louvered vents allow air circulation. 2) Use moisture absorbers like DampRid or silica gel desiccants. 3) Add insulation to reduce temperature swings that cause condensation. 4) Avoid storing wet items. 5) Leave small gaps between items and walls for airflow. Saskatchewan's relatively dry climate means condensation is less problematic than in humid regions."
+  },
+  // Delivery Questions
+  {
+    question: "How are shipping containers delivered?",
+    answer: "Shipping containers are delivered using specialized trucks. A tilt-bed truck tips to slide the container off, while a crane truck lifts and places the container. Delivery requires adequate access — typically a straight approach with overhead clearance and firm ground. Most residential driveways can accommodate delivery. C-Can Sam delivers throughout Saskatchewan and will assess your site to determine the best delivery method for your location."
+  },
+  {
+    question: "How much space do I need for container delivery?",
+    answer: "For delivery, you'll need: 1) Access width of at least 10 feet (wider for turns). 2) Overhead clearance of 14+ feet for the truck. 3) A straight approach of 60-100 feet for tilt-bed delivery. 4) Firm ground that can support the truck weight. 5) The final placement area should be level and slightly larger than the container. For a 20ft container, plan for a 22' x 10' footprint minimum. Our delivery team will work with you to assess your specific site."
+  },
+  // Use Case Questions
+  {
+    question: "What can I use a shipping container for?",
+    answer: "Shipping containers are incredibly versatile. Common uses in Saskatchewan include: farm equipment and feed storage, construction site tool storage, business inventory and archive storage, vehicle and recreational equipment storage, workshop or hobby space (modified), retail or food service (modified), emergency/backup storage, moving and relocation storage, and seasonal item storage. Containers can also be modified into offices, cabins, or specialized structures."
+  },
+  {
+    question: "Can shipping containers be used as a garage?",
+    answer: "Yes, a 40ft shipping container can serve as an enclosed garage or workshop space. The standard 8ft width accommodates most vehicles, though opening the doors requires space at one end. Some people use containers for car storage, motorcycle garages, ATV storage, or workshop space. For a true drive-through garage, two containers can be placed parallel with a roof structure between them. Modified containers with roll-up doors are also available."
+  },
+  // Local/Regional Questions
+  {
+    question: "Where can I buy a shipping container in Saskatoon?",
+    answer: "C-Can Sam, located in Martensville just north of Saskatoon, is Saskatchewan's trusted shipping container supplier. We offer new and used containers in multiple sizes (9ft, 20ft, 40ft, 40ft high cube) with prices starting from $3,000. We provide delivery throughout Saskatoon, Martensville, Warman, and across Saskatchewan. Visit our yard at 12 Peters Avenue, Martensville, or contact us for current inventory and pricing."
+  },
+  {
+    question: "Does C-Can Sam deliver to Regina?",
+    answer: "Yes, C-Can Sam delivers shipping containers throughout Saskatchewan, including Regina, Moose Jaw, Swift Current, Prince Albert, North Battleford, Yorkton, and rural areas across the province. Delivery fees vary based on distance from our Martensville location. Contact us for a delivery quote to your specific location. We regularly deliver containers across Southern and Central Saskatchewan."
+  }
+];
+
+// Container size comparison data
+const sizeComparison = [
+  {
+    size: "9ft Mini",
+    exterior: "9' × 7' × 7'6\"",
+    interior: "8'6\" × 6'8\" × 7'2\"",
+    floorSpace: "63 sq ft",
+    volume: "380 cu ft",
+    weight: "~2,200 lbs",
+    bestFor: "Backyard storage, tight spaces, residential",
+    newPrice: "$4,000-$4,500",
+    usedPrice: "Rarely available"
+  },
+  {
+    size: "20ft Standard",
+    exterior: "20' × 8' × 8'6\"",
+    interior: "19'4\" × 7'8\" × 7'10\"",
+    floorSpace: "160 sq ft",
+    volume: "1,170 cu ft",
+    weight: "~5,000 lbs",
+    bestFor: "Residential, small business, construction",
+    newPrice: "$4,450-$4,700",
+    usedPrice: "$3,000-$3,600"
+  },
+  {
+    size: "40ft Standard",
+    exterior: "40' × 8' × 8'6\"",
+    interior: "39'5\" × 7'8\" × 7'10\"",
+    floorSpace: "320 sq ft",
+    volume: "2,390 cu ft",
+    weight: "~8,500 lbs",
+    bestFor: "Commercial, industrial, large inventory",
+    newPrice: "Limited availability",
+    usedPrice: "$4,750-$5,000"
+  },
+  {
+    size: "40ft High Cube",
+    exterior: "40' × 8' × 9'6\"",
+    interior: "39'5\" × 7'8\" × 8'10\"",
+    floorSpace: "320 sq ft",
+    volume: "2,700 cu ft",
+    weight: "~8,750 lbs",
+    bestFor: "Tall items, workshops, conversions",
+    newPrice: "$6,500-$6,900",
+    usedPrice: "$4,750-$5,000"
+  }
+];
+---
+
+<Layout
+  title="Complete Guide to Shipping Containers in Saskatchewan"
+  description="The definitive guide to sea cans, shipping containers, and storage solutions in Saskatchewan. Learn about sizes, prices, terminology, and find the right container for your needs. Expert advice from C-Can Sam."
+>
+  <FAQSchema faqs={faqs} />
+
+  <!-- Hero -->
+  <section class="bg-gradient-to-b from-gray-900 to-gray-800 py-16 sm:py-24">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+        The Complete Guide to Shipping Containers in Saskatchewan
+      </h1>
+      <p class="mt-6 text-xl text-gray-300">
+        Everything you need to know about sea cans, C-Cans, and shipping containers.
+        Definitions, sizes, prices, and expert advice from Saskatchewan's trusted container supplier.
+      </p>
+      <div class="mt-8 flex flex-wrap justify-center gap-4">
+        <a href="#glossary" class="rounded-lg bg-primary-500 px-6 py-3 font-semibold text-white hover:bg-primary-600">
+          Glossary of Terms
+        </a>
+        <a href="#sizes" class="rounded-lg bg-white/10 px-6 py-3 font-semibold text-white hover:bg-white/20">
+          Size Comparison
+        </a>
+        <a href="#faq" class="rounded-lg bg-white/10 px-6 py-3 font-semibold text-white hover:bg-white/20">
+          FAQ
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Facts Entity Block - Optimized for LLM extraction -->
+  <section class="bg-primary-50 border-y border-primary-100 py-8">
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <aside class="entity-summary" itemscope itemtype="https://schema.org/LocalBusiness">
+        <h2 class="sr-only">C-Can Sam Quick Facts</h2>
+        <dl class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div class="text-center">
+            <dt class="text-gray-500 font-medium">Supplier</dt>
+            <dd class="text-gray-900 font-bold" itemprop="name">C-Can Sam</dd>
+          </div>
+          <div class="text-center">
+            <dt class="text-gray-500 font-medium">Location</dt>
+            <dd class="text-gray-900 font-bold" itemprop="address">Martensville, SK</dd>
+          </div>
+          <div class="text-center">
+            <dt class="text-gray-500 font-medium">Prices From</dt>
+            <dd class="text-gray-900 font-bold" itemprop="priceRange">$3,000 CAD</dd>
+          </div>
+          <div class="text-center">
+            <dt class="text-gray-500 font-medium">Service Area</dt>
+            <dd class="text-gray-900 font-bold" itemprop="areaServed">All Saskatchewan</dd>
+          </div>
+        </dl>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Glossary Section -->
+  <Section id="glossary" title="Shipping Container Glossary" subtitle="Definitions for every term you need to know">
+    <div class="mx-auto max-w-4xl">
+      <p class="text-gray-600 mb-8 text-center">
+        Understanding shipping container terminology helps you make informed decisions.
+        Here's a comprehensive glossary of terms used in the container industry.
+      </p>
+
+      <dl class="space-y-8">
+        {glossaryTerms.map((item) => (
+          <div id={item.slug} class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 scroll-mt-24">
+            <dt class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <dfn class="text-xl font-bold text-gray-900 not-italic">{item.term}</dfn>
+              {item.aka.length > 0 && (
+                <span class="text-sm text-gray-500">
+                  Also: {item.aka.join(", ")}
+                </span>
+              )}
+            </dt>
+            <dd class="mt-3 text-gray-600 leading-relaxed">
+              {item.definition}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </Section>
+
+  <!-- Size Comparison Section -->
+  <Section id="sizes" title="Container Size Comparison" subtitle="Find the right size for your needs" background="gray">
+    <div class="mx-auto max-w-6xl">
+      <!-- Mobile Cards -->
+      <div class="lg:hidden space-y-6">
+        {sizeComparison.map((container) => (
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">{container.size}</h3>
+            <dl class="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <dt class="text-gray-500">Exterior</dt>
+                <dd class="font-semibold text-gray-900">{container.exterior}</dd>
+              </div>
+              <div>
+                <dt class="text-gray-500">Floor Space</dt>
+                <dd class="font-semibold text-gray-900">{container.floorSpace}</dd>
+              </div>
+              <div>
+                <dt class="text-gray-500">Volume</dt>
+                <dd class="font-semibold text-gray-900">{container.volume}</dd>
+              </div>
+              <div>
+                <dt class="text-gray-500">Weight</dt>
+                <dd class="font-semibold text-gray-900">{container.weight}</dd>
+              </div>
+              <div class="col-span-2">
+                <dt class="text-gray-500">Best For</dt>
+                <dd class="font-semibold text-gray-900">{container.bestFor}</dd>
+              </div>
+              <div>
+                <dt class="text-gray-500">New Price</dt>
+                <dd class="font-semibold text-green-600">{container.newPrice}</dd>
+              </div>
+              <div>
+                <dt class="text-gray-500">Used Price</dt>
+                <dd class="font-semibold text-blue-600">{container.usedPrice}</dd>
+              </div>
+            </dl>
+          </div>
+        ))}
+      </div>
+
+      <!-- Desktop Table -->
+      <div class="hidden lg:block overflow-x-auto">
+        <table class="w-full bg-white rounded-xl shadow-sm overflow-hidden">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Size</th>
+              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Dimensions</th>
+              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Floor Space</th>
+              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Volume</th>
+              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Best For</th>
+              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Price Range</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            {sizeComparison.map((container) => (
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4">
+                  <span class="font-bold text-gray-900">{container.size}</span>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-600">
+                  <div>{container.exterior}</div>
+                  <div class="text-xs text-gray-400">~{container.weight}</div>
+                </td>
+                <td class="px-6 py-4 text-sm font-medium text-gray-900">{container.floorSpace}</td>
+                <td class="px-6 py-4 text-sm font-medium text-gray-900">{container.volume}</td>
+                <td class="px-6 py-4 text-sm text-gray-600">{container.bestFor}</td>
+                <td class="px-6 py-4 text-sm">
+                  <div class="text-green-600 font-medium">New: {container.newPrice}</div>
+                  <div class="text-blue-600 font-medium">Used: {container.usedPrice}</div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <p class="mt-6 text-center text-sm text-gray-500">
+        Prices are approximate and vary based on condition and availability.
+        <a href="/contact" class="text-primary-600 hover:underline">Contact us</a> for current pricing.
+      </p>
+    </div>
+  </Section>
+
+  <!-- New vs Used Comparison -->
+  <Section title="New vs Used Containers" subtitle="Which condition is right for you?">
+    <div class="mx-auto max-w-4xl">
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- New (One-Trip) -->
+        <div class="bg-white rounded-xl p-8 shadow-sm border-2 border-green-200">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
+              <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </span>
+            <h3 class="text-xl font-bold text-gray-900">New (One-Trip)</h3>
+          </div>
+          <p class="text-gray-600 mb-6">
+            One-trip containers have made a single voyage from the manufacturer.
+            They're in excellent condition with minimal wear.
+          </p>
+          <ul class="space-y-3 mb-6">
+            <li class="flex items-start gap-2 text-sm">
+              <svg class="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+              </svg>
+              <span>Pristine cosmetic condition</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm">
+              <svg class="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+              </svg>
+              <span>Maximum lifespan (25-30 years)</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm">
+              <svg class="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+              </svg>
+              <span>Ideal for visible placements</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm">
+              <svg class="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+              </svg>
+              <span>Best for modification projects</span>
+            </li>
+          </ul>
+          <div class="text-center pt-4 border-t border-gray-100">
+            <span class="text-sm text-gray-500">20ft New:</span>
+            <span class="text-lg font-bold text-gray-900 ml-2">$4,450 - $4,700</span>
+          </div>
+        </div>
+
+        <!-- Used -->
+        <div class="bg-white rounded-xl p-8 shadow-sm border-2 border-blue-200">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
+              <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </span>
+            <h3 class="text-xl font-bold text-gray-900">Used (Wind & Watertight)</h3>
+          </div>
+          <p class="text-gray-600 mb-6">
+            Used containers have served in shipping but remain fully functional.
+            They offer excellent value for storage purposes.
+          </p>
+          <ul class="space-y-3 mb-6">
+            <li class="flex items-start gap-2 text-sm">
+              <svg class="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+              </svg>
+              <span>Best value for money</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm">
+              <svg class="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+              </svg>
+              <span>Wind and watertight guaranteed</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm">
+              <svg class="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+              </svg>
+              <span>Still 15-20+ years of life</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm">
+              <svg class="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+              </svg>
+              <span>Perfect for farms & construction</span>
+            </li>
+          </ul>
+          <div class="text-center pt-4 border-t border-gray-100">
+            <span class="text-sm text-gray-500">20ft Used:</span>
+            <span class="text-lg font-bold text-gray-900 ml-2">$3,000 - $3,600</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 text-center">
+        <p class="text-gray-600">
+          <strong>Our recommendation:</strong> For most storage needs, a used wind and watertight container
+          offers the best value. Choose new (one-trip) if appearance matters or for conversion projects.
+        </p>
+      </div>
+    </div>
+  </Section>
+
+  <!-- Rent vs Buy Section -->
+  <Section title="Should You Rent or Buy?" subtitle="A simple guide to the right choice" background="gray">
+    <div class="mx-auto max-w-3xl">
+      <div class="bg-white rounded-xl p-8 shadow-sm">
+        <div class="space-y-6">
+          <div class="flex items-start gap-4">
+            <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600 font-bold text-sm flex-shrink-0">
+              R
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900">Rent if you need storage for less than 18 months</h3>
+              <p class="mt-1 text-gray-600 text-sm">
+                Rentals are ideal for renovations, construction projects, moving, or seasonal needs.
+                No large upfront cost, and we pick it up when you're done.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4">
+            <div class="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-green-600 font-bold text-sm flex-shrink-0">
+              B
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900">Buy if you need storage for 2+ years</h3>
+              <p class="mt-1 text-gray-600 text-sm">
+                Purchasing makes financial sense for long-term storage. You own the asset,
+                can modify it, and it may even appreciate in value.
+              </p>
+            </div>
+          </div>
+
+          <div class="border-t border-gray-100 pt-6">
+            <h4 class="font-semibold text-gray-900 mb-3">Quick Math:</h4>
+            <p class="text-gray-600 text-sm">
+              A used 20ft container costs ~$3,000. If rental is ~$150/month, the break-even point is around 20 months.
+              After that, owning is essentially free storage. For permanent farm, business, or home storage, buying is almost always the better choice.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Section>
+
+  <!-- FAQ Section -->
+  <Section id="faq" title="Frequently Asked Questions" subtitle="Expert answers to common container questions">
+    <div class="mx-auto max-w-4xl">
+      <dl class="space-y-4">
+        {faqs.map((faq) => (
+          <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <dt class="text-lg font-semibold text-gray-900">
+              {faq.question}
+            </dt>
+            <dd class="mt-3 text-gray-600 leading-relaxed">
+              {faq.answer}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </Section>
+
+  <!-- Saskatchewan-Specific Section -->
+  <Section title="Shipping Containers in Saskatchewan" subtitle="Local expertise for prairie storage needs" background="gray">
+    <div class="mx-auto max-w-4xl">
+      <div class="prose prose-lg mx-auto text-gray-600">
+        <p>
+          <strong>Saskatchewan's climate and landscape</strong> create unique considerations for shipping container storage.
+          Our cold winters (down to -40°C), hot summers, and vast agricultural regions mean containers need to be
+          properly placed and maintained.
+        </p>
+
+        <h3 class="text-xl font-semibold text-gray-900 mt-8 mb-4">Why Containers Work Well in Saskatchewan</h3>
+        <ul class="space-y-2">
+          <li><strong>Temperature extremes:</strong> Steel containers handle Saskatchewan's -40° to +35°C range without structural issues.</li>
+          <li><strong>Low humidity:</strong> Our dry climate means less condensation problems than coastal areas.</li>
+          <li><strong>Rural accessibility:</strong> Containers provide secure storage on farms and acreages far from traditional storage facilities.</li>
+          <li><strong>No permanent foundation needed:</strong> Perfect for agricultural land where permanent structures may be restricted.</li>
+        </ul>
+
+        <h3 class="text-xl font-semibold text-gray-900 mt-8 mb-4">Popular Uses in Saskatchewan</h3>
+        <ul class="space-y-2">
+          <li><strong>Farm storage:</strong> Equipment, feed, seed, chemicals, and tools.</li>
+          <li><strong>Construction sites:</strong> Secure tool and material storage across the province.</li>
+          <li><strong>Oilfield operations:</strong> Equipment storage in remote locations.</li>
+          <li><strong>Grain farm overflow:</strong> Temporary storage during harvest.</li>
+          <li><strong>Acreage storage:</strong> Workshops, seasonal equipment, recreational vehicles.</li>
+        </ul>
+
+        <h3 class="text-xl font-semibold text-gray-900 mt-8 mb-4">Delivery Across Saskatchewan</h3>
+        <p>
+          Based in <strong>Martensville</strong>, C-Can Sam delivers containers throughout Saskatchewan.
+          We regularly serve Saskatoon, Regina, Prince Albert, Moose Jaw, Swift Current, North Battleford,
+          Yorkton, and rural communities across the province. Delivery fees vary by distance — contact us for a quote to your location.
+        </p>
+      </div>
+    </div>
+  </Section>
+
+  <!-- CTA -->
+  <CTA
+    title="Ready to Get Your Container?"
+    description="C-Can Sam has been serving Saskatchewan since 2022. Whether you're buying, renting, or just have questions — we're here to help."
+    primaryButton={{ text: "Get a Free Quote", href: "/contact" }}
+    secondaryButton={{ text: "View Our Containers", href: "/storage-container-sales-and-rentals" }}
+  />
+</Layout>
