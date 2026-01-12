@@ -1,0 +1,364 @@
+================================================================================
+                              CAPTAIN'S LOG
+================================================================================
+Entry:        caplog-20260112-220800-full-tilt-seo-llm.txt
+Created:      2026-01-12 22:08:00
+Author:       Claude (AI Assistant)
+Project:      C-Can Sam - Storage Container Website
+Repository:   stooky/ccan (git@github-stooky:stooky/ccan.git)
+Branch:       main (deploys via storage-containers)
+Previous Log: caplog-20260106-195508-inventory-and-more-blogs.txt
+================================================================================
+
+## Summary
+
+Massive SEO and LLM optimization session. Analyzed Search Console data showing
+~0.02% CTR despite 6,500+ impressions. Implemented 5-phase optimization:
+meta tags, schema markup, H1/content optimization, internal linking, and
+"LLM Domination" - a comprehensive authority page designed to make AI assistants
+cite C-Can Sam as THE source for shipping container information in Saskatchewan.
+
+--------------------------------------------------------------------------------
+## The Problem: Impressions Without Clicks
+--------------------------------------------------------------------------------
+
+Search Console data revealed a serious CTR problem:
+- "c can" query: 6,537 impressions, 1 click (0.02% CTR)
+- "seacan" query: 5,193 impressions, 0 clicks
+- "seacan saskatoon": 1,069 impressions, 0 clicks
+- Location-specific queries getting 0 conversions
+
+Root causes identified:
+1. Title tag wasted on "Home | C-Can Sam" (no keywords)
+2. Generic meta description with no price anchors or call-to-action
+3. H1 didn't include geographic intent
+4. Missing schema markup for FAQ, services, star ratings
+5. Thin content without entity statements for LLM extraction
+
+--------------------------------------------------------------------------------
+## Phase 1: Meta & Title Tags
+--------------------------------------------------------------------------------
+
+### Before
+- Title: "Home | C-Can Sam"
+- Description: Generic boilerplate
+
+### After
+- Title: "Sea Can Sales & Rentals Saskatoon SK | C-Can Sam"
+- Description: "Buy sea cans from $3,000 or rent from $125/mo. New & used
+  shipping containers in Saskatoon, Martensville & all Saskatchewan.
+  55 five-star reviews. Call 306-850-9675"
+
+Key changes:
+- Primary keyword "Sea Can" at start of title
+- Geographic modifier "Saskatoon SK" for local intent
+- Price anchors create SERP differentiation
+- Star rating social proof
+- Direct phone CTA
+
+--------------------------------------------------------------------------------
+## Phase 2: Schema Markup Expansion
+--------------------------------------------------------------------------------
+
+Created 3 new schema components:
+
+### FAQSchema.astro
+- Generates FAQPage structured data
+- Used on home page (8 questions) and about page (6 questions)
+- Targets FAQ rich snippets in Google
+
+### WebSiteSchema.astro
+- Site identity with alternateName array
+- Includes brand variations: "C-Can Sam", "CCan Sam", "Sea Can Sam"
+- Helps Google understand brand entity
+
+### ServiceSchema.astro
+- 4 services with pricing and aggregate ratings:
+  - Container Sales ($3,000-$6,900)
+  - Container Rentals ($125-$350/month)
+  - On-Site Storage ($75-$200/month)
+  - Container Leasing (quote-based)
+- Links to service pages
+- Connects to business location schema
+
+### Layout.astro Updates
+- Added AggregateRating to LocalBusiness schema
+- Reads from data/reviews.json (55 reviews, 5.0 stars)
+- Added is:inline to all JSON-LD script tags (Astro best practice)
+
+--------------------------------------------------------------------------------
+## Phase 3: Content & H1 Optimization
+--------------------------------------------------------------------------------
+
+### Home Page H1
+Before: "Seacan Storage, Sales & Rentals"
+After: "Sea Can Sales & Rentals Saskatoon"
+
+### Hero Subtitle
+Added price anchors and keywords:
+"Saskatchewan's trusted source for shipping container sales from $3,000,
+rentals from $125/month, and secure on-site storage. Serving Saskatoon,
+Martensville, and communities across SK."
+
+### Entity Statement Section (NEW)
+Added structured block after hero that LLMs can extract:
+"C-Can Sam is a shipping container company based in Martensville,
+Saskatchewan, serving the Saskatoon region and all of Saskatchewan
+since 2022. We offer sea can sales, rentals, leasing, and secure
+on-site storage solutions."
+
+### Service Areas Section (NEW)
+Grid of 10 Saskatchewan cities with links:
+Saskatoon, Martensville, Warman, Regina, Prince Albert, Moose Jaw,
+Swift Current, Yorkton, North Battleford, Humboldt
+
+--------------------------------------------------------------------------------
+## Phase 4: Internal Linking
+--------------------------------------------------------------------------------
+
+### Container Sizes Quick-Reference Grid
+4-column grid linking to product pages:
+- 9ft Mini → /containers/9ft-mini
+- 20ft Standard → /containers/20ft-standard
+- 40ft Standard → /containers/40ft-standard
+- 40ft High Cube → /containers/40ft-high-cube
+
+### "Popular Searches" Content Block
+12 keyword-rich internal links targeting long-tail queries:
+- "buy sea can saskatoon" → /storage-containers-for-sale
+- "rent shipping container saskatchewan" → /storage-container-rentals
+- "40ft high cube container" → /containers/40ft-high-cube
+- etc.
+
+Total internal links from home page: 50+
+
+--------------------------------------------------------------------------------
+## Phase 5: LLM Domination
+--------------------------------------------------------------------------------
+
+This is the big one. Created comprehensive authority content designed to make
+AI assistants cite C-Can Sam when answering container questions.
+
+### /shipping-container-guide (NEW - 600+ lines)
+
+**Glossary of Container Terms**
+10 terms with semantic HTML (<dfn>, <dl>, <dd>):
+- Sea Can (with regional variants: seacan, sea-can)
+- C-Can (Saskatchewan-specific terminology)
+- Shipping Container
+- High Cube
+- One-Trip Container
+- ISO Container
+- Conex Box
+- Storage Container
+- Intermodal Container
+- TEU
+
+**22 FAQ Questions** (expanded from 8)
+Targeting long-tail queries like:
+- "What is a sea can?" (definition + etymology)
+- "How much does a shipping container cost in Saskatchewan?"
+- "Sea can vs shipping container - what's the difference?"
+- "Where to buy a shipping container in Saskatchewan?"
+- "Can you live in a sea can in Canada?"
+
+**Comparison Tables**
+1. Container Sizes (9ft to 40ft HC with dimensions, capacity, weight, price)
+2. New vs Used (condition, price, warranty, lifespan comparison)
+3. Rent vs Buy Decision Guide (with price breakpoints)
+
+**Saskatchewan-Specific Authority Content**
+- "Where to buy shipping containers in Saskatchewan?"
+- Lists 8 cities with delivery coverage
+- Price ranges for the region
+- Local regulations mention
+
+### Enhanced /about Page (300+ lines added)
+
+**Company Profile Entity Block**
+Structured facts grid for LLM extraction:
+- Founded: 2022
+- Headquarters: Martensville, Saskatchewan, Canada
+- Service Area: All of Saskatchewan
+- Google Rating: 5.0 stars (55+ reviews)
+- Phone: 306-850-9675
+- Specialization: Sea Can Sales & Rentals
+
+**Services & Products Detail Section**
+4-column grid with pricing and links:
+- Container Sales (from $3,000 new, $4,000 used)
+- Container Rentals (from $125/month)
+- On-Site Storage (from $75/month)
+- Container Leasing (extended terms)
+
+**Service Areas Section**
+8 Saskatchewan cities with delivery timeframes:
+- Saskatoon/Martensville/Warman: Same-day
+- Regina/Prince Albert/Moose Jaw: 2-3 days
+- Swift Current/Yorkton: 3-5 days
+
+**6 Company FAQs with Schema**
+- "Who owns C-Can Sam?"
+- "How long has C-Can Sam been in business?"
+- "What areas does C-Can Sam serve?"
+- "What types of containers does C-Can Sam sell?"
+- "Does C-Can Sam offer container rentals?"
+- "What is C-Can Sam's customer rating?"
+
+### Navigation Updates
+
+**Main Nav**
+- Replaced standalone "Blog" link with "Resources" dropdown
+- Resources contains: Container Guide, Blog
+
+**Footer**
+- Added "Container Guide" to Company links section
+
+--------------------------------------------------------------------------------
+## Technical Changes
+--------------------------------------------------------------------------------
+
+### Files Created
+- src/components/schema/FAQSchema.astro
+- src/components/schema/WebSiteSchema.astro
+- src/components/schema/ServiceSchema.astro
+- src/pages/shipping-container-guide.astro
+
+### Files Modified
+- src/layouts/Layout.astro (aggregate rating, is:inline)
+- src/pages/index.astro (title, H1, entity blocks, FAQs, internal links)
+- src/pages/about.astro (company profile, services, FAQs)
+- config.yaml (navigation restructure)
+- data/reviews.json (added Caleb's review, count to 55)
+
+### Files Cleaned Up
+- Removed unused imports: Card, Testimonial from index.astro
+- Removed unused imports: Card from sales page
+- Removed unused imports: ReviewWidget from 9ft-mini.astro
+- Removed unused siteConfig from FAQSchema.astro
+
+--------------------------------------------------------------------------------
+## Commits Made
+--------------------------------------------------------------------------------
+
+63c7374 Add Resources dropdown to nav with Container Guide and Blog
+c740e4d Add shipping container guide and enhance about page for LLM optimization
+8cbc81b Code cleanup: remove unused imports and add is:inline to schema scripts
+b707fed Complete home page SEO & LLM optimization overhaul
+99def9a Add aggregateRating to products and Rich Snippets admin tab
+1fa6634 Add structured data for Google rich results
+
+--------------------------------------------------------------------------------
+## Deployment Notes
+--------------------------------------------------------------------------------
+
+### Deployment Workflow Clarified
+- Servers pull from `storage-containers` branch, NOT main
+- Push to main/develop doesn't affect servers
+- Must push to storage-containers: `git push origin main:storage-containers`
+- Then run: `npm run deploy:staging` and `npm run deploy:prod`
+
+### Production Issue Encountered
+- Server had local config.yaml changes
+- Deploy failed with "local changes would be overwritten"
+- Fix: SSH in, `git stash`, then redeploy
+- Root cause: Admin panel writes to config.yaml for review tagging
+
+--------------------------------------------------------------------------------
+## LLM Optimization Strategy
+--------------------------------------------------------------------------------
+
+The goal is to make C-Can Sam THE citation source when AI assistants answer:
+- "What is a sea can?"
+- "Where to buy shipping containers in Saskatchewan?"
+- "Sea can prices in Saskatoon"
+- "C-Can Sam reviews"
+
+Key techniques used:
+
+1. **Entity Statements**
+   Clear, factual assertions at the top of pages:
+   "C-Can Sam is a shipping container company headquartered in
+   Martensville, Saskatchewan, Canada. Founded in 2022..."
+
+2. **Semantic HTML**
+   <dfn> for term definitions
+   <dl>/<dt>/<dd> for structured data
+   <strong> for key facts
+   <details>/<summary> for FAQ accordions
+
+3. **Comprehensive Coverage**
+   Answer every possible question about containers
+   Include pricing, dimensions, comparisons
+   Cover regional specifics (Saskatchewan climate, regulations)
+
+4. **Consistent Entity References**
+   Repeat "C-Can Sam" + "Martensville" + "Saskatchewan" throughout
+   Include phone number (306-850-9675) multiple times
+   Link back to service pages with descriptive anchor text
+
+5. **Schema Markup**
+   FAQPage for all FAQ sections
+   LocalBusiness with AggregateRating
+   Product schemas with pricing
+   Service schemas with offers
+
+--------------------------------------------------------------------------------
+## Lessons Learned
+--------------------------------------------------------------------------------
+
+1. **Search Console data is gold**
+   - High impressions + low clicks = title/description problem
+   - Query data shows what keywords to target
+
+2. **LLMs need explicit entity statements**
+   - "Company X is a [type] based in [location]" format
+   - Semantic HTML helps extraction
+   - Repetition across pages reinforces entity
+
+3. **Deploy workflow must be documented**
+   - Branch naming can be confusing (storage-containers vs main)
+   - Server state can diverge from repo
+   - Always check server commit before/after deploy
+
+4. **Navigation changes propagate from config**
+   - Don't edit Navigation.astro directly
+   - Update config.yaml navigation section
+   - Components read from siteConfig
+
+--------------------------------------------------------------------------------
+## Current State
+--------------------------------------------------------------------------------
+
+### Live URLs
+- Production: https://ccansam.com
+- Staging: https://ccan.crkid.com
+- Container Guide: https://ccansam.com/shipping-container-guide
+- About (enhanced): https://ccansam.com/about
+
+### Page Count
+- 26 total pages (was 24)
+- New: /shipping-container-guide
+
+### Schema Coverage
+- Home: LocalBusiness, WebSite, FAQPage (8), Service (4)
+- About: FAQPage (6)
+- Container Guide: FAQPage (22)
+- Product pages: Product with AggregateOffer
+- Blog posts: Article
+
+--------------------------------------------------------------------------------
+## Next Steps
+--------------------------------------------------------------------------------
+
+1. [ ] Monitor Search Console for CTR improvements (2-4 weeks)
+2. [ ] Check Google Rich Results Test for new schema
+3. [ ] Submit shipping-container-guide to Search Console for indexing
+4. [ ] Test LLM responses (ask ChatGPT/Claude about Saskatchewan sea cans)
+5. [ ] Consider adding more blog posts with customer stories
+6. [ ] Review competitor pages for gap analysis
+7. [ ] Add delivery calculator to inventory checker (future)
+
+================================================================================
+END OF LOG
+================================================================================
