@@ -3,8 +3,6 @@ import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import Section from '../components/Section.astro';
 import FeatureGrid from '../components/FeatureGrid.astro';
-import Card from '../components/Card.astro';
-import Testimonial from '../components/Testimonial.astro';
 import CTA from '../components/CTA.astro';
 import ReviewWidget from '../components/ReviewWidget.astro';
 import FAQSchema from '../components/schema/FAQSchema.astro';
@@ -121,27 +119,6 @@ const features = [
   },
 ];
 
-// Customer testimonials
-const testimonials = [
-  {
-    quote: "Great service and competitive prices. The container was delivered on time and in excellent condition. Perfect for our farm storage needs.",
-    author: "Mike R.",
-    role: "Farm Owner",
-    company: "Warman, SK",
-  },
-  {
-    quote: "Easy to work with and very professional. They helped us find the right size container for our construction site. Will definitely use again.",
-    author: "Sarah L.",
-    role: "Project Manager",
-    company: "Saskatoon, SK",
-  },
-  {
-    quote: "Reliable and affordable storage solutions. The rental process was straightforward and the delivery was quick. Highly recommend!",
-    author: "Dave K.",
-    role: "Business Owner",
-    company: "Martensville, SK",
-  },
-];
 ---
 
 <Layout
@@ -381,7 +358,7 @@ const testimonials = [
   >
     <div class="mx-auto max-w-4xl">
       <dl class="space-y-6">
-        {faqs.map((faq, index) => (
+        {faqs.map((faq) => (
           <div class="rounded-lg bg-white p-6 shadow-sm">
             <dt class="text-lg font-semibold text-gray-900">
               {faq.question}

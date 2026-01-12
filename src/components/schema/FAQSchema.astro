@@ -4,7 +4,6 @@
  * Generates JSON-LD structured data for FAQ pages
  * Triggers expandable FAQ rich snippets in Google search results
  */
-import { siteConfig } from '../../config/site';
 
 interface FAQItem {
   question: string;
@@ -32,5 +31,5 @@ const schema = faqs.length > 0 ? {
 ---
 
 {schema && (
-  <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />
 )}

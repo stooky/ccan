@@ -1,0 +1,728 @@
+# =============================================================================
+# ASTRO SMB TEMPLATE - FEATURE CHECKLIST
+# =============================================================================
+#
+# Go through each section and mark your decisions:
+#   include: true/false
+#   customize: "description of what needs to change"
+#   notes: "any additional thoughts"
+#
+# Categories:
+#   [CORE]     - Essential for any site, include by default
+#   [FEATURE]  - Nice to have, optional enhancement
+#   [BUSINESS] - Specific to C-Can Sam, needs heavy customization or removal
+#
+# =============================================================================
+
+template:
+  name: "astro-smb-starter"
+  description: "Production-ready Astro static site for small businesses"
+  based_on: "C-Can Sam (ccansam.com)"
+  created: "2026-01-08"
+
+# =============================================================================
+# CORE ARCHITECTURE
+# =============================================================================
+architecture:
+
+  astro_framework:
+    type: "[CORE]"
+    description: "Astro 5.x with static site generation"
+    include: true
+    files:
+      - astro.config.mjs
+      - package.json
+      - tsconfig.json
+    notes: "Keep as-is, update site URL in config"
+
+  tailwind_css:
+    type: "[CORE]"
+    description: "Tailwind CSS v4 with custom theme variables"
+    include: true
+    files:
+      - src/styles/global.css
+    customize: "Replace brand colors (primary, secondary, accent)"
+
+  folder_structure:
+    type: "[CORE]"
+    description: "Standard Astro folder layout"
+    include: true
+    structure:
+      src_pages: "File-based routing"
+      src_components: "Reusable Astro components"
+      src_layouts: "Page templates"
+      src_content: "Markdown collections (blog)"
+      src_config: "TypeScript config loader"
+      src_assets: "Optimized images"
+      src_styles: "Global CSS"
+      public: "Static files (favicons, robots.txt)"
+      api: "PHP backend handlers"
+      data: "JSON data files"
+      scripts: "Node.js CLI tools"
+
+  sitemap_generation:
+    type: "[CORE]"
+    description: "@astrojs/sitemap integration"
+    include: true
+    notes: "Auto-generates sitemap-index.xml"
+
+  image_optimization:
+    type: "[CORE]"
+    description: "Sharp image service for WebP, resizing"
+    include: true
+    notes: "Built into Astro, no changes needed"
+
+# =============================================================================
+# CONFIGURATION SYSTEM
+# =============================================================================
+configuration:
+
+  config_yaml:
+    type: "[CORE]"
+    description: "Single source of truth for all site settings"
+    include: true
+    files:
+      - config.yaml
+    customize: "Strip all C-Can Sam data, create placeholder structure"
+    sections_to_include:
+      site: true           # name, tagline, description, url
+      contact: true        # email, phone, address
+      hours: true          # business hours
+      social: true         # social media links
+      navigation: true     # main nav + footer links
+      analytics: true      # GA/GTM IDs
+      admin: true          # secret path for admin panel
+      logging: true        # form submission paths
+      reviews: true        # review widget config
+      email: false         # Resend API (add to config.local.yaml)
+    sections_to_remove:
+      products: "QUESTION: Include generic product catalog?"
+
+  config_local_yaml:
+    type: "[CORE]"
+    description: "Environment-specific overrides (not in git)"
+    include: true
+    files:
+      - config.local.yaml.example
+    customize: "Create example file with placeholder keys"
+    secrets_to_document:
+      - RESEND_API_KEY
+      - GOOGLE_ANALYTICS_ID
+      - GTM_ID
+      - ADMIN_SECRET_PATH
+
+  site_ts:
+    type: "[CORE]"
+    description: "TypeScript config loader with type safety"
+    include: true
+    files:
+      - src/config/site.ts
+    customize: "Remove container-specific types if not using products"
+
+# =============================================================================
+# LAYOUTS
+# =============================================================================
+layouts:
+
+  layout_astro:
+    type: "[CORE]"
+    description: "Master page template with SEO, schema, GTM"
+    include: true
+    files:
+      - src/layouts/Layout.astro
+    features:
+      seo_meta_tags: true
+      open_graph: true
+      twitter_cards: true
+      canonical_urls: true
+      google_fonts: true
+      gtm_integration: true
+      skip_link_a11y: true
+    schema_included:
+      local_business: true
+      breadcrumb: true
+    customize: "Update LocalBusiness schema fields"
+
+# =============================================================================
+# COMPONENTS
+# =============================================================================
+components:
+
+  # --- Navigation & Structure ---
+  navigation:
+    type: "[CORE]"
+    description: "Sticky header with responsive mobile menu"
+    include: true
+    files:
+      - src/components/Navigation.astro
+    features:
+      - "Logo + site name"
+      - "Desktop horizontal menu"
+      - "Mobile hamburger toggle"
+      - "CTA button"
+    customize: "Update logo, driven by config.yaml navigation"
+
+  footer:
+    type: "[CORE]"
+    description: "Multi-column footer with social links"
+    include: true
+    files:
+      - src/components/Footer.astro
+    features:
+      - "4-6 link columns"
+      - "Social media icons"
+      - "Business info"
+      - "Copyright"
+    customize: "Driven by config.yaml footerLinks"
+
+  # --- Content Display ---
+  hero:
+    type: "[CORE]"
+    description: "Large hero section with background, CTAs"
+    include: true
+    files:
+      - src/components/Hero.astro
+    variants:
+      - "large (homepage)"
+      - "medium (service pages)"
+      - "small (blog)"
+
+  section:
+    type: "[CORE]"
+    description: "Generic section wrapper with padding/background"
+    include: true
+    files:
+      - src/components/Section.astro
+
+  card:
+    type: "[CORE]"
+    description: "Flexible card component"
+    include: true
+    files:
+      - src/components/Card.astro
+    variants:
+      - "icon card"
+      - "image card"
+      - "text card"
+
+  feature_grid:
+    type: "[CORE]"
+    description: "Grid layout for feature cards"
+    include: true
+    files:
+      - src/components/FeatureGrid.astro
+
+  cta:
+    type: "[CORE]"
+    description: "Call-to-action section"
+    include: true
+    files:
+      - src/components/CTA.astro
+    variants:
+      - "primary (colored background)"
+      - "gray"
+      - "white"
+
+  blog_card:
+    type: "[CORE]"
+    description: "Blog post preview card"
+    include: true
+    files:
+      - src/components/BlogCard.astro
+
+  testimonial:
+    type: "[CORE]"
+    description: "Simple quote + author"
+    include: true
+    files:
+      - src/components/Testimonial.astro
+
+  # --- Forms ---
+  contact_form:
+    type: "[CORE]"
+    description: "Basic contact form (name, email, phone, message)"
+    include: true
+    files:
+      - src/components/ContactForm.astro
+    backend: "api/contact.php"
+
+  tabbed_contact_form:
+    type: "[BUSINESS]"
+    description: "Multi-tab form with Contact/Quote/Leasing tabs"
+    include: "QUESTION"
+    question: "Do you want multi-tab forms for different inquiry types?"
+    files:
+      - src/components/TabbedContactForm.astro
+    customize: "Rename tabs, adjust fields per business type"
+
+  # --- Reviews ---
+  review_widget:
+    type: "[FEATURE]"
+    description: "Google reviews display with 4 layout options"
+    include: "QUESTION"
+    question: "Do you want to display Google reviews?"
+    files:
+      - src/components/ReviewWidget.astro
+    layouts:
+      - "featured (1 large + 2 small)"
+      - "standard (horizontal cards)"
+      - "compact (minimal)"
+      - "3-row (grid)"
+    data_source: "data/reviews.json"
+
+  # --- Schema Components ---
+  article_schema:
+    type: "[CORE]"
+    description: "JSON-LD for blog posts"
+    include: true
+    files:
+      - src/components/schema/ArticleSchema.astro
+
+  breadcrumb_schema:
+    type: "[CORE]"
+    description: "Dynamic breadcrumb navigation schema"
+    include: true
+    files:
+      - src/components/schema/BreadcrumbSchema.astro
+
+  product_schema:
+    type: "[BUSINESS]"
+    description: "JSON-LD for products with pricing, ratings"
+    include: "QUESTION"
+    question: "Will the site have products with prices?"
+    files:
+      - src/components/schema/ProductSchema.astro
+    customize: "Adapt for your product types"
+
+# =============================================================================
+# PAGES
+# =============================================================================
+pages:
+
+  # --- Core Static Pages ---
+  homepage:
+    type: "[CORE]"
+    description: "Main landing page"
+    include: true
+    files:
+      - src/pages/index.astro
+    customize: "Replace all C-Can Sam content"
+
+  about:
+    type: "[CORE]"
+    description: "About the company"
+    include: true
+    files:
+      - src/pages/about.astro
+    customize: "Replace story, team, values"
+
+  contact:
+    type: "[CORE]"
+    description: "Contact form page"
+    include: true
+    files:
+      - src/pages/contact.astro
+
+  privacy:
+    type: "[CORE]"
+    description: "Privacy policy"
+    include: true
+    files:
+      - src/pages/privacy.astro
+    customize: "Update company name, contact info"
+
+  terms:
+    type: "[CORE]"
+    description: "Terms of service"
+    include: true
+    files:
+      - src/pages/terms.astro
+    customize: "Update company name, contact info"
+
+  # --- Blog System ---
+  blog_index:
+    type: "[CORE]"
+    description: "Blog listing page"
+    include: true
+    files:
+      - src/pages/blog/index.astro
+
+  blog_post:
+    type: "[CORE]"
+    description: "Dynamic blog post pages"
+    include: true
+    files:
+      - src/pages/blog/[...slug].astro
+      - src/content.config.ts
+      - src/content/blog/*.md
+
+  # --- Service/Product Pages ---
+  service_pages:
+    type: "[BUSINESS]"
+    description: "Container-specific service pages"
+    include: "QUESTION"
+    question: "How many service/product category pages do you need?"
+    current_pages:
+      - shipping-containers.astro
+      - storage-container-sales-and-rentals.astro
+      - storage-container-rentals.astro
+      - storage-container-leasing.astro
+      - on-site-storage-rentals.astro
+      - storage-containers-for-sale.astro
+    recommendation: "Create 1 example service page template"
+
+  product_pages:
+    type: "[BUSINESS]"
+    description: "Individual product pages (containers/)"
+    include: "QUESTION"
+    question: "Do you need individual product pages?"
+    current_pages:
+      - containers/9ft-mini.astro
+      - containers/20ft-standard.astro
+      - containers/40ft-standard.astro
+      - containers/40ft-high-cube.astro
+    recommendation: "Create 1 example product page template"
+
+  referrals:
+    type: "[BUSINESS]"
+    description: "Referral program page"
+    include: false
+    notes: "Remove unless business has referral program"
+
+  inventory_checker:
+    type: "[BUSINESS]"
+    description: "Live inventory search with quote form"
+    include: "QUESTION"
+    question: "Do you need inventory/catalog functionality?"
+    files:
+      - src/pages/inventory-checker.astro
+      - data/inventory.json
+      - api/quote.php
+
+# =============================================================================
+# API / BACKEND
+# =============================================================================
+api:
+
+  contact_php:
+    type: "[CORE]"
+    description: "Contact form submission handler"
+    include: true
+    files:
+      - api/contact.php
+    features:
+      - "JSON logging"
+      - "Resend email API"
+      - "CORS headers"
+      - "Validation"
+
+  quote_php:
+    type: "[BUSINESS]"
+    description: "Quote request handler for inventory items"
+    include: "QUESTION"
+    question: "Do you need quote request functionality?"
+    files:
+      - api/quote.php
+
+  admin_php:
+    type: "[FEATURE]"
+    description: "Web-based admin panel"
+    include: true
+    files:
+      - api/admin.php
+    tabs:
+      submissions: "[CORE] View contact form submissions"
+      reviews: "[FEATURE] View/manage reviews"
+      backlinks: "[FEATURE] SEO backlink research"
+      rich_snippets: "[FEATURE] Manage product pricing for schema"
+    customize: "Remove tabs you don't need"
+
+  backlink_search_php:
+    type: "[FEATURE]"
+    description: "SEO backlink analysis tool"
+    include: "QUESTION"
+    question: "Do you want SEO tools in admin?"
+    files:
+      - api/backlink-search.php
+
+  tag_reviews_php:
+    type: "[BUSINESS]"
+    description: "AI-powered review tagging"
+    include: false
+    notes: "Only needed if using page-specific reviews"
+
+# =============================================================================
+# DATA FILES
+# =============================================================================
+data:
+
+  reviews_json:
+    type: "[FEATURE]"
+    description: "Google Business reviews data"
+    include: "QUESTION"
+    question: "Will you import Google reviews?"
+    files:
+      - data/reviews.json
+    customize: "Create empty structure or example data"
+
+  inventory_json:
+    type: "[BUSINESS]"
+    description: "Product inventory database"
+    include: "QUESTION"
+    question: "Do you need inventory tracking?"
+    files:
+      - data/inventory.json
+    notes: "Remove if not using inventory system"
+
+  submissions_json:
+    type: "[CORE]"
+    description: "Form submission log (auto-created)"
+    include: true
+    notes: "Created automatically by contact.php"
+
+# =============================================================================
+# SCRIPTS
+# =============================================================================
+scripts:
+
+  deploy_js:
+    type: "[FEATURE]"
+    description: "SSH-based deployment to staging/prod"
+    include: true
+    files:
+      - scripts/deploy.js
+    customize: "Update server hostnames, paths"
+
+  launch_js:
+    type: "[BUSINESS]"
+    description: "Multi-vertical site launcher (HVAC, plumbing, etc)"
+    include: false
+    notes: "Agency-specific, remove for single-site template"
+
+  validate_js:
+    type: "[BUSINESS]"
+    description: "Configuration validator"
+    include: false
+    notes: "Remove unless building multi-vertical system"
+
+  stash_restore_js:
+    type: "[BUSINESS]"
+    description: "Multi-site switching (stash/restore)"
+    include: false
+    notes: "Agency-specific, remove for single-site template"
+
+  backup_js:
+    type: "[FEATURE]"
+    description: "Backup current site state"
+    include: "QUESTION"
+    question: "Do you want backup functionality?"
+    files:
+      - scripts/backup.js
+
+  tag_reviews_js:
+    type: "[BUSINESS]"
+    description: "Bulk review tagging CLI"
+    include: false
+    notes: "Only needed for page-specific reviews"
+
+# =============================================================================
+# ASSETS & STYLING
+# =============================================================================
+assets:
+
+  images:
+    type: "[CORE]"
+    description: "Placeholder images for template"
+    include: true
+    files:
+      - src/assets/images/logo.png (placeholder)
+      - src/assets/images/hero-bg.webp (placeholder)
+      - src/assets/images/og-image.png (placeholder)
+    customize: "Replace with actual brand assets"
+
+  favicons:
+    type: "[CORE]"
+    description: "Favicon set"
+    include: true
+    files:
+      - public/favicon.ico
+      - public/favicon-32.png
+      - public/favicon-16.png
+      - public/apple-touch-icon.png
+    customize: "Generate from logo"
+
+  global_css:
+    type: "[CORE]"
+    description: "Tailwind theme with brand colors"
+    include: true
+    files:
+      - src/styles/global.css
+    customize: |
+      Replace color variables:
+      - --color-primary-*: Your primary brand color
+      - --color-secondary-*: Your secondary color
+      - --color-accent-*: Your accent color
+
+# =============================================================================
+# NPM SCRIPTS
+# =============================================================================
+npm_scripts:
+
+  core:
+    - "dev: astro dev"
+    - "build: astro build"
+    - "preview: astro preview"
+
+  deployment:
+    include: "QUESTION"
+    question: "Include SSH deployment scripts?"
+    scripts:
+      - "deploy: deploy to staging"
+      - "deploy:staging: deploy to staging"
+      - "deploy:prod: deploy to production"
+
+  remove_for_template:
+    - "launch: Multi-vertical launcher"
+    - "validate: Config validator"
+    - "stash: Site stashing"
+    - "restore: Site restoration"
+    - "tag-reviews: Review tagging"
+
+# =============================================================================
+# DOCUMENTATION TO CREATE
+# =============================================================================
+documentation:
+
+  readme:
+    include: true
+    sections:
+      - "Quick Start"
+      - "Configuration"
+      - "Customization"
+      - "Deployment"
+      - "Admin Panel"
+      - "Adding Blog Posts"
+
+  config_example:
+    include: true
+    files:
+      - config.yaml (with placeholder values)
+      - config.local.yaml.example
+
+  customization_guide:
+    include: true
+    topics:
+      - "Changing brand colors"
+      - "Updating navigation"
+      - "Adding pages"
+      - "Modifying schemas"
+      - "Setting up email"
+
+# =============================================================================
+# QUESTIONS TO ANSWER
+# =============================================================================
+decisions:
+
+  q1_products:
+    question: "Will the template include product catalog functionality?"
+    options:
+      - "Yes - keep ProductSchema, product pages, inventory"
+      - "No - remove all product-related code"
+      - "Optional - include as commented/disabled feature"
+    your_answer: ""
+
+  q2_reviews:
+    question: "Include Google Reviews integration?"
+    options:
+      - "Yes - keep ReviewWidget, reviews.json, admin tab"
+      - "No - remove review system entirely"
+      - "Testimonials only - keep Testimonial.astro, remove Google integration"
+    your_answer: ""
+
+  q3_forms:
+    question: "What form types to include?"
+    options:
+      - "Basic contact form only"
+      - "Contact + Quote request"
+      - "Multi-tab (Contact/Quote/Custom)"
+    your_answer: ""
+
+  q4_admin:
+    question: "Which admin panel features?"
+    options:
+      - "Submissions only"
+      - "Submissions + Reviews"
+      - "Full (Submissions, Reviews, Backlinks, Rich Snippets)"
+    your_answer: ""
+
+  q5_deployment:
+    question: "Include deployment scripts?"
+    options:
+      - "Yes - SSH-based staging/prod"
+      - "No - manual deployment"
+      - "Different method (Vercel, Netlify, etc)"
+    your_answer: ""
+
+  q6_blog:
+    question: "Include blog system?"
+    options:
+      - "Yes - full blog with example posts"
+      - "Yes - blog structure, no example posts"
+      - "No - remove blog entirely"
+    your_answer: ""
+
+  q7_multi_site:
+    question: "Keep multi-site/vertical capabilities?"
+    options:
+      - "Yes - agency template with launch/stash"
+      - "No - single-site template only"
+    your_answer: ""
+
+# =============================================================================
+# TEMPLATE CREATION PLAN
+# =============================================================================
+creation_plan:
+
+  step_1:
+    name: "Create new branch"
+    commands:
+      - "git checkout -b template-vanilla"
+
+  step_2:
+    name: "Remove business-specific content"
+    actions:
+      - "Clear config.yaml of C-Can Sam data"
+      - "Remove container pages"
+      - "Remove blog posts (keep structure)"
+      - "Remove inventory data"
+      - "Clear reviews.json"
+
+  step_3:
+    name: "Create placeholder content"
+    actions:
+      - "Add placeholder images"
+      - "Create example service page"
+      - "Create example product page (if keeping)"
+      - "Add 1 example blog post"
+
+  step_4:
+    name: "Update documentation"
+    actions:
+      - "Write comprehensive README"
+      - "Create config.yaml with comments"
+      - "Add customization guide"
+
+  step_5:
+    name: "Test template"
+    actions:
+      - "npm install from scratch"
+      - "npm run build"
+      - "Verify all pages render"
+      - "Test contact form"
+
+  step_6:
+    name: "Create template repo"
+    options:
+      option_a: "Push to new GitHub repo"
+      option_b: "Create GitHub template repository"
+      option_c: "Package as npm create starter"
