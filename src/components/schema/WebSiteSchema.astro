@@ -1,0 +1,28 @@
+---
+/**
+ * WebSiteSchema Component
+ * Generates JSON-LD structured data for the website
+ * Helps Google understand site structure and can enable sitelinks
+ */
+import { siteConfig } from '../../config/site';
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": siteConfig.name,
+  "alternateName": ["C-Can Sam", "CCan Sam", "CCanSam", "Sea Can Sam"],
+  "url": siteConfig.url,
+  "description": siteConfig.description,
+  "publisher": {
+    "@type": "Organization",
+    "name": siteConfig.name,
+    "url": siteConfig.url,
+    "logo": {
+      "@type": "ImageObject",
+      "url": `${siteConfig.url}/images/logo.png`
+    }
+  }
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

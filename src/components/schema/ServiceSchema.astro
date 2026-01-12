@@ -1,0 +1,150 @@
+---
+/**
+ * ServiceSchema Component
+ * Generates JSON-LD structured data for services offered
+ * Helps Google understand the business services with pricing
+ */
+import { siteConfig } from '../../config/site';
+import fs from 'node:fs';
+import path from 'node:path';
+
+// Load reviews for aggregate rating
+let reviewsData = { totalCount: 0, averageRating: 0 };
+try {
+  const reviewsPath = path.join(process.cwd(), 'data', 'reviews.json');
+  const reviewsContent = fs.readFileSync(reviewsPath, 'utf-8');
+  reviewsData = JSON.parse(reviewsContent);
+} catch {
+  // Reviews file not found, use defaults
+}
+
+const aggregateRating = reviewsData.totalCount > 0 ? {
+  "@type": "AggregateRating",
+  "ratingValue": reviewsData.averageRating.toFixed(1),
+  "bestRating": "5",
+  "worstRating": "1",
+  "reviewCount": reviewsData.totalCount
+} : null;
+
+const services = [
+  {
+    "@type": "Service",
+    "name": "Shipping Container Sales",
+    "alternateName": ["Sea Can Sales", "C-Can Sales", "Storage Container Sales"],
+    "description": "New and used shipping containers for sale in Saskatchewan. 20ft and 40ft containers available, including high cube options. Prices starting from $3,000 for used containers.",
+    "provider": {
+      "@type": "LocalBusiness",
+      "name": siteConfig.name
+    },
+    "areaServed": {
+      "@type": "State",
+      "name": "Saskatchewan",
+      "containsPlace": [
+        { "@type": "City", "name": "Saskatoon" },
+        { "@type": "City", "name": "Martensville" },
+        { "@type": "City", "name": "Warman" }
+      ]
+    },
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Shipping Containers for Sale",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Product",
+            "name": "20ft Standard Container"
+          },
+          "priceSpecification": {
+            "@type": "PriceSpecification",
+            "priceCurrency": "CAD",
+            "minPrice": "3000",
+            "maxPrice": "4700"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Product",
+            "name": "40ft Standard Container"
+          },
+          "priceSpecification": {
+            "@type": "PriceSpecification",
+            "priceCurrency": "CAD",
+            "minPrice": "4750",
+            "maxPrice": "5000"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Product",
+            "name": "40ft High Cube Container"
+          },
+          "priceSpecification": {
+            "@type": "PriceSpecification",
+            "priceCurrency": "CAD",
+            "minPrice": "4750",
+            "maxPrice": "6900"
+          }
+        }
+      ]
+    },
+    ...(aggregateRating && { "aggregateRating": aggregateRating })
+  },
+  {
+    "@type": "Service",
+    "name": "Shipping Container Rentals",
+    "alternateName": ["Sea Can Rentals", "C-Can Rentals", "Storage Container Rentals"],
+    "description": "Flexible shipping container rentals in Saskatoon and Saskatchewan. Month-to-month terms available. Perfect for renovations, construction sites, and temporary storage needs.",
+    "provider": {
+      "@type": "LocalBusiness",
+      "name": siteConfig.name
+    },
+    "areaServed": {
+      "@type": "State",
+      "name": "Saskatchewan"
+    },
+    ...(aggregateRating && { "aggregateRating": aggregateRating })
+  },
+  {
+    "@type": "Service",
+    "name": "On-Site Container Storage",
+    "alternateName": ["Secure Storage Saskatoon", "Container Storage Martensville"],
+    "description": "Secure, weatherproof container storage at our Martensville facility. 24/7 access available. Convenient location serving Saskatoon, Warman, and surrounding areas.",
+    "provider": {
+      "@type": "LocalBusiness",
+      "name": siteConfig.name
+    },
+    "areaServed": {
+      "@type": "City",
+      "name": "Martensville",
+      "containedInPlace": {
+        "@type": "State",
+        "name": "Saskatchewan"
+      }
+    },
+    ...(aggregateRating && { "aggregateRating": aggregateRating })
+  },
+  {
+    "@type": "Service",
+    "name": "Container Delivery",
+    "description": "Professional shipping container delivery throughout Saskatchewan. Fast, reliable delivery to your location with expert placement.",
+    "provider": {
+      "@type": "LocalBusiness",
+      "name": siteConfig.name
+    },
+    "areaServed": {
+      "@type": "State",
+      "name": "Saskatchewan"
+    }
+  }
+];
+
+const schema = {
+  "@context": "https://schema.org",
+  "@graph": services
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

@@ -7,8 +7,91 @@ import Card from '../components/Card.astro';
 import Testimonial from '../components/Testimonial.astro';
 import CTA from '../components/CTA.astro';
 import ReviewWidget from '../components/ReviewWidget.astro';
+import FAQSchema from '../components/schema/FAQSchema.astro';
+import WebSiteSchema from '../components/schema/WebSiteSchema.astro';
+import ServiceSchema from '../components/schema/ServiceSchema.astro';
 import { siteConfig } from '../config/site';
 import heroBg from '../assets/images/hero-bg.webp';
+
+// Container products with specs for quick-reference grid
+const containers = [
+  {
+    name: "9ft Mini",
+    slug: "9ft-mini",
+    dimensions: "9' × 7' × 7'6\"",
+    sqft: "63 sq ft",
+    newPrice: "$4,000+",
+    usedPrice: null,
+    bestFor: "Tight spaces, backyard storage",
+    popular: false,
+  },
+  {
+    name: "20ft Standard",
+    slug: "20ft-standard",
+    dimensions: "20' × 8' × 8'6\"",
+    sqft: "160 sq ft",
+    newPrice: "$4,450+",
+    usedPrice: "$3,000+",
+    bestFor: "Residential, small business",
+    popular: true,
+  },
+  {
+    name: "40ft Standard",
+    slug: "40ft-standard",
+    dimensions: "40' × 8' × 8'6\"",
+    sqft: "320 sq ft",
+    newPrice: null,
+    usedPrice: "$4,750+",
+    bestFor: "Commercial, industrial",
+    popular: false,
+  },
+  {
+    name: "40ft High Cube",
+    slug: "40ft-high-cube",
+    dimensions: "40' × 8' × 9'6\"",
+    sqft: "320 sq ft",
+    newPrice: "$6,500+",
+    usedPrice: "$4,750+",
+    bestFor: "Tall items, max capacity",
+    popular: true,
+  },
+];
+
+// FAQ data for schema and display - targeting Search Console keywords
+const faqs = [
+  {
+    question: "What is a sea can or C-Can?",
+    answer: "A sea can (also spelled seacan, C-Can, or c can) is a shipping container used for storage. These steel containers were originally designed for transporting goods overseas, but are now widely used across Saskatchewan for secure, weatherproof storage. They're perfect for farms, construction sites, businesses, and residential storage needs."
+  },
+  {
+    question: "How much does a shipping container cost in Saskatchewan?",
+    answer: "Shipping container prices in Saskatchewan start from $3,000 for quality used 20ft containers. New (one-trip) containers range from $4,450 to $6,900 depending on size. 40ft containers and high cube options are priced based on condition and availability. Contact us for current pricing and inventory at our Martensville location."
+  },
+  {
+    question: "Do you deliver sea cans to Saskatoon and area?",
+    answer: "Yes! We deliver shipping containers throughout Saskatoon, Martensville, Warman, and all of Saskatchewan. Our experienced delivery drivers can place your container exactly where you need it. Delivery is fast and professional - many customers receive their container within 24-48 hours of purchase."
+  },
+  {
+    question: "Can I rent a shipping container instead of buying?",
+    answer: "Absolutely! C-Can Sam offers flexible container rentals with month-to-month terms. Renting is ideal for renovations, temporary storage during a move, construction projects, or seasonal needs. We have 20ft and 40ft containers available for rent, delivered to your location or stored at our secure Martensville facility."
+  },
+  {
+    question: "What sizes of storage containers do you have?",
+    answer: "We carry a full range of shipping container sizes: 9ft mini containers for tight spaces, 20ft standard containers (most popular for residential use), 40ft standard containers for maximum storage, and 40ft high cube containers with extra height. All containers are wind and watertight with secure locking systems."
+  },
+  {
+    question: "Where is your storage facility located?",
+    answer: "Our storage facility is located at 12 Peters Avenue in Martensville, Saskatchewan - just minutes north of Saskatoon. We offer secure on-site storage where you can keep your rented container at our facility with convenient access. The location serves Saskatoon, Warman, and the surrounding area."
+  },
+  {
+    question: "What's the difference between new and used containers?",
+    answer: "New containers (called 'one-trip' containers) have only made one voyage from the manufacturer and are in excellent cosmetic condition. Used containers have been in shipping service longer but are thoroughly inspected to ensure they're wind and watertight. Both options provide secure, weatherproof storage - used containers offer better value while new containers look pristine."
+  },
+  {
+    question: "Do you offer portable storage solutions?",
+    answer: "Yes! Our shipping containers are the ultimate portable storage solution. We deliver containers directly to your property in Saskatoon, Martensville, Warman, or anywhere in Saskatchewan. Use them for moving, renovations, farm equipment, business inventory, or any storage need. When you're done, we pick them up - or keep it permanently with a purchase."
+  }
+];
 
 // C-Can Sam Storage Services
 const features = [
@@ -61,11 +144,19 @@ const testimonials = [
 ];
 ---
 
-<Layout title="Home">
+<Layout
+  title="Sea Can Sales & Rentals Saskatoon SK"
+  description="New & used sea cans from $3,000. Buy, rent or store shipping containers in Saskatoon, Martensville & across Saskatchewan. Fast delivery. Call 306-281-4100 for a free quote."
+>
+  <!-- Schema Markup for Rich Results -->
+  <FAQSchema faqs={faqs} />
+  <WebSiteSchema />
+  <ServiceSchema />
+
   <!-- Hero Section -->
   <Hero
-    title="Seacan Storage, Sales & Rentals"
-    subtitle="Whether you're decluttering, moving, renovating, or expanding your business, our storage solutions offer the flexibility and security you need. With a range of durable containers for sale or rent, we provide reliable options for both short-term and long-term storage needs."
+    title="Sea Can Sales & Rentals Saskatoon"
+    subtitle="Saskatchewan's trusted shipping container supplier since 2022. New sea cans from $4,450, used from $3,000. Buy, rent, or store — we deliver across the province."
     primaryCta={{ text: "WhatsApp Us", href: "https://wa.me/13062814100?text=Hello%20there!%20I%20am%20interested%20in%20your%20services.", variant: "whatsapp" }}
     secondaryCta={{ text: "Our Containers", href: "/storage-container-sales-and-rentals", variant: "blue" }}
     backgroundImage={heroBg}
@@ -84,6 +175,20 @@ const testimonials = [
     </div>
   </div>
 
+  <!-- Entity Statement - About C-Can Sam -->
+  <section class="bg-white py-12 border-b border-gray-100">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <p class="text-lg text-gray-700 leading-relaxed">
+        <strong class="text-gray-900">C-Can Sam</strong> is a family-owned shipping container company based in
+        <strong>Martensville, Saskatchewan</strong>, serving Saskatoon, Warman, and communities across the province.
+        We specialize in <strong>sea can sales, rentals, and secure storage</strong> — offering new and used
+        containers from 9ft minis to 40ft high cubes. Whether you need portable storage for a renovation,
+        a permanent solution for your farm or business, or secure on-site storage at our facility,
+        we provide <strong>fast delivery, competitive pricing, and straightforward service</strong> you can count on.
+      </p>
+    </div>
+  </section>
+
   <!-- Services Section -->
   <Section
     title="Straightforward Shipping Container Sales & Rentals"
@@ -91,6 +196,66 @@ const testimonials = [
     background="gray"
   >
     <FeatureGrid features={features} columns={4} />
+  </Section>
+
+  <!-- Container Sizes Quick Reference -->
+  <Section
+    title="Container Sizes & Pricing"
+    subtitle="Find the right shipping container for your needs"
+  >
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {containers.map((container) => (
+        <a
+          href={`/containers/${container.slug}`}
+          class="group relative rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:border-primary-300 hover:shadow-md"
+        >
+          {container.popular && (
+            <span class="absolute -top-3 right-4 rounded-full bg-primary-500 px-3 py-1 text-xs font-medium text-white">
+              Popular
+            </span>
+          )}
+          <h3 class="text-xl font-bold text-gray-900 group-hover:text-primary-600">
+            {container.name}
+          </h3>
+          <p class="mt-1 text-sm text-gray-500">{container.dimensions}</p>
+          <p class="text-sm text-gray-500">{container.sqft}</p>
+
+          <div class="mt-4 space-y-2">
+            {container.usedPrice && (
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600">Used:</span>
+                <span class="font-semibold text-gray-900">{container.usedPrice}</span>
+              </div>
+            )}
+            {container.newPrice && (
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600">New:</span>
+                <span class="font-semibold text-gray-900">{container.newPrice}</span>
+              </div>
+            )}
+          </div>
+
+          <p class="mt-4 text-xs text-gray-500">
+            Best for: {container.bestFor}
+          </p>
+
+          <div class="mt-4 flex items-center text-sm font-medium text-primary-600 group-hover:text-primary-700">
+            View details
+            <svg class="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
+          </div>
+        </a>
+      ))}
+    </div>
+    <div class="mt-8 text-center">
+      <a
+        href="/storage-container-sales-and-rentals"
+        class="inline-flex items-center justify-center rounded-lg bg-primary-600 px-6 py-3 text-base font-medium text-white shadow-sm transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+      >
+        View All Containers
+      </a>
+    </div>
   </Section>
 
   <!-- Why Choose Us Section -->
@@ -171,6 +336,84 @@ const testimonials = [
 
   <!-- Google Reviews Widget -->
   <ReviewWidget pagePath="/" />
+
+  <!-- Service Areas Section -->
+  <Section
+    title="Serving All of Saskatchewan"
+    subtitle="Container delivery and storage solutions across the province"
+  >
+    <div class="mx-auto max-w-5xl">
+      <p class="text-center text-gray-600 mb-10">
+        Based in <strong>Martensville</strong>, we deliver shipping containers throughout Saskatchewan.
+        Whether you're in <strong>Saskatoon</strong>, <strong>Regina</strong>, or a rural community,
+        we'll get your sea can where you need it.
+      </p>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        {[
+          { city: "Saskatoon", note: "Same-day available" },
+          { city: "Martensville", note: "Headquarters" },
+          { city: "Warman", note: "Local delivery" },
+          { city: "Regina", note: "Province-wide" },
+          { city: "Prince Albert", note: "Northern SK" },
+          { city: "Moose Jaw", note: "Southern SK" },
+          { city: "Swift Current", note: "Southwest SK" },
+          { city: "North Battleford", note: "Northwest SK" },
+          { city: "Yorkton", note: "Eastern SK" },
+          { city: "Lloydminster", note: "Border region" },
+        ].map((area) => (
+          <div class="text-center p-4 rounded-lg bg-gray-50 hover:bg-primary-50 transition-colors">
+            <div class="font-semibold text-gray-900">{area.city}</div>
+            <div class="text-xs text-gray-500 mt-1">{area.note}</div>
+          </div>
+        ))}
+      </div>
+      <p class="text-center text-sm text-gray-500 mt-8">
+        Don't see your area? We deliver throughout Saskatchewan — <a href="/contact" class="text-primary-600 hover:underline">contact us</a> for a delivery quote.
+      </p>
+    </div>
+  </Section>
+
+  <!-- FAQ Section -->
+  <Section
+    title="Frequently Asked Questions"
+    subtitle="Everything you need to know about shipping containers in Saskatchewan"
+    background="gray"
+  >
+    <div class="mx-auto max-w-4xl">
+      <dl class="space-y-6">
+        {faqs.map((faq, index) => (
+          <div class="rounded-lg bg-white p-6 shadow-sm">
+            <dt class="text-lg font-semibold text-gray-900">
+              {faq.question}
+            </dt>
+            <dd class="mt-3 text-gray-600">
+              {faq.answer}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </Section>
+
+  <!-- Popular Searches / Related Topics - Long-tail SEO -->
+  <section class="bg-gray-50 py-12 border-t border-gray-100">
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Looking for shipping containers in Saskatchewan?</h2>
+      <p class="text-gray-600 text-sm leading-relaxed">
+        Whether you need a <a href="/containers/20ft-standard" class="text-primary-600 hover:underline">20ft shipping container in Saskatoon</a>,
+        a <a href="/containers/40ft-high-cube" class="text-primary-600 hover:underline">40ft high cube sea can</a> for your farm,
+        or <a href="/storage-container-rentals" class="text-primary-600 hover:underline">portable storage rentals</a> for a construction project —
+        C-Can Sam has you covered. We offer <a href="/storage-containers-for-sale" class="text-primary-600 hover:underline">used shipping containers for sale in Saskatchewan</a> starting
+        at $3,000, plus <a href="/storage-container-rentals" class="text-primary-600 hover:underline">flexible sea can rentals</a> with
+        month-to-month terms. Looking to <a href="/storage-containers-for-sale" class="text-primary-600 hover:underline">buy a C-Can</a>?
+        Browse our <a href="/containers/9ft-mini" class="text-primary-600 hover:underline">9ft mini containers</a>,
+        <a href="/containers/40ft-standard" class="text-primary-600 hover:underline">40ft standard containers</a>,
+        and more. We deliver to <strong>Saskatoon</strong>, <strong>Martensville</strong>, <strong>Warman</strong>, <strong>Regina</strong>,
+        and throughout Saskatchewan. Need <a href="/on-site-storage-rentals" class="text-primary-600 hover:underline">secure storage near Saskatoon</a>?
+        Visit our Martensville facility. <a href="/contact" class="text-primary-600 hover:underline font-medium">Get a free quote today</a>.
+      </p>
+    </div>
+  </section>
 
   <!-- CTA Section -->
   <CTA

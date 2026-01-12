@@ -4,6 +4,18 @@ import Footer from '../components/Footer.astro';
 import BreadcrumbSchema from '../components/schema/BreadcrumbSchema.astro';
 import { siteConfig } from '../config/site';
 import '../styles/global.css';
+import fs from 'node:fs';
+import path from 'node:path';
+
+// Load reviews for aggregate rating on LocalBusiness
+let reviewsData = { totalCount: 0, averageRating: 0 };
+try {
+  const reviewsPath = path.join(process.cwd(), 'data', 'reviews.json');
+  const reviewsContent = fs.readFileSync(reviewsPath, 'utf-8');
+  reviewsData = JSON.parse(reviewsContent);
+} catch {
+  // Reviews file not found, use defaults
+}
 
 // Build sameAs array for LocalBusiness schema (social profiles)
 const sameAsLinks = [
@@ -148,7 +160,16 @@ const fullTitle = `${title} | ${siteConfig.name}`;
           "longitude": -106.6702
         },
         "geoRadius": "200000"
-      }
+      },
+      ...(reviewsData.totalCount > 0 && {
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": reviewsData.averageRating.toFixed(1),
+          "bestRating": "5",
+          "worstRating": "1",
+          "reviewCount": reviewsData.totalCount
+        }
+      })
     })} />
 
     <!-- Breadcrumb Schema -->

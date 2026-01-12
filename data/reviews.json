@@ -1,9 +1,20 @@
 {
-  "lastSync": "2026-01-01",
+  "lastSync": "2026-01-11",
   "source": "Google Business Profile",
-  "totalCount": 54,
+  "totalCount": 55,
   "averageRating": 4.98,
   "reviews": [
+    {
+      "id": "review_055",
+      "author": "Caleb",
+      "rating": 5,
+      "date": "2026-01-09",
+      "relativeDate": "2 days ago",
+      "text": "We've used C-Can Sam twice now and couldn't be happier with their service! If you're searching for secure storage Saskatoon, shipping container rental Saskatoon, or on-site storage Martensville/Warman area, look no further.\n\nWe first rented a 20ft seacan for a home renovation — delivery was prompt, the container was clean and weatherproof, and the flexible month-to-month terms made everything stress-free. When we needed longer-term storage for business equipment and some farm gear, we went back to Sam and got a great 40ft container. Everything stayed dry, safe, and rodent-free through the winter.\n\nThe team is super friendly, responsive, and genuinely helpful — they answered all our questions and even gave solid advice on sizing. Local family-owned business that actually cares about customers in the Saskatoon, Martensville, Warman, and surrounding areas.\n\nHighly recommend C-Can Sam for container sales, rentals, portable storage solutions, or secure off-site/on-site storage in Saskatchewan. Affordable, reliable, and hassle-free — 10/10 will use again!\n\nThanks, Sam — you guys rock!",
+      "hasPhoto": false,
+      "isNew": true,
+      "isLocalGuide": true
+    },
     {
       "id": "review_001",
       "author": "Morris Bunyan",
