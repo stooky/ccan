@@ -15,6 +15,9 @@
     "deploy": "node scripts/deploy.js staging",
     "deploy:staging": "node scripts/deploy.js staging",
     "deploy:prod": "node scripts/deploy.js production",
+    "ship": "node scripts/ship.js",
+    "ship:staging": "node scripts/ship.js --staging",
+    "ship:prod": "node scripts/ship.js --prod",
     "backup": "node scripts/backup.js",
     "tag-reviews": "node scripts/tag-reviews.js"
   },

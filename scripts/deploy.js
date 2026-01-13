@@ -16,6 +16,7 @@ const ENVIRONMENTS = {
     host: 'ccan.crkid.com',
     user: 'root',
     path: '/var/www/ccan',
+    branch: 'develop',
     url: 'https://ccan.crkid.com',
   },
   production: {
@@ -23,6 +24,7 @@ const ENVIRONMENTS = {
     host: 'ccansam.com',
     user: 'root',
     path: '/var/www/ccan',
+    branch: 'main',
     url: 'https://ccansam.com',
   },
 };
@@ -41,7 +43,7 @@ console.log(`\n🚀 Deploying to ${env.name} (${env.host})...\n`);
 
 const sshKey = '~/.ssh/id_rsa';
 const sshCmd = `ssh -i ${sshKey} ${env.user}@${env.host}`;
-const remoteCmd = `cd ${env.path} && git pull origin storage-containers && npm run build`;
+const remoteCmd = `cd ${env.path} && git fetch origin && git checkout ${env.branch} && git pull origin ${env.branch} && npm run build`;
 
 try {
   // Run the deploy command
