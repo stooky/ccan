@@ -101,7 +101,7 @@ navigation:
       href: "/storage-container-sales-and-rentals"
       children:
         - name: "Buy"
-          href: "/storage-containers-for-sale"
+          href: "/seacan-storage-containers-for-sale"
         - name: "Rent"
           href: "/storage-container-rentals"
         - name: "Lease"
@@ -125,7 +125,7 @@ navigation:
     # Services - core offerings (primary SEO value)
     services:
       - name: "Buy Containers"
-        href: "/storage-containers-for-sale"
+        href: "/seacan-storage-containers-for-sale"
       - name: "Rent Containers"
         href: "/storage-container-rentals"
       - name: "Lease Containers"
@@ -251,7 +251,7 @@ redirects:
   /homepage/: /
   # /shipping-containers/ now has its own SEO-optimized page
   /rentals/: /storage-container-rentals/
-  /sales/: /storage-containers-for-sale/
+  /sales/: /seacan-storage-containers-for-sale/
   /off-site-storage/: /on-site-storage-rentals/
   /our-containers/: /storage-container-sales-and-rentals/
   /our-containers/20ft-standard-container/: /containers/20ft-standard/
@@ -272,7 +272,8 @@ redirects:
   /renovating-shipping-containers-turning-steel-into-homes/: /blog/container-homes-steel-into-living/
   /what-is-a-seacan-one-tripper-sustainable-solutions/: /blog/what-is-one-trip-container/
   /portable-storage-solutions-rent-containers-today/: /storage-container-rentals/
-  /invest-in-a-seacan-for-sale/: /storage-containers-for-sale/
+  /invest-in-a-seacan-for-sale/: /seacan-storage-containers-for-sale/
+  /storage-containers-for-sale/: /seacan-storage-containers-for-sale/
   /shipping-containers-offices-and-retail-spaces/: /blog/
   /should-you-rent-or-buy-a-container/: /blog/
   /optimize-your-dorm-space-practical-storage-solutions/: /blog/
@@ -312,7 +313,7 @@ reviews:
       position: "before-cta"
       max_reviews: 3
       ai_prompt: "Reviews mentioning trust, family business, local service, or personal experience with the team"
-    - path: "/storage-containers-for-sale"
+    - path: "/seacan-storage-containers-for-sale"
       layout: "3-row"
       position: "after-hero"
       max_reviews: 6
@@ -356,52 +357,52 @@ reviews:
   # Review-to-page mappings (auto-populated by "Tag Reviews" in admin)
   # Format: review_id: ["/path1", "/path2"]
   tagged:
-    review_001: ["/","/about","/storage-containers-for-sale","/storage-container-sales-and-rentals"]
+    review_001: ["/","/about","/seacan-storage-containers-for-sale","/storage-container-sales-and-rentals"]
     review_002: ["/","/storage-container-sales-and-rentals"]
-    review_003: ["/storage-containers-for-sale","/containers/20ft-standard","/storage-container-sales-and-rentals"]
+    review_003: ["/seacan-storage-containers-for-sale","/containers/20ft-standard","/storage-container-sales-and-rentals"]
     review_004: ["/","/storage-container-sales-and-rentals"]
-    review_005: ["/storage-containers-for-sale","/storage-container-sales-and-rentals"]
+    review_005: ["/seacan-storage-containers-for-sale","/storage-container-sales-and-rentals"]
     review_006: ["/"]
     review_007: ["/"]
-    review_008: ["/storage-containers-for-sale","/storage-container-sales-and-rentals"]
-    review_009: ["/storage-containers-for-sale"]
-    review_010: ["/storage-containers-for-sale"]
-    review_011: ["/storage-containers-for-sale","/storage-container-rentals","/storage-container-sales-and-rentals"]
+    review_008: ["/seacan-storage-containers-for-sale","/storage-container-sales-and-rentals"]
+    review_009: ["/seacan-storage-containers-for-sale"]
+    review_010: ["/seacan-storage-containers-for-sale"]
+    review_011: ["/seacan-storage-containers-for-sale","/storage-container-rentals","/storage-container-sales-and-rentals"]
     review_012: ["/"]
     review_013: ["/"]
     review_014: ["/"]
-    review_015: ["/storage-containers-for-sale","/containers/20ft-standard"]
-    review_016: ["/storage-containers-for-sale"]
+    review_015: ["/seacan-storage-containers-for-sale","/containers/20ft-standard"]
+    review_016: ["/seacan-storage-containers-for-sale"]
     review_017: ["/"]
-    review_018: ["/storage-containers-for-sale","/containers/40ft-standard"]
+    review_018: ["/seacan-storage-containers-for-sale","/containers/40ft-standard"]
     review_019: ["/"]
     review_020: ["/"]
     review_021: ["/"]
     review_022: ["/"]
-    review_023: ["/about","/storage-containers-for-sale"]
+    review_023: ["/about","/seacan-storage-containers-for-sale"]
     review_024: ["/"]
-    review_026: ["/storage-containers-for-sale","/on-site-storage-rentals"]
-    review_027: ["/storage-containers-for-sale"]
-    review_028: ["/storage-containers-for-sale","/containers/40ft-standard"]
-    review_029: ["/storage-containers-for-sale"]
+    review_026: ["/seacan-storage-containers-for-sale","/on-site-storage-rentals"]
+    review_027: ["/seacan-storage-containers-for-sale"]
+    review_028: ["/seacan-storage-containers-for-sale","/containers/40ft-standard"]
+    review_029: ["/seacan-storage-containers-for-sale"]
     review_030: ["/"]
-    review_031: ["/storage-containers-for-sale"]
-    review_032: ["/storage-containers-for-sale"]
+    review_031: ["/seacan-storage-containers-for-sale"]
+    review_032: ["/seacan-storage-containers-for-sale"]
     review_033: ["/"]
-    review_034: ["/storage-containers-for-sale"]
-    review_035: ["/storage-containers-for-sale"]
+    review_034: ["/seacan-storage-containers-for-sale"]
+    review_035: ["/seacan-storage-containers-for-sale"]
     review_036: ["/about"]
-    review_037: ["/storage-containers-for-sale"]
+    review_037: ["/seacan-storage-containers-for-sale"]
     review_038: ["/"]
     review_039: ["/"]
     review_040: ["/"]
     review_041: ["/"]
-    review_042: ["/storage-containers-for-sale"]
+    review_042: ["/seacan-storage-containers-for-sale"]
     review_043: ["/"]
-    review_047: ["/storage-containers-for-sale"]
+    review_047: ["/seacan-storage-containers-for-sale"]
     review_048: ["/"]
-    review_049: ["/storage-containers-for-sale"]
-    review_050: ["/storage-containers-for-sale"]
+    review_049: ["/seacan-storage-containers-for-sale"]
+    review_050: ["/seacan-storage-containers-for-sale"]
     review_051: ["/about"]
     review_052: ["/storage-container-rentals","/containers/20ft-standard"]
     review_053: ["/"]
