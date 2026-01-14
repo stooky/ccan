@@ -50,43 +50,37 @@ const services = [
       "name": "Shipping Containers for Sale",
       "itemListElement": [
         {
-          "@type": "Offer",
-          "itemOffered": {
-            "@type": "Product",
-            "name": "20ft Standard Container"
-          },
-          "priceSpecification": {
-            "@type": "PriceSpecification",
+          "@type": "OfferCatalog",
+          "name": "20ft Standard Container",
+          "description": "20ft standard shipping container, new or used",
+          "itemListElement": [{
+            "@type": "Offer",
             "priceCurrency": "CAD",
-            "minPrice": "3000",
-            "maxPrice": "4700"
-          }
+            "price": "3000",
+            "availability": "https://schema.org/InStock"
+          }]
         },
         {
-          "@type": "Offer",
-          "itemOffered": {
-            "@type": "Product",
-            "name": "40ft Standard Container"
-          },
-          "priceSpecification": {
-            "@type": "PriceSpecification",
+          "@type": "OfferCatalog",
+          "name": "40ft Standard Container",
+          "description": "40ft standard shipping container, new or used",
+          "itemListElement": [{
+            "@type": "Offer",
             "priceCurrency": "CAD",
-            "minPrice": "4750",
-            "maxPrice": "5000"
-          }
+            "price": "4750",
+            "availability": "https://schema.org/InStock"
+          }]
         },
         {
-          "@type": "Offer",
-          "itemOffered": {
-            "@type": "Product",
-            "name": "40ft High Cube Container"
-          },
-          "priceSpecification": {
-            "@type": "PriceSpecification",
+          "@type": "OfferCatalog",
+          "name": "40ft High Cube Container",
+          "description": "40ft high cube shipping container with extra height",
+          "itemListElement": [{
+            "@type": "Offer",
             "priceCurrency": "CAD",
-            "minPrice": "4750",
-            "maxPrice": "6900"
-          }
+            "price": "4750",
+            "availability": "https://schema.org/InStock"
+          }]
         }
       ]
     },
