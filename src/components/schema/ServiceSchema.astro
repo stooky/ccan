@@ -38,51 +38,16 @@ const services = [
     },
     "areaServed": {
       "@type": "State",
-      "name": "Saskatchewan",
-      "containsPlace": [
-        { "@type": "City", "name": "Saskatoon" },
-        { "@type": "City", "name": "Martensville" },
-        { "@type": "City", "name": "Warman" }
-      ]
+      "name": "Saskatchewan"
     },
-    "hasOfferCatalog": {
-      "@type": "OfferCatalog",
-      "name": "Shipping Containers for Sale",
-      "itemListElement": [
-        {
-          "@type": "OfferCatalog",
-          "name": "20ft Standard Container",
-          "description": "20ft standard shipping container, new or used",
-          "itemListElement": [{
-            "@type": "Offer",
-            "priceCurrency": "CAD",
-            "price": "3000",
-            "availability": "https://schema.org/InStock"
-          }]
-        },
-        {
-          "@type": "OfferCatalog",
-          "name": "40ft Standard Container",
-          "description": "40ft standard shipping container, new or used",
-          "itemListElement": [{
-            "@type": "Offer",
-            "priceCurrency": "CAD",
-            "price": "4750",
-            "availability": "https://schema.org/InStock"
-          }]
-        },
-        {
-          "@type": "OfferCatalog",
-          "name": "40ft High Cube Container",
-          "description": "40ft high cube shipping container with extra height",
-          "itemListElement": [{
-            "@type": "Offer",
-            "priceCurrency": "CAD",
-            "price": "4750",
-            "availability": "https://schema.org/InStock"
-          }]
-        }
-      ]
+    "offers": {
+      "@type": "Offer",
+      "priceSpecification": {
+        "@type": "PriceSpecification",
+        "priceCurrency": "CAD",
+        "minPrice": "3000"
+      },
+      "availability": "https://schema.org/InStock"
     },
     ...(aggregateRating && { "aggregateRating": aggregateRating })
   },
@@ -99,6 +64,16 @@ const services = [
       "@type": "State",
       "name": "Saskatchewan"
     },
+    "offers": {
+      "@type": "Offer",
+      "priceSpecification": {
+        "@type": "PriceSpecification",
+        "priceCurrency": "CAD",
+        "minPrice": "150",
+        "unitText": "month"
+      },
+      "availability": "https://schema.org/InStock"
+    },
     ...(aggregateRating && { "aggregateRating": aggregateRating })
   },
   {
@@ -112,11 +87,17 @@ const services = [
     },
     "areaServed": {
       "@type": "City",
-      "name": "Martensville",
-      "containedInPlace": {
-        "@type": "State",
-        "name": "Saskatchewan"
-      }
+      "name": "Martensville"
+    },
+    "offers": {
+      "@type": "Offer",
+      "priceSpecification": {
+        "@type": "PriceSpecification",
+        "priceCurrency": "CAD",
+        "minPrice": "100",
+        "unitText": "month"
+      },
+      "availability": "https://schema.org/InStock"
     },
     ...(aggregateRating && { "aggregateRating": aggregateRating })
   },
