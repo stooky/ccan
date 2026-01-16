@@ -105,6 +105,9 @@ const apiEndpoint = import.meta.env.PUBLIC_CONTACT_API
     <input type="text" name="website_url" id="website_url" tabindex="-1" autocomplete="off" />
   </div>
 
+  <!-- Time-based validation (tracks form load time) -->
+  <input type="hidden" name="_formLoadTime" id="_formLoadTime" value="" />
+
   <!-- Status message -->
   <div id="form-status" class="hidden rounded-lg p-4"></div>
 
@@ -133,8 +136,14 @@ const apiEndpoint = import.meta.env.PUBLIC_CONTACT_API
     const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
     const btnText = document.getElementById('btn-text') as HTMLSpanElement;
     const btnLoading = document.getElementById('btn-loading') as HTMLSpanElement;
+    const formLoadTime = document.getElementById('_formLoadTime') as HTMLInputElement;
 
     if (!form) return;
+
+    // Set form load timestamp for time-based spam detection
+    if (formLoadTime) {
+      formLoadTime.value = Date.now().toString();
+    }
 
     const endpoint = form.dataset.endpoint || '/api/contact.php';
 

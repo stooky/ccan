@@ -148,6 +148,17 @@ $reviewsAvgRating = $reviewsData['averageRating'] ?? 0;
 // Get current tab
 $currentTab = $_GET['tab'] ?? 'submissions';
 
+// Load spam log
+$spamLogFile = dirname(__DIR__) . '/data/spam-log.json';
+$spamLog = [];
+if (file_exists($spamLogFile)) {
+    $spamContent = file_get_contents($spamLogFile);
+    $spamLog = json_decode($spamContent, true) ?? [];
+}
+$spamCount = count($spamLog);
+$spamToday = count(array_filter($spamLog, fn($s) => date('Y-m-d', strtotime($s['timestamp'] ?? '1970-01-01')) === date('Y-m-d')));
+$spamJson = json_encode($spamLog);
+
 // Load products config for Rich Snippets tab
 $productsConfig = [];
 if ($config && isset($config['products']['containers'])) {
@@ -523,6 +534,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             <a href="?key=<?= urlencode($secretPath) ?>&tab=submissions" class="tab <?= $currentTab === 'submissions' ? 'active' : '' ?>">
                 Submissions (<?= $totalSubmissions ?>)
             </a>
+            <a href="?key=<?= urlencode($secretPath) ?>&tab=spam" class="tab <?= $currentTab === 'spam' ? 'active' : '' ?>">
+                Spam (<?= $spamCount ?>)
+            </a>
             <a href="?key=<?= urlencode($secretPath) ?>&tab=reviews" class="tab <?= $currentTab === 'reviews' ? 'active' : '' ?>">
                 Reviews (<?= $reviewsTotalCount ?>)
             </a>
@@ -601,6 +615,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         </div>
 
         </div><!-- End Submissions Tab -->
+
+        <!-- Spam Tab -->
+        <div class="tab-content <?= $currentTab === 'spam' ? 'active' : '' ?>" id="spam-tab">
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value"><?= $spamCount ?></div>
+                    <div class="stat-label">Total Blocked</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value"><?= $spamToday ?></div>
+                    <div class="stat-label">Today</div>
+                </div>
+            </div>
+
+            <div style="background: #fef3c7; border: 1px solid #fcd34d; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem;">
+                <p style="font-size: 0.875rem; color: #92400e;">
+                    <strong>Spam Protection Active:</strong> These submissions were blocked by the spam filters.
+                    Blocked users see a fake "success" message so they don't know they were caught.
+                </p>
+            </div>
+
+            <!-- Spam Filter Bar -->
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label>Reason:</label>
+                    <select id="spam-reason-filter">
+                        <option value="all">All</option>
+                        <option value="honeypot">Honeypot</option>
+                        <option value="time_check">Time Check</option>
+                        <option value="content_filter">Content Filter</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Search:</label>
+                    <input type="text" id="spam-search-input" placeholder="Email, IP..." />
+                </div>
+                <span class="results-count"><span id="spam-filtered-count">0</span> blocked</span>
+            </div>
+
+            <div class="submissions" id="spam-container">
+                <!-- Spam entries will be rendered by JavaScript -->
+            </div>
+
+            <div class="empty" id="spam-empty-state" style="display: none;">
+                <p>No spam caught yet. That's a good thing!</p>
+            </div>
+        </div><!-- End Spam Tab -->
 
         <!-- Reviews Tab -->
         <div class="tab-content <?= $currentTab === 'reviews' ? 'active' : '' ?>" id="reviews-tab">
@@ -1590,6 +1651,150 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 }
             });
         }
+
+        // ============================================
+        // Spam Tab Functionality
+        // ============================================
+        const allSpam = <?= $spamJson ?>;
+        const spamContainer = document.getElementById('spam-container');
+        const spamEmptyState = document.getElementById('spam-empty-state');
+        const spamReasonFilter = document.getElementById('spam-reason-filter');
+        const spamSearchInput = document.getElementById('spam-search-input');
+        const spamFilteredCountEl = document.getElementById('spam-filtered-count');
+
+        function getReasonBadgeClass(reason) {
+            if (reason.startsWith('honeypot')) return 'badge-quote';
+            if (reason.startsWith('time_check')) return 'badge-message';
+            return 'badge-quote';
+        }
+
+        function getReasonLabel(reason) {
+            if (reason === 'honeypot') return 'Honeypot';
+            if (reason === 'time_check') return 'Too Fast';
+            if (reason.startsWith('content_filter:spam_phrase:')) return 'Spam Phrase: ' + reason.split(':')[2];
+            if (reason.startsWith('content_filter:excessive_urls')) return 'Too Many URLs';
+            if (reason.startsWith('content_filter:disposable_email:')) return 'Disposable Email';
+            if (reason.startsWith('content_filter:excessive_caps')) return 'Excessive Caps';
+            if (reason.startsWith('content_filter:')) return 'Content: ' + reason.split(':')[1];
+            return reason;
+        }
+
+        function filterSpam() {
+            const reasonFilter = spamReasonFilter?.value || 'all';
+            const search = spamSearchInput?.value?.toLowerCase().trim() || '';
+
+            const filtered = allSpam.filter(spam => {
+                // Reason filter
+                if (reasonFilter !== 'all') {
+                    if (!spam.reason?.startsWith(reasonFilter)) return false;
+                }
+
+                // Search filter
+                if (search) {
+                    const searchText = [
+                        spam.email || '',
+                        spam.ip || '',
+                        spam.reason || '',
+                        spam.userAgent || ''
+                    ].join(' ').toLowerCase();
+                    if (!searchText.includes(search)) return false;
+                }
+
+                return true;
+            });
+
+            // Sort by timestamp descending (newest first)
+            filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            renderSpam(filtered);
+            if (spamFilteredCountEl) spamFilteredCountEl.textContent = filtered.length;
+        }
+
+        function renderSpam(spamEntries) {
+            if (!spamContainer) return;
+
+            if (spamEntries.length === 0) {
+                spamContainer.innerHTML = '';
+                if (spamEmptyState) spamEmptyState.style.display = 'block';
+                return;
+            }
+
+            if (spamEmptyState) spamEmptyState.style.display = 'none';
+
+            spamContainer.innerHTML = spamEntries.map((spam, index) => {
+                const date = new Date(spam.timestamp);
+                const dateStr = date.toLocaleDateString();
+                const timeStr = date.toLocaleTimeString();
+
+                return `
+                    <div class="submission-row" id="spam-row-${index}">
+                        <div class="submission-summary" onclick="toggleSpamRow(${index})">
+                            <span class="expand-icon">▶</span>
+                            <span class="badge ${getReasonBadgeClass(spam.reason)}">
+                                ${escapeHtml(getReasonLabel(spam.reason))}
+                            </span>
+                            <span class="summary-email">${escapeHtml(spam.email || '(no email)')}</span>
+                            <span class="summary-phone">${escapeHtml(spam.ip || '')}</span>
+                            <span class="summary-preview">${escapeHtml((spam.userAgent || '').substring(0, 50))}</span>
+                            <span class="summary-date">${escapeHtml(dateStr)}</span>
+                        </div>
+                        <div class="submission-details">
+                            <div class="details-grid">
+                                <div class="detail-item">
+                                    <div class="detail-label">Blocked Reason</div>
+                                    <div class="detail-value">${escapeHtml(spam.reason)}</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Email</div>
+                                    <div class="detail-value">${escapeHtml(spam.email || '')}</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">IP Address</div>
+                                    <div class="detail-value">${escapeHtml(spam.ip || '')}</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Date & Time</div>
+                                    <div class="detail-value">${escapeHtml(dateStr + ' ' + timeStr)}</div>
+                                </div>
+                            </div>
+                            <div class="message-section">
+                                <div class="message-label">User Agent</div>
+                                <div class="message-content" style="font-size: 0.75rem;">${escapeHtml(spam.userAgent || '')}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleSpamRow(index) {
+            const row = document.getElementById('spam-row-' + index);
+            if (row) row.classList.toggle('expanded');
+        }
+
+        // Spam event listeners
+        if (spamReasonFilter) {
+            spamReasonFilter.addEventListener('change', filterSpam);
+        }
+        if (spamSearchInput) {
+            spamSearchInput.addEventListener('input', filterSpam);
+        }
+
+        // Initial spam render (if on spam tab)
+        if (document.getElementById('spam-tab')?.classList.contains('active')) {
+            filterSpam();
+        }
+
+        // Render spam when tab is clicked
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                setTimeout(() => {
+                    if (document.getElementById('spam-tab')?.classList.contains('active')) {
+                        filterSpam();
+                    }
+                }, 0);
+            });
+        });
     </script>
 </body>
 </html>

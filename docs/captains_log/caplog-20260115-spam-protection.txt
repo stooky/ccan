@@ -1,0 +1,110 @@
+================================================================================
+CAPTAIN'S LOG - 2026-01-15 - Spam Protection Implementation
+================================================================================
+
+## The Problem
+
+Forms were vulnerable to spam and scammers. Only protection was a honeypot field,
+which catches the dumbest bots but nothing else. Needed invisible protection that
+doesn't annoy legitimate customers with CAPTCHAs.
+
+## What We Built
+
+Multi-layer spam protection. All invisible to users. All configurable in config.yaml.
+
+### Layer 1: Honeypot (already existed)
+Hidden field that bots auto-fill. Humans never see it.
+
+### Layer 2: Time-Based Validation (NEW)
+- Frontend sets timestamp when form loads
+- Backend checks: did they submit in under 3 seconds?
+- Humans can't fill a form that fast. Bots can.
+- Configurable: `security.min_submit_time` (default: 3 seconds)
+
+### Layer 3: Rate Limiting (NEW - was in config but not enforced)
+- Tracks IP submissions in `data/rate-limits.json`
+- Blocks if too many requests in time window
+- Auto-cleans expired entries
+- Configurable: `security.rate_limit` (default: 10) and `rate_limit_window` (default: 3600 seconds)
+
+### Layer 4: Content Filtering (NEW)
+Checks message content for spam indicators:
+
+**Excessive URLs:** More than 2 links = spam (configurable: `security.max_urls`)
+
+**Spam Phrases:** Blocks messages containing:
+- crypto/bitcoin/ethereum/nft
+- seo services/rank your website
+- casino/poker/slot machine
+- viagra/cialis/pharmacy
+- make money fast/earn money online
+- nigerian prince/lottery winner
+- etc. (full list in config.yaml)
+
+**Excessive Caps:** Messages that are >75% uppercase get flagged
+
+### Layer 5: Disposable Email Blocking (NEW)
+Blocks throwaway email domains:
+- mailinator.com, guerrillamail.com, tempmail.com
+- 10minutemail.com, yopmail.com, etc.
+- ~20 domains blocked by default, easy to add more
+
+## Files Changed
+
+```
+src/components/ContactForm.astro      - Added _formLoadTime hidden field
+src/components/TabbedContactForm.astro - Added _formLoadTime to both forms
+api/contact.php                        - All the backend validation logic
+config.yaml                            - New security settings section
+README.md                              - Documentation
+```
+
+## Key Design Decisions
+
+1. **Pretend success on spam rejection**
+   Spammers get "Thank you for your message!" even when blocked.
+   No feedback = no way to probe the filters.
+
+2. **Spam logging**
+   All rejections logged to `data/spam-log.json` with reason, IP, email, timestamp.
+   Useful for analysis. Auto-truncates to last 500 entries when over 1000.
+
+3. **No CAPTCHA**
+   These invisible checks should catch 95%+ of spam.
+   If it gets bad later, Cloudflare Turnstile is the fallback plan.
+
+4. **Config-driven blocklists**
+   Spam phrases and disposable domains live in config.yaml.
+   Easy to add new ones without touching PHP code.
+
+## Testing Notes
+
+Can't fully test locally since PHP runs on server. Logic review:
+- Time check: compares JS Date.now() (ms) with PHP microtime(true)*1000 (ms)
+- Rate limit: file-based, cleans up on each request
+- Content filter: case-insensitive, checks all text fields
+
+## Admin Panel - Spam Tab
+
+Added a "Spam" tab to the admin panel (`/api/admin.php`) to view blocked submissions:
+- Shows total blocked count and today's count
+- Filter by reason (honeypot, time check, content filter)
+- Search by email or IP
+- Expandable rows show full details (reason, email, IP, user agent, timestamp)
+- Newest entries shown first
+
+The spam log auto-rotates at 1000 entries (keeps last 500).
+
+## What's NOT Protected
+
+- Quote form (`api/quote.php`) - same spam checks should be added if needed
+
+## Next Steps If Spam Persists
+
+1. Add Cloudflare Turnstile (free, invisible CAPTCHA)
+2. Implement email verification (send code, confirm to submit)
+3. Block by country if attacks come from specific regions
+
+---
+Session: ~45 minutes
+Result: 5-layer invisible spam protection, all configurable

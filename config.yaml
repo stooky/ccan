@@ -239,14 +239,73 @@ logging:
   max_size_mb: 10
 
 # -----------------------------------------------------------------------------
-# Security Settings
+# Security Settings (Spam Prevention)
 # -----------------------------------------------------------------------------
 security:
-  # Honeypot field name (for spam prevention)
+  # Honeypot field name (hidden field that bots fill out)
   honeypot_field: "website_url"
 
-  # Rate limiting: max submissions per IP per hour
+  # Time-based validation: minimum seconds to fill out form (bots submit instantly)
+  min_submit_time: 3
+
+  # Rate limiting: max submissions per IP within the window
   rate_limit: 10
+  rate_limit_window: 3600  # seconds (1 hour)
+
+  # Content filtering: max URLs allowed in message
+  max_urls: 2
+
+  # Spam phrases to block (checked in message + name fields)
+  # Add more as needed - these are case-insensitive
+  spam_phrases:
+    - "crypto"
+    - "bitcoin"
+    - "ethereum"
+    - "nft"
+    - "seo services"
+    - "seo expert"
+    - "rank your website"
+    - "web traffic"
+    - "buy followers"
+    - "instagram followers"
+    - "casino"
+    - "poker online"
+    - "slot machine"
+    - "viagra"
+    - "cialis"
+    - "pharmacy"
+    - "make money fast"
+    - "earn money online"
+    - "work from home opportunity"
+    - "nigerian prince"
+    - "lottery winner"
+    - "you have won"
+    - "click here now"
+    - "act now"
+    - "limited time offer"
+    - "webcam"
+    - "adult content"
+
+  # Disposable email domains to block
+  disposable_domains:
+    - "mailinator.com"
+    - "guerrillamail.com"
+    - "tempmail.com"
+    - "throwaway.email"
+    - "10minutemail.com"
+    - "trashmail.com"
+    - "fakeinbox.com"
+    - "temp-mail.org"
+    - "getnada.com"
+    - "maildrop.cc"
+    - "yopmail.com"
+    - "sharklasers.com"
+    - "guerrillamail.info"
+    - "grr.la"
+    - "spam4.me"
+    - "dispostable.com"
+    - "tempail.com"
+    - "burnermail.io"
 
 # -----------------------------------------------------------------------------
 # URL Redirects (301 Permanent)

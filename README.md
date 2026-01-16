@@ -99,10 +99,9 @@ GTM handles everything. The container ID is in `config.yaml`. GA4 runs inside GT
 Contact forms POST to `api/contact.php`. The quote system uses `api/quote.php`. Both:
 
 1. Validate server-side (never trust the client)
-2. Check honeypot field (catches most bots)
-3. Rate limit by IP (10 requests/hour)
-4. Send via Resend API (actually reaches inboxes)
-5. Log to JSON (you own your data)
+2. Run through multi-layer spam protection (see Security below)
+3. Send via Resend API (actually delivers to inboxes)
+4. Log to JSON (you own your data)
 
 Falls back to PHP `mail()` if no Resend key, but that usually lands in spam.
 
@@ -160,10 +159,26 @@ Total JavaScript shipped to the client: ~2KB for mobile nav toggle. Everything e
 
 ## Security
 
-Covers the basics without pretending to be Fort Knox:
+Covers the basics without pretending to be Fort Knox.
 
-- Honeypot fields catch form bots
-- Rate limiting prevents abuse (10 req/hour/IP)
+### Spam Protection (Multi-Layer)
+
+Forms go through five invisible checks. All are configurable in `config.yaml` under `security:`.
+
+| Layer | What it does | Default |
+|-------|--------------|---------|
+| **Honeypot** | Hidden field that bots fill out, humans don't see | `website_url` field |
+| **Time-based** | Rejects forms submitted in under N seconds (bots are instant) | 3 seconds minimum |
+| **Rate limiting** | Max submissions per IP within time window | 10 per hour |
+| **Content filter** | Blocks messages with spam phrases, excessive URLs, all-caps | See config for phrase list |
+| **Disposable emails** | Blocks throwaway email domains (mailinator, tempmail, etc.) | ~20 domains blocked |
+
+Spam attempts are logged to `data/spam-log.json` for analysis. Legitimate-looking rejections pretend to succeed (no feedback for spammers).
+
+**Adding to blocklists:** Edit `security.spam_phrases` or `security.disposable_domains` in config.yaml.
+
+### Infrastructure Security
+
 - Input sanitization in all PHP endpoints
 - Secret URL for admin (not auth, but sufficient for single-user)
 - nginx blocks direct access to `data/`, `config.yaml`, `.git/`

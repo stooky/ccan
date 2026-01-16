@@ -242,6 +242,9 @@ const apiEndpoint = isDev ? 'http://localhost:3001/contact' : '/api/contact.php'
         <input type="text" name="website_url" id="quote-website" tabindex="-1" autocomplete="off" />
       </div>
 
+      <!-- Time-based validation -->
+      <input type="hidden" name="_formLoadTime" class="form-load-time" value="" />
+
       <!-- Status message -->
       <div id="quote-status" class="hidden rounded-lg p-4"></div>
 
@@ -339,6 +342,9 @@ const apiEndpoint = isDev ? 'http://localhost:3001/contact' : '/api/contact.php'
         <input type="text" name="website_url" id="msg-website" tabindex="-1" autocomplete="off" />
       </div>
 
+      <!-- Time-based validation -->
+      <input type="hidden" name="_formLoadTime" class="form-load-time" value="" />
+
       <!-- Status message -->
       <div id="message-status" class="hidden rounded-lg p-4"></div>
 
@@ -364,6 +370,12 @@ const apiEndpoint = isDev ? 'http://localhost:3001/contact' : '/api/contact.php'
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    // Set form load timestamp for time-based spam detection
+    const formLoadTime = Date.now().toString();
+    document.querySelectorAll('.form-load-time').forEach(input => {
+      (input as HTMLInputElement).value = formLoadTime;
+    });
+
     // Tab switching
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabPanels = document.querySelectorAll('.tab-panel');

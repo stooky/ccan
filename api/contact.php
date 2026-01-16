@@ -70,7 +70,12 @@ function parseSimpleYaml($path) {
         ],
         'security' => [
             'honeypot_field' => 'website_url',
-            'rate_limit' => 10
+            'rate_limit' => 10,
+            'rate_limit_window' => 3600,
+            'min_submit_time' => 3,
+            'max_urls' => 2,
+            'spam_phrases' => [],
+            'disposable_domains' => []
         ]
     ];
 
@@ -89,9 +94,33 @@ function parseSimpleYaml($path) {
         $config['logging']['submissions_file'] = trim($matches[1]);
     }
 
-    // Extract honeypot field
+    // Extract security settings
     if (preg_match('/honeypot_field:\s*["\']?([^"\'\n]+)["\']?/', $content, $matches)) {
         $config['security']['honeypot_field'] = trim($matches[1]);
+    }
+    if (preg_match('/min_submit_time:\s*(\d+)/', $content, $matches)) {
+        $config['security']['min_submit_time'] = intval($matches[1]);
+    }
+    if (preg_match('/rate_limit:\s*(\d+)/', $content, $matches)) {
+        $config['security']['rate_limit'] = intval($matches[1]);
+    }
+    if (preg_match('/rate_limit_window:\s*(\d+)/', $content, $matches)) {
+        $config['security']['rate_limit_window'] = intval($matches[1]);
+    }
+    if (preg_match('/max_urls:\s*(\d+)/', $content, $matches)) {
+        $config['security']['max_urls'] = intval($matches[1]);
+    }
+
+    // Extract spam_phrases array
+    if (preg_match('/spam_phrases:\s*\n((?:\s+-\s*["\']?[^"\'\n]+["\']?\n)+)/m', $content, $matches)) {
+        preg_match_all('/-\s*["\']?([^"\'\n]+)["\']?/', $matches[1], $phrases);
+        $config['security']['spam_phrases'] = array_map('trim', $phrases[1]);
+    }
+
+    // Extract disposable_domains array
+    if (preg_match('/disposable_domains:\s*\n((?:\s+-\s*["\']?[^"\'\n]+["\']?\n)+)/m', $content, $matches)) {
+        preg_match_all('/-\s*["\']?([^"\'\n]+)["\']?/', $matches[1], $domains);
+        $config['security']['disposable_domains'] = array_map('trim', $domains[1]);
     }
 
     return $config;
@@ -111,6 +140,44 @@ if (strpos($contentType, 'application/json') !== false) {
 $honeypotField = $config['security']['honeypot_field'] ?? 'website_url';
 if (!empty($data[$honeypotField])) {
     // Bot detected - pretend success but do nothing
+    logSpamAttempt('honeypot', $data, $config);
+    echo json_encode(['success' => true, 'message' => 'Thank you for your message!']);
+    exit();
+}
+
+// Time-based validation (reject if form submitted too quickly)
+$minSubmitTime = $config['security']['min_submit_time'] ?? 3; // seconds
+if (!empty($data['_formLoadTime'])) {
+    $loadTime = intval($data['_formLoadTime']);
+    $submitTime = round(microtime(true) * 1000); // current time in ms
+    $elapsedSeconds = ($submitTime - $loadTime) / 1000;
+
+    if ($elapsedSeconds < $minSubmitTime) {
+        // Form submitted too quickly - likely a bot
+        logSpamAttempt('time_check', $data, $config);
+        echo json_encode(['success' => true, 'message' => 'Thank you for your message!']);
+        exit();
+    }
+}
+// Remove internal field from data
+unset($data['_formLoadTime']);
+
+// Rate limiting check
+$rateLimit = $config['security']['rate_limit'] ?? 10; // max per hour
+$rateLimitWindow = $config['security']['rate_limit_window'] ?? 3600; // 1 hour in seconds
+$clientIp = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+
+if (!checkRateLimit($clientIp, $rateLimit, $rateLimitWindow, $config)) {
+    http_response_code(429);
+    echo json_encode(['success' => false, 'message' => 'Too many submissions. Please try again later.']);
+    exit();
+}
+
+// Content filtering
+$contentFilterResult = checkContentFilters($data, $config);
+if ($contentFilterResult !== true) {
+    logSpamAttempt('content_filter:' . $contentFilterResult, $data, $config);
+    // Pretend success to not give spammers feedback
     echo json_encode(['success' => true, 'message' => 'Thank you for your message!']);
     exit();
 }
@@ -336,3 +403,146 @@ echo json_encode([
     'message' => 'Thank you for your message! We\'ll get back to you soon.',
     'id' => $submission['id']
 ]);
+
+/**
+ * Log spam attempt for analysis
+ */
+function logSpamAttempt($reason, $data, $config) {
+    $logFile = dirname(__DIR__) . '/data/spam-log.json';
+    $logDir = dirname($logFile);
+
+    if (!is_dir($logDir)) {
+        mkdir($logDir, 0755, true);
+    }
+
+    $entries = [];
+    if (file_exists($logFile)) {
+        $content = file_get_contents($logFile);
+        $entries = json_decode($content, true) ?? [];
+    }
+
+    // Keep only last 1000 entries
+    if (count($entries) > 1000) {
+        $entries = array_slice($entries, -500);
+    }
+
+    $entries[] = [
+        'timestamp' => date('c'),
+        'reason' => $reason,
+        'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+        'email' => $data['email'] ?? '',
+        'userAgent' => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 200),
+    ];
+
+    file_put_contents($logFile, json_encode($entries, JSON_PRETTY_PRINT));
+}
+
+/**
+ * Check rate limit for IP address
+ */
+function checkRateLimit($ip, $maxRequests, $windowSeconds, $config) {
+    $rateFile = dirname(__DIR__) . '/data/rate-limits.json';
+    $rateDir = dirname($rateFile);
+
+    if (!is_dir($rateDir)) {
+        mkdir($rateDir, 0755, true);
+    }
+
+    $now = time();
+    $rates = [];
+
+    if (file_exists($rateFile)) {
+        $content = file_get_contents($rateFile);
+        $rates = json_decode($content, true) ?? [];
+    }
+
+    // Clean up expired entries
+    foreach ($rates as $rateIp => $timestamps) {
+        $rates[$rateIp] = array_filter($timestamps, function($ts) use ($now, $windowSeconds) {
+            return ($now - $ts) < $windowSeconds;
+        });
+        if (empty($rates[$rateIp])) {
+            unset($rates[$rateIp]);
+        }
+    }
+
+    // Check current IP
+    $ipRequests = $rates[$ip] ?? [];
+    if (count($ipRequests) >= $maxRequests) {
+        file_put_contents($rateFile, json_encode($rates, JSON_PRETTY_PRINT));
+        return false;
+    }
+
+    // Add new request timestamp
+    $rates[$ip][] = $now;
+    file_put_contents($rateFile, json_encode($rates, JSON_PRETTY_PRINT));
+
+    return true;
+}
+
+/**
+ * Check content for spam indicators
+ * Returns true if clean, or string describing the filter that triggered
+ */
+function checkContentFilters($data, $config) {
+    $message = strtolower($data['message'] ?? '');
+    $email = strtolower($data['email'] ?? '');
+    $allText = $message . ' ' . ($data['name'] ?? '') . ' ' . ($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? '');
+    $allText = strtolower($allText);
+
+    // Check for excessive URLs (more than 2 links = spam)
+    $urlCount = preg_match_all('/https?:\/\/|www\./i', $message);
+    $maxUrls = $config['security']['max_urls'] ?? 2;
+    if ($urlCount > $maxUrls) {
+        return 'excessive_urls';
+    }
+
+    // Spam phrases to block
+    $spamPhrases = $config['security']['spam_phrases'] ?? [
+        'crypto', 'bitcoin', 'ethereum', 'nft',
+        'seo services', 'seo expert', 'rank your website',
+        'web traffic', 'buy followers', 'instagram followers',
+        'casino', 'poker online', 'slot machine',
+        'viagra', 'cialis', 'pharmacy',
+        'make money fast', 'earn money online', 'work from home opportunity',
+        'nigerian prince', 'lottery winner', 'you have won',
+        'click here now', 'act now', 'limited time offer',
+        'webcam', 'adult content', 'xxx',
+    ];
+
+    foreach ($spamPhrases as $phrase) {
+        if (strpos($allText, strtolower($phrase)) !== false) {
+            return 'spam_phrase:' . $phrase;
+        }
+    }
+
+    // Disposable email domains to block
+    $disposableDomains = $config['security']['disposable_domains'] ?? [
+        'mailinator.com', 'guerrillamail.com', 'tempmail.com', 'throwaway.email',
+        '10minutemail.com', 'trashmail.com', 'fakeinbox.com', 'temp-mail.org',
+        'getnada.com', 'maildrop.cc', 'yopmail.com', 'sharklasers.com',
+        'guerrillamail.info', 'grr.la', 'spam4.me', 'dispostable.com',
+        'mailnesia.com', 'tempr.email', 'discard.email', 'tmpmail.org',
+        'emailondeck.com', 'mohmal.com', 'tempail.com', 'burnermail.io',
+    ];
+
+    $emailDomain = '';
+    if (strpos($email, '@') !== false) {
+        $emailDomain = substr($email, strpos($email, '@') + 1);
+    }
+
+    foreach ($disposableDomains as $domain) {
+        if ($emailDomain === $domain) {
+            return 'disposable_email:' . $domain;
+        }
+    }
+
+    // Check for all caps message (often spam)
+    $upperCount = preg_match_all('/[A-Z]/', $data['message'] ?? '');
+    $lowerCount = preg_match_all('/[a-z]/', $data['message'] ?? '');
+    if ($upperCount > 20 && $lowerCount > 0 && ($upperCount / $lowerCount) > 3) {
+        return 'excessive_caps';
+    }
+
+    return true;
+}
