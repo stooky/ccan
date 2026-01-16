@@ -2,20 +2,11 @@
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/Footer.astro';
 import BreadcrumbSchema from '../components/schema/BreadcrumbSchema.astro';
-import { siteConfig } from '../config/site';
+import { siteConfig, getReviewStats } from '../config/site';
 import '../styles/global.css';
-import fs from 'node:fs';
-import path from 'node:path';
 
-// Load reviews for aggregate rating on LocalBusiness
-let reviewsData = { totalCount: 0, averageRating: 0 };
-try {
-  const reviewsPath = path.join(process.cwd(), 'data', 'reviews.json');
-  const reviewsContent = fs.readFileSync(reviewsPath, 'utf-8');
-  reviewsData = JSON.parse(reviewsContent);
-} catch {
-  // Reviews file not found, use defaults
-}
+// Get review stats for aggregate rating on LocalBusiness
+const reviewsData = getReviewStats();
 
 // Build sameAs array for LocalBusiness schema (social profiles)
 const sameAsLinks = [
@@ -139,8 +130,8 @@ const fullTitle = `${title} | ${siteConfig.name}`;
       },
       "geo": {
         "@type": "GeoCoordinates",
-        "latitude": 52.2614082,
-        "longitude": -106.6082841
+        "latitude": siteConfig.contact.geo.latitude,
+        "longitude": siteConfig.contact.geo.longitude
       },
       "openingHoursSpecification": [
         {
@@ -156,10 +147,10 @@ const fullTitle = `${title} | ${siteConfig.name}`;
         "@type": "GeoCircle",
         "geoMidpoint": {
           "@type": "GeoCoordinates",
-          "latitude": 52.1579,
-          "longitude": -106.6702
+          "latitude": siteConfig.contact.serviceArea.latitude,
+          "longitude": siteConfig.contact.serviceArea.longitude
         },
-        "geoRadius": "200000"
+        "geoRadius": String(siteConfig.contact.serviceArea.radius)
       },
       ...(reviewsData.totalCount > 0 && {
         "aggregateRating": {

@@ -41,16 +41,25 @@ function getRelativeTime(dateStr: string): string {
   if (diffDays < 1) return 'today';
   if (diffDays === 1) return 'yesterday';
   if (diffDays < 7) return `${diffDays} days ago`;
-  if (diffDays < 14) return 'a week ago';
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-  if (diffDays < 60) return 'a month ago';
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
-  if (diffDays < 730) return 'a year ago';
-  return `${Math.floor(diffDays / 365)} years ago`;
+
+  // Weeks: use calculation for smooth progression
+  const weeks = Math.floor(diffDays / 7);
+  if (diffDays < 30) return weeks === 1 ? 'a week ago' : `${weeks} weeks ago`;
+
+  // Months
+  const months = Math.floor(diffDays / 30);
+  if (diffDays < 365) return months === 1 ? 'a month ago' : `${months} months ago`;
+
+  // Years
+  const years = Math.floor(diffDays / 365);
+  return years === 1 ? 'a year ago' : `${years} years ago`;
 }
 
+// Counter for unique widget IDs (safer than Math.random)
+let widgetCounter = 0;
+
 // Unique ID for this widget instance
-const widgetId = `review-widget-${Math.random().toString(36).substr(2, 9)}`;
+const widgetId = `review-widget-${++widgetCounter}-${Date.now().toString(36)}`;
 ---
 
 {layout === 'featured' && (

@@ -29,11 +29,22 @@ interface Address {
   country: string;
 }
 
+interface GeoCoordinates {
+  latitude: number;
+  longitude: number;
+}
+
+interface ServiceArea extends GeoCoordinates {
+  radius: number;
+}
+
 interface Contact {
   email: string;
   phone: string;
   phoneLocal: string;
   address: Address;
+  geo: GeoCoordinates;
+  serviceArea: ServiceArea;
 }
 
 interface Social {
@@ -151,6 +162,15 @@ function loadConfig(): SiteConfig {
         zip: config.contact.address.zip,
         country: config.contact.address.country,
       },
+      geo: {
+        latitude: config.contact.geo?.latitude || 52.2614082,
+        longitude: config.contact.geo?.longitude || -106.6082841,
+      },
+      serviceArea: {
+        latitude: config.contact.service_area?.latitude || 52.1579,
+        longitude: config.contact.service_area?.longitude || -106.6702,
+        radius: config.contact.service_area?.radius || 200000,
+      },
     },
 
     // Social media
@@ -224,23 +244,58 @@ export function getContainerBySlug(slug: string): ContainerProduct | undefined {
   return siteConfig.products.containers.find(c => c.slug === slug);
 }
 
-// Load reviews from JSON file
-function loadReviews(): Review[] {
+// Cache for reviews data (loaded once per build)
+interface ReviewsData {
+  reviews: Review[];
+  totalCount: number;
+  averageRating: number;
+}
+let reviewsDataCache: ReviewsData | null = null;
+
+// Load reviews from JSON file (with caching)
+function loadReviewsData(): ReviewsData {
+  // Return cached data if already loaded
+  if (reviewsDataCache !== null) {
+    return reviewsDataCache;
+  }
+
   try {
     const reviewsPath = path.join(process.cwd(), 'data', 'reviews.json');
     const reviewsFile = fs.readFileSync(reviewsPath, 'utf-8');
     const data = JSON.parse(reviewsFile);
-    return (data.reviews || []).map((r: any) => ({
-      id: r.id,
-      author: r.author,
-      rating: r.rating,
-      date: r.date,
-      text: r.text,
-      hasPhoto: r.hasPhoto || false,
-    }));
+    reviewsDataCache = {
+      reviews: (data.reviews || []).map((r: any) => ({
+        id: r.id,
+        author: r.author,
+        rating: r.rating,
+        date: r.date,
+        text: r.text,
+        hasPhoto: r.hasPhoto || false,
+      })),
+      totalCount: data.totalCount || 0,
+      averageRating: data.averageRating || 0,
+    };
+    return reviewsDataCache;
   } catch {
-    return [];
+    reviewsDataCache = { reviews: [], totalCount: 0, averageRating: 0 };
+    return reviewsDataCache;
   }
+}
+
+// Get just the reviews array (for backward compatibility)
+function loadReviews(): Review[] {
+  return loadReviewsData().reviews;
+}
+
+// Get review stats for schema (totalCount, averageRating)
+export function getReviewStats(): { totalCount: number; averageRating: number } {
+  const data = loadReviewsData();
+  return { totalCount: data.totalCount, averageRating: data.averageRating };
+}
+
+// Helper: Format phone number to digits only (for tel: links)
+export function getPhoneDigits(phone: string): string {
+  return phone.replace(/\D/g, '');
 }
 
 // Get reviews for a specific page path

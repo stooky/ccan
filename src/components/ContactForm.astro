@@ -7,9 +7,10 @@ const {
   showSubject = true,
 } = Astro.props;
 
-// Determine API endpoint based on environment
-const isDev = import.meta.env.DEV;
-const apiEndpoint = isDev ? 'http://localhost:3001/contact' : '/api/contact.php';
+// API endpoint: use PUBLIC_CONTACT_API env var if set, otherwise defaults
+// In .env.local: PUBLIC_CONTACT_API=https://staging.example.com/api/contact
+const apiEndpoint = import.meta.env.PUBLIC_CONTACT_API
+  || (import.meta.env.DEV ? 'http://localhost:3001/contact' : '/api/contact.php');
 ---
 
 <form id="contact-form" class="space-y-6" data-endpoint={apiEndpoint}>

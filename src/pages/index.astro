@@ -8,52 +8,37 @@ import ReviewWidget from '../components/ReviewWidget.astro';
 import FAQSchema from '../components/schema/FAQSchema.astro';
 import WebSiteSchema from '../components/schema/WebSiteSchema.astro';
 import ServiceSchema from '../components/schema/ServiceSchema.astro';
-import { siteConfig } from '../config/site';
+import { siteConfig, getContainerBySlug } from '../config/site';
 import heroBg from '../assets/images/hero-bg.webp';
 
-// Container products with specs for quick-reference grid
-const containers = [
-  {
-    name: "9ft Mini",
-    slug: "9ft-mini",
-    dimensions: "9' × 7' × 7'6\"",
-    sqft: "63 sq ft",
-    newPrice: "$4,000+",
-    usedPrice: null,
-    bestFor: "Tight spaces, backyard storage",
-    popular: false,
-  },
-  {
-    name: "20ft Standard",
-    slug: "20ft-standard",
-    dimensions: "20' × 8' × 8'6\"",
-    sqft: "160 sq ft",
-    newPrice: "$4,450+",
-    usedPrice: "$3,000+",
-    bestFor: "Residential, small business",
-    popular: true,
-  },
-  {
-    name: "40ft Standard",
-    slug: "40ft-standard",
-    dimensions: "40' × 8' × 8'6\"",
-    sqft: "320 sq ft",
-    newPrice: null,
-    usedPrice: "$4,750+",
-    bestFor: "Commercial, industrial",
-    popular: false,
-  },
-  {
-    name: "40ft High Cube",
-    slug: "40ft-high-cube",
-    dimensions: "40' × 8' × 9'6\"",
-    sqft: "320 sq ft",
-    newPrice: "$6,500+",
-    usedPrice: "$4,750+",
-    bestFor: "Tall items, max capacity",
-    popular: true,
-  },
+// Helper to format price from config
+function formatPrice(price: number | undefined): string | null {
+  if (!price) return null;
+  return `$${price.toLocaleString()}+`;
+}
+
+// Container display data (UI-specific fields + prices from config)
+const containerDisplayData = [
+  { slug: "9ft-mini", dimensions: "9' × 7' × 7'6\"", sqft: "63 sq ft", bestFor: "Tight spaces, backyard storage", popular: false },
+  { slug: "20ft-standard", dimensions: "20' × 8' × 8'6\"", sqft: "160 sq ft", bestFor: "Residential, small business", popular: true },
+  { slug: "40ft-standard", dimensions: "40' × 8' × 8'6\"", sqft: "320 sq ft", bestFor: "Commercial, industrial", popular: false },
+  { slug: "40ft-high-cube", dimensions: "40' × 8' × 9'6\"", sqft: "320 sq ft", bestFor: "Tall items, max capacity", popular: true },
 ];
+
+// Merge display data with pricing from config (single source of truth for prices)
+const containers = containerDisplayData.map(display => {
+  const product = getContainerBySlug(display.slug);
+  return {
+    name: product?.name || display.slug,
+    slug: display.slug,
+    dimensions: display.dimensions,
+    sqft: display.sqft,
+    newPrice: formatPrice(product?.new?.min),
+    usedPrice: formatPrice(product?.used?.min),
+    bestFor: display.bestFor,
+    popular: display.popular,
+  };
+});
 
 // FAQ data for schema and display - targeting Search Console keywords
 const faqs = [

@@ -64,6 +64,15 @@ contact:
     state: "SK"
     zip: "S0K 0A2"
     country: "Canada"
+  # Geo coordinates for LocalBusiness schema
+  geo:
+    latitude: 52.2614082
+    longitude: -106.6082841
+  # Service area center (Saskatoon) and radius in meters
+  service_area:
+    latitude: 52.1579
+    longitude: -106.6702
+    radius: 200000
 
 # -----------------------------------------------------------------------------
 # Business Hours

@@ -178,26 +178,55 @@ Most reviews should appear on 1-3 pages maximum.`
 function updateConfig(tagged) {
   let content = fs.readFileSync(CONFIG_PATH, 'utf-8');
 
-  // Find and replace the tagged section
-  const taggedStart = content.indexOf('tagged:');
+  // Find the tagged section
+  const taggedStart = content.indexOf('\n  tagged:');
   if (taggedStart === -1) {
     console.error('Could not find tagged: section in config.yaml');
     return false;
   }
 
+  // Find where the tagged section ends (next top-level or second-level section)
+  // Look for next line that starts with no indent or 2 spaces (sibling section)
+  const lines = content.split('\n');
+  let taggedLineIndex = -1;
+  let taggedEndLineIndex = -1;
+
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].trim() === 'tagged:' || lines[i] === '  tagged:') {
+      taggedLineIndex = i;
+      continue;
+    }
+    // After finding tagged:, look for the next section at same or higher level
+    if (taggedLineIndex !== -1 && taggedEndLineIndex === -1) {
+      const line = lines[i];
+      // Next section at reviews level (2 spaces) or top level (no indent)
+      if (line.match(/^  [a-z_]+:/) || (line.match(/^[a-z_]+:/) && line.trim() !== '')) {
+        taggedEndLineIndex = i;
+        break;
+      }
+    }
+  }
+
+  // If no end found, tagged section goes to end of file
+  if (taggedEndLineIndex === -1) {
+    taggedEndLineIndex = lines.length;
+  }
+
   // Build the new tagged section
-  const taggedLines = ['tagged:'];
+  const taggedLines = ['  tagged:'];
   for (const [reviewId, pages] of Object.entries(tagged)) {
     if (pages.length > 0) {
       taggedLines.push(`    ${reviewId}: ${JSON.stringify(pages)}`);
     }
   }
 
-  // Find where the tagged section ends (next section or end of file)
-  const beforeTagged = content.substring(0, taggedStart);
+  // Reconstruct the file: before + new tagged + after
+  const beforeTagged = lines.slice(0, taggedLineIndex);
+  const afterTagged = lines.slice(taggedEndLineIndex);
 
-  // Write the new config
-  const newContent = beforeTagged + taggedLines.join('\n') + '\n';
+  const newLines = [...beforeTagged, ...taggedLines, ...afterTagged];
+  const newContent = newLines.join('\n');
+
   fs.writeFileSync(CONFIG_PATH, newContent, 'utf-8');
 
   return true;
