@@ -108,3 +108,100 @@ The spam log auto-rotates at 1000 entries (keeps last 500).
 ---
 Session: ~45 minutes
 Result: 5-layer invisible spam protection, all configurable
+
+================================================================================
+UPDATE - 2026-01-16 - Advanced Bot Detection Added
+================================================================================
+
+## The Problem
+
+Spam got through with gibberish content:
+- Name: "RLuWJgVLqRmIFixr" (random characters)
+- Email: "xoxob.a.ya.qo8.3@gmail.com" (suspicious dot pattern)
+- Message: "txKSMOAQNXRvxXvezHI" (no real words)
+- Phone: "5996424987" (invalid area code - 599 is Caribbean)
+
+Basic filters didn't catch it because:
+- No spam keywords
+- Not a disposable email domain
+- Waited 3+ seconds to submit
+- Didn't fill honeypot
+
+## What We Added
+
+### 1. Gibberish Detection (entropy analysis)
+Random strings have high entropy and lack common letter patterns.
+- Checks: th, he, in, er, an, re, on, at... (common English bigrams)
+- "txKSMOAQNXRvxXvezHI" has high entropy + no common patterns = blocked
+
+### 2. Name Validation
+Real names have:
+- Vowels (~35-45% of letters)
+- No more than 4 consecutive consonants
+- Capitals only at start of words
+
+"RLuWJgVLqRmIFixr" fails: random mid-word capitals, low vowel ratio
+
+### 3. Phone Area Code Validation
+Checks against list of valid Canadian area codes:
+- 306, 639 (Saskatchewan)
+- 403, 587, 780, 825 (Alberta)
+- 204, 431 (Manitoba)
+- 236, 250, 604, 672, 778 (BC)
+- Plus Ontario, Quebec
+
+"5996424987" fails: 599 not in valid list
+
+### 4. Message Word Validation
+Requires at least one real English word from a dictionary of ~150 common words
+plus container/shipping-specific terms (quote, delivery, container, etc.)
+
+"txKSMOAQNXRvxXvezHI" fails: zero dictionary matches
+
+### 5. Gmail Dot Pattern
+Bots often use gmail addresses with many dots: x.o.x.o.b@gmail.com
+- Limit: 3+ dots in username = flagged
+- Legitimate users rarely have this pattern
+
+## Config Options (all in config.yaml)
+
+```yaml
+security:
+  gibberish_detection: true
+  name_validation: true
+  phone_area_code_validation: true
+  valid_area_codes: ["306", "639", ...]
+  message_word_validation: true
+  min_real_words: 1
+  gmail_dot_limit: 3
+```
+
+## Files Changed
+
+```
+config.yaml       - New security settings
+api/contact.php   - 4 new validation functions
+README.md         - Updated security documentation
+```
+
+## The Spam That Triggered This
+
+```
+Name: RLuWJgVLqRmIFixr
+Email: xoxob.a.ya.qo8.3@gmail.com
+Phone: 5996424987
+Message: txKSMOAQNXRvxXvezHI
+IP: 185.220.101.131 (Tor exit node)
+```
+
+Would now be caught by:
+- invalid_name:random_caps
+- invalid_phone:invalid_area_code:599
+- gibberish_message:no_real_words
+- gmail_dot_pattern:4_dots
+
+Any ONE of these would block it.
+
+---
+Session update: +30 minutes
+Result: 10-layer invisible spam protection (basic 5 + advanced 5)

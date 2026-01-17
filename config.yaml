@@ -307,6 +307,51 @@ security:
     - "tempail.com"
     - "burnermail.io"
 
+  # --- Advanced Bot Detection (catches gibberish spam) ---
+
+  # Gibberish detection: enable checking for random character strings
+  gibberish_detection: true
+
+  # Name validation: require names to have vowels and reasonable structure
+  name_validation: true
+
+  # Phone validation: require valid North American area codes
+  # Set to false if you expect international customers
+  phone_area_code_validation: true
+  valid_area_codes:
+    # Saskatchewan
+    - "306"
+    - "639"
+    # Alberta
+    - "403"
+    - "587"
+    - "780"
+    - "825"
+    # Manitoba
+    - "204"
+    - "431"
+    # BC
+    - "236"
+    - "250"
+    - "604"
+    - "672"
+    - "778"
+    # Ontario (common)
+    - "416"
+    - "647"
+    - "905"
+    - "437"
+    # Quebec (common)
+    - "514"
+    - "438"
+
+  # Message validation: require at least one real English word
+  message_word_validation: true
+  min_real_words: 1
+
+  # Gmail dot pattern: flag emails with 3+ dots in username (bot pattern)
+  gmail_dot_limit: 3
+
 # -----------------------------------------------------------------------------
 # URL Redirects (301 Permanent)
 # -----------------------------------------------------------------------------

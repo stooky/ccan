@@ -163,7 +163,9 @@ Covers the basics without pretending to be Fort Knox.
 
 ### Spam Protection (Multi-Layer)
 
-Forms go through five invisible checks. All are configurable in `config.yaml` under `security:`.
+Forms go through multiple invisible checks. All are configurable in `config.yaml` under `security:`.
+
+#### Basic Protection
 
 | Layer | What it does | Default |
 |-------|--------------|---------|
@@ -173,9 +175,29 @@ Forms go through five invisible checks. All are configurable in `config.yaml` un
 | **Content filter** | Blocks messages with spam phrases, excessive URLs, all-caps | See config for phrase list |
 | **Disposable emails** | Blocks throwaway email domains (mailinator, tempmail, etc.) | ~20 domains blocked |
 
+#### Advanced Bot Detection
+
+Catches sophisticated bots that bypass basic filters (gibberish names/messages, fake phone numbers).
+
+| Layer | What it does | Config Key |
+|-------|--------------|------------|
+| **Gibberish detection** | Entropy analysis catches random strings like "RLuWJgVL" | `gibberish_detection: true` |
+| **Name validation** | Checks vowel ratio, consonant clusters, random caps | `name_validation: true` |
+| **Phone validation** | Requires valid Canadian area codes (306, 639, etc.) | `phone_area_code_validation: true` |
+| **Message word check** | Requires at least one real English word | `message_word_validation: true` |
+| **Gmail dot pattern** | Flags emails with 3+ dots (e.g., `x.o.x.o@gmail.com`) | `gmail_dot_limit: 3` |
+
+**How it catches spam:**
+- Name "RLuWJgVLqRmIFixr" fails: random caps, low vowel ratio
+- Message "txKSMOAQNXRvxXvezHI" fails: no real words, high entropy
+- Phone "5996424987" fails: invalid area code (599 is Caribbean)
+- Email "xoxob.a.ya.qo8.3@gmail.com" fails: 4 dots in username
+
 Spam attempts are logged to `data/spam-log.json` for analysis. Legitimate-looking rejections pretend to succeed (no feedback for spammers).
 
 **Adding to blocklists:** Edit `security.spam_phrases` or `security.disposable_domains` in config.yaml.
+
+**Adding area codes:** Edit `security.valid_area_codes` to include more Canadian/US area codes as needed.
 
 ### Infrastructure Security
 

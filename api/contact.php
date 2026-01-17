@@ -75,7 +75,15 @@ function parseSimpleYaml($path) {
             'min_submit_time' => 3,
             'max_urls' => 2,
             'spam_phrases' => [],
-            'disposable_domains' => []
+            'disposable_domains' => [],
+            // Advanced bot detection
+            'gibberish_detection' => true,
+            'name_validation' => true,
+            'phone_area_code_validation' => true,
+            'valid_area_codes' => ['306', '639', '403', '587', '780', '204', '431', '250', '604', '778'],
+            'message_word_validation' => true,
+            'min_real_words' => 1,
+            'gmail_dot_limit' => 3
         ]
     ];
 
@@ -121,6 +129,32 @@ function parseSimpleYaml($path) {
     if (preg_match('/disposable_domains:\s*\n((?:\s+-\s*["\']?[^"\'\n]+["\']?\n)+)/m', $content, $matches)) {
         preg_match_all('/-\s*["\']?([^"\'\n]+)["\']?/', $matches[1], $domains);
         $config['security']['disposable_domains'] = array_map('trim', $domains[1]);
+    }
+
+    // Extract advanced bot detection settings
+    if (preg_match('/gibberish_detection:\s*(true|false)/i', $content, $matches)) {
+        $config['security']['gibberish_detection'] = strtolower($matches[1]) === 'true';
+    }
+    if (preg_match('/name_validation:\s*(true|false)/i', $content, $matches)) {
+        $config['security']['name_validation'] = strtolower($matches[1]) === 'true';
+    }
+    if (preg_match('/phone_area_code_validation:\s*(true|false)/i', $content, $matches)) {
+        $config['security']['phone_area_code_validation'] = strtolower($matches[1]) === 'true';
+    }
+    if (preg_match('/message_word_validation:\s*(true|false)/i', $content, $matches)) {
+        $config['security']['message_word_validation'] = strtolower($matches[1]) === 'true';
+    }
+    if (preg_match('/min_real_words:\s*(\d+)/', $content, $matches)) {
+        $config['security']['min_real_words'] = intval($matches[1]);
+    }
+    if (preg_match('/gmail_dot_limit:\s*(\d+)/', $content, $matches)) {
+        $config['security']['gmail_dot_limit'] = intval($matches[1]);
+    }
+
+    // Extract valid_area_codes array
+    if (preg_match('/valid_area_codes:\s*\n((?:\s+-\s*["\']?[^"\'\n]+["\']?\n)+)/m', $content, $matches)) {
+        preg_match_all('/-\s*["\']?([^"\'\n]+)["\']?/', $matches[1], $codes);
+        $config['security']['valid_area_codes'] = array_map('trim', $codes[1]);
     }
 
     return $config;
@@ -544,5 +578,208 @@ function checkContentFilters($data, $config) {
         return 'excessive_caps';
     }
 
+    // --- Advanced Bot Detection ---
+
+    // Gmail dot pattern check (bots often use x.o.x.o.b pattern)
+    $gmailDotLimit = $config['security']['gmail_dot_limit'] ?? 3;
+    if (strpos($email, '@gmail.com') !== false) {
+        $username = substr($email, 0, strpos($email, '@'));
+        $dotCount = substr_count($username, '.');
+        if ($dotCount >= $gmailDotLimit) {
+            return 'gmail_dot_pattern:' . $dotCount . '_dots';
+        }
+    }
+
+    // Name validation (check for gibberish names)
+    if ($config['security']['name_validation'] ?? true) {
+        $name = $data['name'] ?? (($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? ''));
+        $name = trim($name);
+        if (strlen($name) > 0) {
+            $nameResult = isGibberishName($name);
+            if ($nameResult !== true) {
+                return 'invalid_name:' . $nameResult;
+            }
+        }
+    }
+
+    // Phone area code validation
+    if ($config['security']['phone_area_code_validation'] ?? true) {
+        $phone = preg_replace('/\D/', '', $data['phone'] ?? '');
+        if (strlen($phone) >= 10) {
+            $validCodes = $config['security']['valid_area_codes'] ?? ['306', '639'];
+            $phoneResult = isValidAreaCode($phone, $validCodes);
+            if ($phoneResult !== true) {
+                return 'invalid_phone:' . $phoneResult;
+            }
+        }
+    }
+
+    // Message word validation (check for gibberish messages)
+    if ($config['security']['message_word_validation'] ?? true) {
+        $messageText = $data['message'] ?? '';
+        if (strlen(trim($messageText)) > 0) {
+            $minWords = $config['security']['min_real_words'] ?? 1;
+            $messageResult = hasRealWords($messageText, $minWords);
+            if ($messageResult !== true) {
+                return 'gibberish_message:' . $messageResult;
+            }
+        }
+    }
+
+    // Gibberish detection on all text fields
+    if ($config['security']['gibberish_detection'] ?? true) {
+        $fieldsToCheck = ['name', 'firstName', 'lastName', 'message'];
+        foreach ($fieldsToCheck as $field) {
+            $value = $data[$field] ?? '';
+            if (strlen($value) > 5 && isRandomString($value)) {
+                return 'gibberish_' . $field;
+            }
+        }
+    }
+
     return true;
+}
+
+/**
+ * Check if a name looks like gibberish
+ */
+function isGibberishName($name) {
+    // Names should have at least some vowels
+    $vowelCount = preg_match_all('/[aeiouAEIOU]/', $name);
+    $consonantCount = preg_match_all('/[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]/', $name);
+    $letterCount = $vowelCount + $consonantCount;
+
+    // If mostly letters and very few vowels, likely gibberish
+    if ($letterCount > 5 && $vowelCount == 0) {
+        return 'no_vowels';
+    }
+
+    // Check vowel ratio (normal names have ~35-45% vowels)
+    if ($letterCount > 8) {
+        $vowelRatio = $vowelCount / $letterCount;
+        if ($vowelRatio < 0.15) {
+            return 'low_vowel_ratio';
+        }
+    }
+
+    // Check for too many consecutive consonants (more than 4 is unusual)
+    if (preg_match('/[bcdfghjklmnpqrstvwxyz]{5,}/i', $name)) {
+        return 'consonant_cluster';
+    }
+
+    // Check for random case patterns mid-word (like "RLuWJgVL")
+    // Normal names: "John", "McDonald" - capitals only at start or after space/apostrophe
+    $words = preg_split('/[\s\'-]+/', $name);
+    foreach ($words as $word) {
+        if (strlen($word) > 3) {
+            // Count mid-word capitals (not first letter)
+            $midCaps = preg_match_all('/(?!^)[A-Z]/', $word);
+            if ($midCaps > 2) {
+                return 'random_caps';
+            }
+        }
+    }
+
+    return true;
+}
+
+/**
+ * Check if phone has valid North American area code
+ */
+function isValidAreaCode($phone, $validCodes) {
+    // Remove country code if present (1 for North America)
+    if (strlen($phone) == 11 && $phone[0] == '1') {
+        $phone = substr($phone, 1);
+    }
+
+    if (strlen($phone) < 10) {
+        return 'too_short';
+    }
+
+    $areaCode = substr($phone, 0, 3);
+
+    // Check against valid area codes
+    if (!in_array($areaCode, $validCodes)) {
+        return 'invalid_area_code:' . $areaCode;
+    }
+
+    return true;
+}
+
+/**
+ * Check if message contains real English words
+ */
+function hasRealWords($message, $minWords = 1) {
+    // Common English words (expanded list for better detection)
+    $commonWords = [
+        'the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'i',
+        'it', 'for', 'not', 'on', 'with', 'he', 'as', 'you', 'do', 'at',
+        'this', 'but', 'his', 'by', 'from', 'they', 'we', 'say', 'her', 'she',
+        'or', 'an', 'will', 'my', 'one', 'all', 'would', 'there', 'their', 'what',
+        'so', 'up', 'out', 'if', 'about', 'who', 'get', 'which', 'go', 'me',
+        'when', 'make', 'can', 'like', 'time', 'no', 'just', 'him', 'know', 'take',
+        'people', 'into', 'year', 'your', 'good', 'some', 'could', 'them', 'see', 'other',
+        'than', 'then', 'now', 'look', 'only', 'come', 'its', 'over', 'think', 'also',
+        'back', 'after', 'use', 'two', 'how', 'our', 'work', 'first', 'well', 'way',
+        'even', 'new', 'want', 'because', 'any', 'these', 'give', 'day', 'most', 'us',
+        // Container/shipping related words
+        'container', 'shipping', 'storage', 'delivery', 'pickup', 'quote', 'price',
+        'buy', 'sell', 'rent', 'lease', 'need', 'looking', 'interested', 'please',
+        'thanks', 'thank', 'hello', 'hi', 'hey', 'call', 'contact', 'email', 'phone',
+        'question', 'questions', 'help', 'information', 'info', 'size', 'condition',
+        'new', 'used', 'foot', 'feet', 'ft', 'standard', 'high', 'cube',
+        'deliver', 'delivered', 'location', 'address', 'available', 'cost', 'much',
+        'weekend', 'weekends', 'week', 'today', 'tomorrow', 'soon', 'asap',
+        'yes', 'no', 'maybe', 'ok', 'okay',
+    ];
+
+    // Extract words from message
+    $words = preg_split('/[\s\p{P}]+/u', strtolower($message));
+    $words = array_filter($words, fn($w) => strlen($w) >= 2);
+
+    $realWordCount = 0;
+    foreach ($words as $word) {
+        if (in_array($word, $commonWords)) {
+            $realWordCount++;
+        }
+    }
+
+    if ($realWordCount < $minWords) {
+        return 'no_real_words';
+    }
+
+    return true;
+}
+
+/**
+ * Check if a string appears to be random characters
+ */
+function isRandomString($str) {
+    // Skip if too short
+    if (strlen($str) < 6) return false;
+
+    // Check entropy (randomness)
+    $str = strtolower($str);
+    $chars = count_chars($str, 1);
+    $len = strlen($str);
+
+    // Calculate entropy
+    $entropy = 0;
+    foreach ($chars as $count) {
+        $p = $count / $len;
+        $entropy -= $p * log($p, 2);
+    }
+
+    // High entropy combined with other indicators suggests random string
+    // Normal English text has entropy around 4.0-4.5
+    // Random strings have entropy around 4.5-5.0+
+    if ($entropy > 4.3) {
+        // Also check for lack of common letter patterns
+        $hasCommonPatterns = preg_match('/(th|he|in|er|an|re|on|at|en|es|or|te|of|ed|is|it|al|ar|st|to|nt|ng|se|ha|as|ou|io|le|ve|co|me|de|hi|ri|ro|ic|ne|ea|ra|ce)/i', $str);
+        if (!$hasCommonPatterns) {
+            return true;
+        }
+    }
+
+    return false;
 }
