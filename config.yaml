@@ -16,6 +16,22 @@ site:
   default_og_image: "/images/logo.png"
 
 # -----------------------------------------------------------------------------
+# Data Version & Migration
+# -----------------------------------------------------------------------------
+# Bump this version when data file structures change.
+# The deploy script will backup data and run migrations automatically.
+# See migrations/ folder for migration scripts.
+#
+data:
+  version: 1
+  files:
+    - submissions.json
+    - reviews.json
+    - inventory.json
+    - spam-log.json
+    - quote-requests.json
+
+# -----------------------------------------------------------------------------
 # Product Pricing (Sale prices in CAD)
 # -----------------------------------------------------------------------------
 # Prices are controlled here and used for:

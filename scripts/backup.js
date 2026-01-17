@@ -24,10 +24,13 @@ const DATA_DIR = path.join(ROOT, 'data');
 const CONFIG_PATH = path.join(ROOT, 'config.yaml');
 const LOCAL_CONFIG_PATH = path.join(ROOT, 'config.local.yaml');
 
-// Files to backup
+// Files to backup (all important data files)
 const BACKUP_FILES = [
   'submissions.json',
-  'reviews.json'
+  'reviews.json',
+  'inventory.json',
+  'spam-log.json',
+  'quote-requests.json'
 ];
 
 // Simple YAML parser for our config
@@ -147,11 +150,13 @@ function sendBackupEmail(config, zipPath, zipName) {
     const stats = BACKUP_FILES.map(f => {
       const filePath = path.join(DATA_DIR, f);
       if (fs.existsSync(filePath)) {
-        const content = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-        if (f === 'submissions.json') {
-          return `- ${f}: ${Array.isArray(content) ? content.length : 0} submissions`;
-        } else if (f === 'reviews.json') {
-          return `- ${f}: ${content.reviews?.length || 0} reviews`;
+        try {
+          const content = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+          const count = Array.isArray(content) ? content.length : (content.reviews?.length || content.items?.length || Object.keys(content).length);
+          const label = f.replace('.json', '').replace(/-/g, ' ');
+          return `- ${f}: ${count} ${label}`;
+        } catch (e) {
+          return `- ${f}: (parse error)`;
         }
       }
       return `- ${f}: not found`;

@@ -33,8 +33,14 @@ pnpm-debug.log*
 temp/
 backup/
 
-# Form submissions (sensitive data)
+# Data backups (created automatically by deploy script)
+data/backups/
+
+# Runtime data files (server-managed, not tracked in git)
 data/submissions.json
+data/spam-log.json
+data/quote-requests.json
+data/rate-limits.json
 
 # Local config overrides (per-server settings)
 config.local.yaml
