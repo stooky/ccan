@@ -67,7 +67,9 @@ try {
 
   // Step 1: Create backup
   console.log('📦 Backing up data files...');
-  const backupDir = `data/backups/$(date +%Y-%m-%d-%H%M%S)`;
+  // Generate timestamp locally to avoid shell escaping issues
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const backupDir = `data/backups/${timestamp}`;
   ssh(`cd ${remotePath} && mkdir -p ${backupDir}`);
 
   const dataFiles = ['submissions.json', 'reviews.json', 'inventory.json', 'spam-log.json', 'quote-requests.json', 'rate-limits.json'];
