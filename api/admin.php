@@ -51,8 +51,8 @@ $secretPath = $config['admin']['secret_path'] ?? 'ccan-admin-2024';
 $perPage = $config['admin']['per_page'] ?? 100;
 $logFile = dirname(__DIR__) . '/' . ($config['logging']['submissions_file'] ?? 'data/submissions.json');
 
-// Check authentication
-$providedKey = $_GET['key'] ?? '';
+// Check authentication (accept key from GET or POST for AJAX requests)
+$providedKey = $_GET['key'] ?? $_POST['key'] ?? '';
 if ($providedKey !== $secretPath) {
     http_response_code(404);
     echo '<!DOCTYPE html><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1></body></html>';
