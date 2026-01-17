@@ -76,6 +76,90 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     exit();
 }
 
+// Handle add review action
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_review') {
+    header('Content-Type: application/json');
+
+    $author = trim($_POST['author'] ?? '');
+    $rating = (int)($_POST['rating'] ?? 0);
+    $text = trim($_POST['text'] ?? '');
+    $ownerResponse = trim($_POST['ownerResponse'] ?? '');
+
+    // Validate
+    if (empty($author)) {
+        echo json_encode(['success' => false, 'message' => 'Name is required']);
+        exit();
+    }
+    if ($rating < 1 || $rating > 5) {
+        echo json_encode(['success' => false, 'message' => 'Rating must be between 1 and 5']);
+        exit();
+    }
+
+    // Load reviews
+    $reviewsPath = dirname(__DIR__) . '/data/reviews.json';
+    $reviewsData = ['reviews' => [], 'lastSync' => null, 'totalCount' => 0, 'averageRating' => 0, 'source' => 'Google Business Profile'];
+    if (file_exists($reviewsPath)) {
+        $reviewsData = json_decode(file_get_contents($reviewsPath), true) ?? $reviewsData;
+    }
+
+    // Generate new review ID
+    $maxId = 0;
+    foreach ($reviewsData['reviews'] as $review) {
+        if (preg_match('/review_(\d+)/', $review['id'], $matches)) {
+            $maxId = max($maxId, (int)$matches[1]);
+        }
+    }
+    $newId = 'review_' . str_pad($maxId + 1, 3, '0', STR_PAD_LEFT);
+
+    // Create new review
+    $newReview = [
+        'id' => $newId,
+        'author' => $author,
+        'rating' => $rating,
+        'date' => date('Y-m-d'),
+        'relativeDate' => 'Just now',
+        'text' => $text ?: null,
+        'hasPhoto' => false,
+        'isNew' => true,
+        'source' => 'manual'
+    ];
+
+    // Add owner response if provided
+    if (!empty($ownerResponse)) {
+        $newReview['ownerResponse'] = [
+            'date' => date('Y-m-d'),
+            'text' => $ownerResponse
+        ];
+    }
+
+    // Remove null text if empty
+    if ($newReview['text'] === null) {
+        unset($newReview['text']);
+    }
+
+    // Add to beginning of reviews array
+    array_unshift($reviewsData['reviews'], $newReview);
+
+    // Update stats
+    $reviewsData['totalCount'] = count($reviewsData['reviews']);
+    $totalRating = 0;
+    foreach ($reviewsData['reviews'] as $review) {
+        $totalRating += $review['rating'];
+    }
+    $reviewsData['averageRating'] = round($totalRating / $reviewsData['totalCount'], 2);
+
+    // Save
+    file_put_contents($reviewsPath, json_encode($reviewsData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+    echo json_encode([
+        'success' => true,
+        'review' => $newReview,
+        'totalCount' => $reviewsData['totalCount'],
+        'averageRating' => $reviewsData['averageRating']
+    ]);
+    exit();
+}
+
 // ============================================================================
 // Spam Detection Functions (for re-analyzing manual entries)
 // ============================================================================
@@ -924,9 +1008,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     </div>
                 </div>
                 <div class="reviews-actions">
+                    <button type="button" class="btn btn-secondary" id="add-review-btn" onclick="openAddReviewModal()">
+                        + Add Review
+                    </button>
                     <button type="button" class="btn btn-primary" id="tag-reviews-btn" onclick="tagReviews()">
                         Tag Reviews with AI
                     </button>
+                </div>
+            </div>
+
+            <!-- Add Review Modal -->
+            <div id="add-review-modal" class="modal" style="display: none;">
+                <div class="modal-content" style="max-width: 550px;">
+                    <div class="modal-header">
+                        <h3>Add New Review</h3>
+                        <button class="modal-close" onclick="closeAddReviewModal()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="add-review-form" onsubmit="submitAddReview(event)">
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; font-size: 0.875rem;">
+                                    Name <span style="color: #dc2626;">*</span>
+                                </label>
+                                <input type="text" name="author" required style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;" placeholder="Customer name">
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; font-size: 0.875rem;">
+                                    Star Rating <span style="color: #dc2626;">*</span>
+                                </label>
+                                <div id="star-rating-input" style="display: flex; gap: 0.25rem; font-size: 1.5rem; cursor: pointer;">
+                                    <span class="star-input" data-rating="1" style="color: #d1d5db;">★</span>
+                                    <span class="star-input" data-rating="2" style="color: #d1d5db;">★</span>
+                                    <span class="star-input" data-rating="3" style="color: #d1d5db;">★</span>
+                                    <span class="star-input" data-rating="4" style="color: #d1d5db;">★</span>
+                                    <span class="star-input" data-rating="5" style="color: #d1d5db;">★</span>
+                                </div>
+                                <input type="hidden" name="rating" id="rating-value" value="" required>
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; font-size: 0.875rem;">
+                                    Review Text <span style="color: #9ca3af; font-weight: normal;">(optional)</span>
+                                </label>
+                                <textarea name="text" rows="4" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem; resize: vertical;" placeholder="Customer's review..."></textarea>
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; font-size: 0.875rem;">
+                                    Owner Response <span style="color: #9ca3af; font-weight: normal;">(optional)</span>
+                                </label>
+                                <textarea name="ownerResponse" rows="3" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem; resize: vertical;" placeholder="Your response to the review..."></textarea>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;">
+                                <button type="button" class="btn btn-secondary" onclick="closeAddReviewModal()">Cancel</button>
+                                <button type="submit" class="btn btn-primary" id="add-review-submit">Add Review</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
 
@@ -2228,6 +2364,94 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         });
 
         // ============================================
+        // Add Review Functionality
+        // ============================================
+        const addReviewModal = document.getElementById('add-review-modal');
+        const addReviewForm = document.getElementById('add-review-form');
+        let selectedRating = 0;
+
+        // Star rating input handling
+        document.querySelectorAll('.star-input').forEach(star => {
+            star.addEventListener('click', () => {
+                selectedRating = parseInt(star.dataset.rating);
+                document.getElementById('rating-value').value = selectedRating;
+                updateStarDisplay(selectedRating);
+            });
+
+            star.addEventListener('mouseenter', () => {
+                updateStarDisplay(parseInt(star.dataset.rating));
+            });
+        });
+
+        document.getElementById('star-rating-input')?.addEventListener('mouseleave', () => {
+            updateStarDisplay(selectedRating);
+        });
+
+        function updateStarDisplay(rating) {
+            document.querySelectorAll('.star-input').forEach(star => {
+                const starRating = parseInt(star.dataset.rating);
+                star.style.color = starRating <= rating ? '#fbbf24' : '#d1d5db';
+            });
+        }
+
+        function openAddReviewModal() {
+            // Reset form
+            addReviewForm.reset();
+            selectedRating = 0;
+            document.getElementById('rating-value').value = '';
+            updateStarDisplay(0);
+            addReviewModal.style.display = 'flex';
+        }
+
+        function closeAddReviewModal() {
+            addReviewModal.style.display = 'none';
+        }
+
+        async function submitAddReview(event) {
+            event.preventDefault();
+
+            const submitBtn = document.getElementById('add-review-submit');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Adding...';
+
+            const formData = new FormData(addReviewForm);
+            formData.append('key', secretPath);
+            formData.append('action', 'add_review');
+
+            try {
+                const response = await fetch('admin.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to add review');
+                }
+
+                // Success - close modal and refresh
+                closeAddReviewModal();
+                alert('Review added successfully! Rebuild the site to see it on the frontend.');
+
+                // Reload page to show updated reviews
+                window.location.reload();
+
+            } catch (error) {
+                console.error('Add review failed:', error);
+                alert('Failed to add review: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Add Review';
+            }
+        }
+
+        // Close add review modal on escape or click outside
+        addReviewModal?.addEventListener('click', (e) => {
+            if (e.target === addReviewModal) closeAddReviewModal();
+        });
+
+        // ============================================
         // Backup Tab Functionality
         // ============================================
         const backupConfirmModal = document.getElementById('backup-confirm-modal');
@@ -2485,6 +2709,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         });
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
+                if (addReviewModal?.style.display !== 'none') closeAddReviewModal();
                 if (backupConfirmModal.style.display !== 'none') closeBackupModal();
                 if (backupProgressModal.style.display !== 'none') closeProgressModal();
             }
