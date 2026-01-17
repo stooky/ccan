@@ -244,6 +244,117 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit();
 }
 
+// Handle edit review action
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'edit_review') {
+    header('Content-Type: application/json');
+
+    $reviewId = trim($_POST['review_id'] ?? '');
+    $author = trim($_POST['author'] ?? '');
+    $rating = (int)($_POST['rating'] ?? 0);
+    $date = trim($_POST['date'] ?? date('Y-m-d'));
+    $text = trim($_POST['text'] ?? '');
+    $ownerResponse = trim($_POST['ownerResponse'] ?? '');
+
+    // Validate
+    if (empty($reviewId)) {
+        echo json_encode(['success' => false, 'message' => 'Review ID is required']);
+        exit();
+    }
+    if (empty($author)) {
+        echo json_encode(['success' => false, 'message' => 'Name is required']);
+        exit();
+    }
+    if ($rating < 1 || $rating > 5) {
+        echo json_encode(['success' => false, 'message' => 'Rating must be between 1 and 5']);
+        exit();
+    }
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        echo json_encode(['success' => false, 'message' => 'Invalid date format']);
+        exit();
+    }
+
+    // Load reviews
+    $reviewsPath = dirname(__DIR__) . '/data/reviews.json';
+    if (!file_exists($reviewsPath)) {
+        echo json_encode(['success' => false, 'message' => 'Reviews file not found']);
+        exit();
+    }
+
+    $reviewsData = json_decode(file_get_contents($reviewsPath), true);
+
+    // Calculate relative date
+    $reviewDate = new DateTime($date);
+    $now = new DateTime();
+    $diff = $now->diff($reviewDate);
+    if ($diff->days == 0) {
+        $relativeDate = 'Today';
+    } elseif ($diff->days == 1) {
+        $relativeDate = 'Yesterday';
+    } elseif ($diff->days < 7) {
+        $relativeDate = $diff->days . ' days ago';
+    } elseif ($diff->days < 30) {
+        $weeks = floor($diff->days / 7);
+        $relativeDate = $weeks . ' week' . ($weeks > 1 ? 's' : '') . ' ago';
+    } elseif ($diff->days < 365) {
+        $months = floor($diff->days / 30);
+        $relativeDate = $months . ' month' . ($months > 1 ? 's' : '') . ' ago';
+    } else {
+        $years = floor($diff->days / 365);
+        $relativeDate = $years . ' year' . ($years > 1 ? 's' : '') . ' ago';
+    }
+
+    // Find and update the review
+    $found = false;
+    foreach ($reviewsData['reviews'] as &$review) {
+        if ($review['id'] === $reviewId) {
+            $found = true;
+            $review['author'] = $author;
+            $review['rating'] = $rating;
+            $review['date'] = $date;
+            $review['relativeDate'] = $relativeDate;
+
+            if (!empty($text)) {
+                $review['text'] = $text;
+            } else {
+                unset($review['text']);
+            }
+
+            if (!empty($ownerResponse)) {
+                $review['ownerResponse'] = [
+                    'date' => $review['ownerResponse']['date'] ?? date('Y-m-d'),
+                    'text' => $ownerResponse
+                ];
+            } else {
+                unset($review['ownerResponse']);
+            }
+            break;
+        }
+    }
+    unset($review);
+
+    if (!$found) {
+        echo json_encode(['success' => false, 'message' => 'Review not found']);
+        exit();
+    }
+
+    // Update stats
+    $totalRating = 0;
+    foreach ($reviewsData['reviews'] as $review) {
+        $totalRating += $review['rating'];
+    }
+    $reviewsData['averageRating'] = round($totalRating / $reviewsData['totalCount'], 2);
+
+    // Save
+    file_put_contents($reviewsPath, json_encode($reviewsData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+    echo json_encode([
+        'success' => true,
+        'totalCount' => $reviewsData['totalCount'],
+        'averageRating' => $reviewsData['averageRating']
+    ]);
+    exit();
+}
+
 // ============================================================================
 // Spam Detection Functions (for re-analyzing manual entries)
 // ============================================================================
@@ -1101,20 +1212,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 </div>
             </div>
 
-            <!-- Add Review Modal -->
+            <!-- Add/Edit Review Modal -->
             <div id="add-review-modal" class="modal" style="display: none;">
                 <div class="modal-content" style="max-width: 550px;">
                     <div class="modal-header">
-                        <h3>Add New Review</h3>
+                        <h3 id="review-modal-title">Add New Review</h3>
                         <button class="modal-close" onclick="closeAddReviewModal()">&times;</button>
                     </div>
                     <div class="modal-body">
-                        <form id="add-review-form" onsubmit="submitAddReview(event)">
+                        <form id="add-review-form" onsubmit="submitReviewForm(event)">
+                            <input type="hidden" name="review_id" id="edit-review-id" value="">
                             <div style="margin-bottom: 1rem;">
                                 <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; font-size: 0.875rem;">
                                     Name <span style="color: #dc2626;">*</span>
                                 </label>
-                                <input type="text" name="author" required style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;" placeholder="Customer name">
+                                <input type="text" name="author" id="review-author" required style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;" placeholder="Customer name">
                             </div>
                             <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
                                 <div style="flex: 1;">
@@ -1134,24 +1246,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                     <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; font-size: 0.875rem;">
                                         Date <span style="color: #dc2626;">*</span>
                                     </label>
-                                    <input type="date" name="date" required style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;" value="<?= date('Y-m-d') ?>">
+                                    <input type="date" name="date" id="review-date" required style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;" value="<?= date('Y-m-d') ?>">
                                 </div>
                             </div>
                             <div style="margin-bottom: 1rem;">
                                 <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; font-size: 0.875rem;">
                                     Review Text <span style="color: #9ca3af; font-weight: normal;">(optional)</span>
                                 </label>
-                                <textarea name="text" rows="4" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem; resize: vertical;" placeholder="Customer's review..."></textarea>
+                                <textarea name="text" id="review-text" rows="4" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem; resize: vertical;" placeholder="Customer's review..."></textarea>
                             </div>
                             <div style="margin-bottom: 1rem;">
                                 <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; font-size: 0.875rem;">
                                     Owner Response <span style="color: #9ca3af; font-weight: normal;">(optional)</span>
                                 </label>
-                                <textarea name="ownerResponse" rows="3" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem; resize: vertical;" placeholder="Your response to the review..."></textarea>
+                                <textarea name="ownerResponse" id="review-owner-response" rows="3" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem; resize: vertical;" placeholder="Your response to the review..."></textarea>
                             </div>
                             <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;">
                                 <button type="button" class="btn btn-secondary" onclick="closeAddReviewModal()">Cancel</button>
-                                <button type="submit" class="btn btn-primary" id="add-review-submit">Add Review</button>
+                                <button type="submit" class="btn btn-primary" id="review-submit-btn">Add Review</button>
                             </div>
                         </form>
                     </div>
@@ -1871,6 +1983,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             </div>
                             <div class="review-date" style="display: flex; align-items: center; gap: 0.5rem;">
                                 <span>${getRelativeTime(review.date)}</span>
+                                <button type="button" class="btn btn-secondary" style="font-size: 0.625rem; padding: 0.125rem 0.375rem; color: #059669;" onclick="editReview('${escapeHtml(review.id)}')">Edit</button>
                                 <button type="button" class="btn btn-secondary" style="font-size: 0.625rem; padding: 0.125rem 0.375rem; color: #dc2626;" onclick="deleteReview('${escapeHtml(review.id)}', '${escapeHtml(review.author)}')">Delete</button>
                             </div>
                         </div>
@@ -2459,11 +2572,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         });
 
         // ============================================
-        // Add Review Functionality
+        // Add/Edit Review Functionality
         // ============================================
         const addReviewModal = document.getElementById('add-review-modal');
         const addReviewForm = document.getElementById('add-review-form');
         let selectedRating = 0;
+        let isEditMode = false;
 
         // Star rating input handling
         document.querySelectorAll('.star-input').forEach(star => {
@@ -2490,28 +2604,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
 
         function openAddReviewModal() {
+            isEditMode = false;
             // Reset form
             addReviewForm.reset();
+            document.getElementById('edit-review-id').value = '';
+            document.getElementById('review-date').value = '<?= date('Y-m-d') ?>';
             selectedRating = 0;
             document.getElementById('rating-value').value = '';
             updateStarDisplay(0);
+
+            // Update modal for add mode
+            document.getElementById('review-modal-title').textContent = 'Add New Review';
+            document.getElementById('review-submit-btn').textContent = 'Add Review';
+
+            addReviewModal.style.display = 'flex';
+        }
+
+        function editReview(reviewId) {
+            isEditMode = true;
+
+            // Find the review data
+            const review = allReviews.find(r => r.id === reviewId);
+            if (!review) {
+                alert('Review not found');
+                return;
+            }
+
+            // Populate form
+            document.getElementById('edit-review-id').value = review.id;
+            document.getElementById('review-author').value = review.author;
+            document.getElementById('review-date').value = review.date;
+            document.getElementById('review-text').value = review.text || '';
+            document.getElementById('review-owner-response').value = review.ownerResponse?.text || '';
+
+            // Set rating
+            selectedRating = review.rating;
+            document.getElementById('rating-value').value = selectedRating;
+            updateStarDisplay(selectedRating);
+
+            // Update modal for edit mode
+            document.getElementById('review-modal-title').textContent = 'Edit Review';
+            document.getElementById('review-submit-btn').textContent = 'Save Changes';
+
             addReviewModal.style.display = 'flex';
         }
 
         function closeAddReviewModal() {
             addReviewModal.style.display = 'none';
+            isEditMode = false;
         }
 
-        async function submitAddReview(event) {
+        async function submitReviewForm(event) {
             event.preventDefault();
 
-            const submitBtn = document.getElementById('add-review-submit');
+            const submitBtn = document.getElementById('review-submit-btn');
+            const originalText = submitBtn.textContent;
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Adding...';
+            submitBtn.textContent = isEditMode ? 'Saving...' : 'Adding...';
 
             const formData = new FormData(addReviewForm);
             formData.append('key', secretPath);
-            formData.append('action', 'add_review');
+            formData.append('action', isEditMode ? 'edit_review' : 'add_review');
 
             try {
                 const response = await fetch('admin.php', {
@@ -2522,22 +2675,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 const data = await response.json();
 
                 if (!data.success) {
-                    throw new Error(data.message || 'Failed to add review');
+                    throw new Error(data.message || 'Failed to save review');
                 }
 
                 // Success - close modal and refresh
                 closeAddReviewModal();
-                alert('Review added successfully! Rebuild the site to see it on the frontend.');
+                alert(isEditMode
+                    ? 'Review updated successfully! Rebuild the site to see changes on the frontend.'
+                    : 'Review added successfully! Rebuild the site to see it on the frontend.');
 
                 // Reload page to show updated reviews
                 window.location.reload();
 
             } catch (error) {
-                console.error('Add review failed:', error);
-                alert('Failed to add review: ' + error.message);
+                console.error('Save review failed:', error);
+                alert('Failed to save review: ' + error.message);
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Add Review';
+                submitBtn.textContent = originalText;
             }
         }
 
