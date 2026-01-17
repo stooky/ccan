@@ -47,80 +47,80 @@ if (!env) {
 console.log(`\n🚀 Deploying to ${env.name} (${env.host})...\n`);
 
 const sshKey = '~/.ssh/id_rsa';
-const sshCmd = `ssh -i ${sshKey} ${env.user}@${env.host}`;
+const sshBase = `ssh -i ${sshKey} ${env.user}@${env.host}`;
 
-// Data files to backup (relative to project root)
-const dataFiles = [
-  'submissions.json',
-  'reviews.json',
-  'inventory.json',
-  'spam-log.json',
-  'quote-requests.json',
-  'rate-limits.json'
-];
+// Helper to run SSH commands
+function ssh(cmd, options = {}) {
+  const fullCmd = `${sshBase} "${cmd.replace(/"/g, '\\"')}"`;
+  return execSync(fullCmd, { stdio: 'inherit', shell: true, ...options });
+}
 
-// Build the remote command sequence
-const remoteCommands = `
-cd ${env.path}
-
-# Create backup directory with timestamp
-BACKUP_DIR="data/backups/$(date +%Y-%m-%d-%H%M%S)"
-mkdir -p "$BACKUP_DIR"
-
-# Backup existing data files
-echo "📦 Backing up data files to $BACKUP_DIR..."
-for file in ${dataFiles.join(' ')}; do
-  if [ -f "data/$file" ]; then
-    cp "data/$file" "$BACKUP_DIR/"
-    echo "   ✓ $file"
-  fi
-done
-
-# Store current data version before pull
-OLD_VERSION=$(grep -oP 'version:\\s*\\K\\d+' config.yaml 2>/dev/null || echo "0")
-
-# Git operations
-echo ""
-echo "📥 Pulling latest code..."
-git fetch origin
-git checkout ${env.branch}
-git pull origin ${env.branch}
-
-# Get new data version after pull
-NEW_VERSION=$(grep -oP 'version:\\s*\\K\\d+' config.yaml 2>/dev/null || echo "0")
-
-# Run migrations if version changed
-if [ "$OLD_VERSION" != "$NEW_VERSION" ]; then
-  echo ""
-  echo "🔄 Data version changed ($OLD_VERSION → $NEW_VERSION), running migrations..."
-  if [ -f "scripts/migrate.js" ]; then
-    node scripts/migrate.js "$OLD_VERSION" "$NEW_VERSION"
-  else
-    echo "   ⚠️  No migrate.js found, skipping migrations"
-  fi
-else
-  echo ""
-  echo "✓ Data version unchanged (v$NEW_VERSION)"
-fi
-
-# Clean old backups (keep last 10)
-echo ""
-echo "🧹 Cleaning old backups (keeping last 10)..."
-cd data/backups 2>/dev/null && ls -dt */ 2>/dev/null | tail -n +11 | xargs rm -rf 2>/dev/null || true
-cd ${env.path}
-
-# Build
-echo ""
-echo "🔨 Building..."
-npm run build
-`.trim();
+// Helper to run SSH commands and capture output
+function sshOutput(cmd) {
+  const fullCmd = `${sshBase} "${cmd.replace(/"/g, '\\"')}"`;
+  return execSync(fullCmd, { encoding: 'utf-8', shell: true }).trim();
+}
 
 try {
-  // Run the deploy command
-  execSync(`${sshCmd} '${remoteCommands}'`, {
-    stdio: 'inherit',
-    shell: true
-  });
+  const remotePath = env.path;
+  const branch = env.branch;
+
+  // Step 1: Create backup
+  console.log('📦 Backing up data files...');
+  const backupDir = `data/backups/$(date +%Y-%m-%d-%H%M%S)`;
+  ssh(`cd ${remotePath} && mkdir -p ${backupDir}`);
+
+  const dataFiles = ['submissions.json', 'reviews.json', 'inventory.json', 'spam-log.json', 'quote-requests.json', 'rate-limits.json'];
+  for (const file of dataFiles) {
+    try {
+      ssh(`cd ${remotePath} && [ -f data/${file} ] && cp data/${file} ${backupDir}/ && echo '   ✓ ${file}'`);
+    } catch (e) {
+      // File doesn't exist, skip
+    }
+  }
+
+  // Step 2: Get old version
+  let oldVersion = '0';
+  try {
+    oldVersion = sshOutput(`cd ${remotePath} && grep -oP 'version:\\s*\\K\\d+' config.yaml 2>/dev/null || echo 0`);
+  } catch (e) {
+    oldVersion = '0';
+  }
+
+  // Step 3: Git pull
+  console.log('\n📥 Pulling latest code...');
+  ssh(`cd ${remotePath} && git fetch origin && git checkout ${branch} && git pull origin ${branch}`);
+
+  // Step 4: Get new version and run migrations if changed
+  let newVersion = '0';
+  try {
+    newVersion = sshOutput(`cd ${remotePath} && grep -oP 'version:\\s*\\K\\d+' config.yaml 2>/dev/null || echo 0`);
+  } catch (e) {
+    newVersion = '0';
+  }
+
+  if (oldVersion !== newVersion) {
+    console.log(`\n🔄 Data version changed (${oldVersion} → ${newVersion}), running migrations...`);
+    try {
+      ssh(`cd ${remotePath} && [ -f scripts/migrate.js ] && node scripts/migrate.js ${oldVersion} ${newVersion}`);
+    } catch (e) {
+      console.log('   ⚠️  Migration script not found or failed');
+    }
+  } else {
+    console.log(`\n✓ Data version unchanged (v${newVersion})`);
+  }
+
+  // Step 5: Clean old backups
+  console.log('\n🧹 Cleaning old backups (keeping last 10)...');
+  try {
+    ssh(`cd ${remotePath}/data/backups 2>/dev/null && ls -dt */ 2>/dev/null | tail -n +11 | xargs rm -rf 2>/dev/null; true`);
+  } catch (e) {
+    // No backups to clean
+  }
+
+  // Step 6: Build
+  console.log('\n🔨 Building...');
+  ssh(`cd ${remotePath} && npm run build`);
 
   console.log(`\n✅ Deployed successfully!`);
   console.log(`   ${env.url}\n`);
