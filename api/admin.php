@@ -1970,8 +1970,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 }
 
                 const bgColor = check.triggered ? '#fef2f2' : '#ffffff';
-                const resultIcon = check.triggered ? '❌ BLOCKED' : '✓ Pass';
-                const resultColor = check.triggered ? '#dc2626' : '#16a34a';
+                const resultIcon = check.triggered ? '❌ DETECTED' : '—';
+                const resultColor = check.triggered ? '#dc2626' : '#9ca3af';
 
                 html += `
                     <tr style="background: ${bgColor};">
