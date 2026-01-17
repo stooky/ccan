@@ -750,6 +750,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             <a href="?key=<?= urlencode($secretPath) ?>&tab=rich-snippets" class="tab <?= $currentTab === 'rich-snippets' ? 'active' : '' ?>">
                 Rich Snippets
             </a>
+            <a href="?key=<?= urlencode($secretPath) ?>&tab=backup" class="tab <?= $currentTab === 'backup' ? 'active' : '' ?>">
+                Backup
+            </a>
         </div>
 
         <!-- Submissions Tab -->
@@ -1092,6 +1095,144 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 </div>
             </div>
         </div><!-- End Rich Snippets Tab -->
+
+        <!-- Backup Tab -->
+        <div class="tab-content <?= $currentTab === 'backup' ? 'active' : '' ?>" id="backup-tab">
+            <div class="rich-snippets-header" style="margin-bottom: 1.5rem;">
+                <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">Data Backup</h2>
+                <p style="color: #6b7280; font-size: 0.875rem;">Backup your data files and have them emailed to you.</p>
+            </div>
+
+            <!-- Size Warning (shown dynamically) -->
+            <div id="backup-size-warning" style="background: #fef3c7; border: 1px solid #fcd34d; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem; display: none;">
+                <p style="font-size: 0.875rem; color: #92400e; margin: 0;">
+                    <strong>Warning:</strong> <span id="backup-warning-text"></span>
+                </p>
+            </div>
+
+            <!-- Stats Summary -->
+            <div style="background: white; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="font-size: 1rem; font-weight: 600;">Data Summary</h3>
+                    <button type="button" class="btn btn-primary" id="create-backup-btn" onclick="createBackup()">
+                        Create Backup
+                    </button>
+                </div>
+
+                <div id="backup-stats-loading" style="text-align: center; padding: 2rem;">
+                    <div class="spinner"></div>
+                    <p style="color: #6b7280; margin-top: 0.5rem;">Loading...</p>
+                </div>
+
+                <div id="backup-stats" style="display: none;">
+                    <div style="display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                        <div>
+                            <div id="backup-total-size" style="font-size: 2rem; font-weight: 700; color: #d97706;">--</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">Total Data Size</div>
+                        </div>
+                        <div>
+                            <div id="backup-file-count" style="font-size: 2rem; font-weight: 700; color: #d97706;">--</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">Files to Backup</div>
+                        </div>
+                        <div>
+                            <div id="backup-count" style="font-size: 2rem; font-weight: 700; color: #d97706;">--</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">Existing Backups</div>
+                        </div>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+                                    <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #6b7280;">File</th>
+                                    <th style="padding: 0.5rem 0.75rem; text-align: right; font-size: 0.75rem; font-weight: 600; color: #6b7280;">Size</th>
+                                    <th style="padding: 0.5rem 0.75rem; text-align: right; font-size: 0.75rem; font-weight: 600; color: #6b7280;">Records</th>
+                                    <th style="padding: 0.5rem 0.75rem; text-align: center; font-size: 0.75rem; font-weight: 600; color: #6b7280;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="backup-stats-table">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Backup History -->
+            <div style="background: white; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem;">Backup History</h3>
+                <p style="font-size: 0.75rem; color: #9ca3af; margin-bottom: 1rem;">
+                    Up to 3 backups are kept. Creating a 4th backup will delete the oldest one.
+                </p>
+
+                <div id="backup-history-loading" style="text-align: center; padding: 2rem; display: none;">
+                    <div class="spinner"></div>
+                </div>
+
+                <div id="backup-history-empty" style="text-align: center; padding: 2rem; color: #9ca3af; display: none;">
+                    <p>No backups yet. Click "Create Backup" to create your first backup.</p>
+                </div>
+
+                <div id="backup-history" style="display: none;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+                                <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #6b7280;">Filename</th>
+                                <th style="padding: 0.5rem 0.75rem; text-align: right; font-size: 0.75rem; font-weight: 600; color: #6b7280;">Size</th>
+                                <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #6b7280;">Created</th>
+                                <th style="padding: 0.5rem 0.75rem; text-align: center; font-size: 0.75rem; font-weight: 600; color: #6b7280;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="backup-history-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Help Info -->
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 0.5rem; padding: 1rem; margin-top: 1.5rem;">
+                <p style="font-size: 0.875rem; font-weight: 500; color: #1e40af; margin-bottom: 0.5rem;">
+                    How Backups Work
+                </p>
+                <ul style="font-size: 0.75rem; color: #1e40af; margin: 0; padding-left: 1.25rem;">
+                    <li>Backups include all data files (submissions, reviews, inventory, spam log) and config.yaml</li>
+                    <li>Backups are compressed as .tgz files and emailed to <?= htmlspecialchars($config['contact_form']['recipient_email'] ?? $config['contact']['email'] ?? 'the admin') ?></li>
+                    <li>Extract with: <code style="background: #dbeafe; padding: 0.125rem 0.375rem; border-radius: 0.25rem;">tar -xzf backup.tgz</code></li>
+                    <li>Maximum 3 backups are stored on the server</li>
+                </ul>
+            </div>
+        </div><!-- End Backup Tab -->
+
+        <!-- Backup Confirmation Modal -->
+        <div id="backup-confirm-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Confirm Backup</h3>
+                    <button class="modal-close" onclick="closeBackupModal()">&times;</button>
+                </div>
+                <div class="modal-body" id="backup-confirm-body">
+                    <p id="backup-confirm-message"></p>
+                    <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem;">
+                        <button type="button" class="btn btn-secondary" onclick="closeBackupModal()">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="backup-confirm-btn" onclick="confirmBackup()">
+                            Create Backup Anyway
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Backup Progress Modal -->
+        <div id="backup-progress-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Creating Backup</h3>
+                </div>
+                <div class="modal-body" id="backup-progress-body">
+                    <div class="spinner"></div>
+                    <p style="text-align: center; margin-top: 1rem;" id="backup-progress-text">Creating backup and sending email...</p>
+                </div>
+            </div>
+        </div>
 
     </div>
 
@@ -2079,9 +2220,280 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     if (document.getElementById('spam-tab')?.classList.contains('active')) {
                         filterSpam();
                     }
+                    if (document.getElementById('backup-tab')?.classList.contains('active')) {
+                        loadBackupData();
+                    }
                 }, 0);
             });
         });
+
+        // ============================================
+        // Backup Tab Functionality
+        // ============================================
+        const backupConfirmModal = document.getElementById('backup-confirm-modal');
+        const backupProgressModal = document.getElementById('backup-progress-modal');
+        let pendingBackupData = null;
+
+        function formatFileSize(bytes) {
+            if (bytes >= 1048576) {
+                return (bytes / 1048576).toFixed(2) + ' MB';
+            } else if (bytes >= 1024) {
+                return (bytes / 1024).toFixed(2) + ' KB';
+            }
+            return bytes + ' bytes';
+        }
+
+        async function loadBackupData() {
+            const statsLoading = document.getElementById('backup-stats-loading');
+            const statsContainer = document.getElementById('backup-stats');
+            const historyLoading = document.getElementById('backup-history-loading');
+            const historyEmpty = document.getElementById('backup-history-empty');
+            const historyContainer = document.getElementById('backup-history');
+            const warningBox = document.getElementById('backup-size-warning');
+            const warningText = document.getElementById('backup-warning-text');
+
+            // Show loading states
+            statsLoading.style.display = 'block';
+            statsContainer.style.display = 'none';
+            historyLoading.style.display = 'block';
+            historyEmpty.style.display = 'none';
+            historyContainer.style.display = 'none';
+
+            try {
+                const response = await fetch(`backup.php?key=${secretPath}&action=list`);
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to load backup data');
+                }
+
+                // Update stats
+                document.getElementById('backup-total-size').textContent = data.totalSizeFormatted;
+                document.getElementById('backup-file-count').textContent = data.stats.filter(s => s.exists).length;
+                document.getElementById('backup-count').textContent = data.backups.length;
+
+                // Render stats table
+                const statsTable = document.getElementById('backup-stats-table');
+                statsTable.innerHTML = data.stats.map(stat => `
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td style="padding: 0.5rem 0.75rem; font-size: 0.875rem;">
+                            <code style="background: #f3f4f6; padding: 0.125rem 0.375rem; border-radius: 0.25rem;">${escapeHtml(stat.file)}</code>
+                        </td>
+                        <td style="padding: 0.5rem 0.75rem; text-align: right; font-size: 0.875rem;">
+                            ${stat.exists ? formatFileSize(stat.size) : '-'}
+                        </td>
+                        <td style="padding: 0.5rem 0.75rem; text-align: right; font-size: 0.875rem;">
+                            ${stat.exists && stat.count ? `${stat.count} ${stat.type}` : '-'}
+                        </td>
+                        <td style="padding: 0.5rem 0.75rem; text-align: center;">
+                            ${stat.exists
+                                ? '<span style="color: #059669; font-size: 0.75rem;">&#10004; Ready</span>'
+                                : '<span style="color: #9ca3af; font-size: 0.75rem;">Not found</span>'
+                            }
+                        </td>
+                    </tr>
+                `).join('');
+
+                // Show warning if needed
+                if (data.warning) {
+                    warningText.textContent = data.warning;
+                    warningBox.style.display = 'block';
+                } else {
+                    warningBox.style.display = 'none';
+                }
+
+                // Render backup history
+                if (data.backups.length === 0) {
+                    historyEmpty.style.display = 'block';
+                    historyContainer.style.display = 'none';
+                } else {
+                    const historyTable = document.getElementById('backup-history-table');
+                    historyTable.innerHTML = data.backups.map((backup, index) => `
+                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 0.5rem 0.75rem; font-size: 0.875rem;">
+                                <code style="background: #f3f4f6; padding: 0.125rem 0.375rem; border-radius: 0.25rem;">${escapeHtml(backup.filename)}</code>
+                                ${index === 0 ? '<span style="background: #d1fae5; color: #065f46; font-size: 0.625rem; padding: 0.125rem 0.375rem; border-radius: 0.25rem; margin-left: 0.5rem;">Latest</span>' : ''}
+                            </td>
+                            <td style="padding: 0.5rem 0.75rem; text-align: right; font-size: 0.875rem;">
+                                ${escapeHtml(backup.sizeFormatted)}
+                            </td>
+                            <td style="padding: 0.5rem 0.75rem; font-size: 0.875rem;">
+                                ${escapeHtml(backup.createdFormatted)}
+                            </td>
+                            <td style="padding: 0.5rem 0.75rem; text-align: center;">
+                                <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" onclick="deleteBackup('${escapeHtml(backup.filename)}')">
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                    historyEmpty.style.display = 'none';
+                    historyContainer.style.display = 'block';
+                }
+
+                // Show stats
+                statsLoading.style.display = 'none';
+                statsContainer.style.display = 'block';
+                historyLoading.style.display = 'none';
+
+            } catch (error) {
+                console.error('Failed to load backup data:', error);
+                statsLoading.innerHTML = `<p style="color: #dc2626;">Error: ${escapeHtml(error.message)}</p>`;
+                historyLoading.style.display = 'none';
+            }
+        }
+
+        async function createBackup(confirmed = false) {
+            const btn = document.getElementById('create-backup-btn');
+            btn.disabled = true;
+            btn.textContent = 'Creating...';
+
+            try {
+                const formData = new FormData();
+                formData.append('key', secretPath);
+                formData.append('action', 'create');
+                if (confirmed) {
+                    formData.append('confirmed', 'true');
+                }
+
+                const response = await fetch('backup.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                // Check if confirmation needed
+                if (!data.success && data.needsConfirmation) {
+                    // Show confirmation modal
+                    document.getElementById('backup-confirm-message').textContent = data.message;
+                    pendingBackupData = data.oldestBackup;
+                    backupConfirmModal.style.display = 'flex';
+                    btn.disabled = false;
+                    btn.textContent = 'Create Backup';
+                    return;
+                }
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Backup creation failed');
+                }
+
+                // Show progress modal with success
+                const progressBody = document.getElementById('backup-progress-body');
+                const progressText = document.getElementById('backup-progress-text');
+
+                backupProgressModal.style.display = 'flex';
+
+                let resultHtml = `
+                    <div style="text-align: center;">
+                        <div style="font-size: 3rem; color: #059669; margin-bottom: 1rem;">&#10004;</div>
+                        <p style="font-weight: 600; color: #065f46; margin-bottom: 0.5rem;">Backup Created Successfully!</p>
+                        <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem;">
+                            ${escapeHtml(data.backup.filename)} (${escapeHtml(data.backup.sizeFormatted)})
+                        </p>
+                `;
+
+                if (data.email.success) {
+                    resultHtml += `<p style="font-size: 0.875rem; color: #059669;">Email sent successfully!</p>`;
+                } else {
+                    resultHtml += `<p style="font-size: 0.875rem; color: #dc2626;">Email failed: ${escapeHtml(data.email.message)}</p>`;
+                }
+
+                if (data.deleted && data.deleted.length > 0) {
+                    resultHtml += `<p style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem;">Deleted old backup: ${escapeHtml(data.deleted.join(', '))}</p>`;
+                }
+
+                if (data.warning) {
+                    resultHtml += `<p style="font-size: 0.75rem; color: #d97706; margin-top: 0.5rem;">${escapeHtml(data.warning)}</p>`;
+                }
+
+                resultHtml += `
+                        <button type="button" class="btn btn-primary" style="margin-top: 1rem;" onclick="closeProgressModal()">Done</button>
+                    </div>
+                `;
+
+                progressBody.innerHTML = resultHtml;
+
+                // Reload backup data
+                loadBackupData();
+
+            } catch (error) {
+                console.error('Backup creation failed:', error);
+                alert('Backup failed: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Create Backup';
+            }
+        }
+
+        function confirmBackup() {
+            closeBackupModal();
+            createBackup(true);
+        }
+
+        function closeBackupModal() {
+            backupConfirmModal.style.display = 'none';
+            pendingBackupData = null;
+        }
+
+        function closeProgressModal() {
+            backupProgressModal.style.display = 'none';
+            // Reset progress modal content
+            document.getElementById('backup-progress-body').innerHTML = `
+                <div class="spinner"></div>
+                <p style="text-align: center; margin-top: 1rem;" id="backup-progress-text">Creating backup and sending email...</p>
+            `;
+        }
+
+        async function deleteBackup(filename) {
+            if (!confirm(`Are you sure you want to delete ${filename}?`)) {
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('key', secretPath);
+                formData.append('action', 'delete');
+                formData.append('filename', filename);
+
+                const response = await fetch('backup.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to delete backup');
+                }
+
+                // Reload backup data
+                loadBackupData();
+
+            } catch (error) {
+                console.error('Delete failed:', error);
+                alert('Delete failed: ' + error.message);
+            }
+        }
+
+        // Close modals on escape key or click outside
+        backupConfirmModal.addEventListener('click', (e) => {
+            if (e.target === backupConfirmModal) closeBackupModal();
+        });
+        backupProgressModal.addEventListener('click', (e) => {
+            if (e.target === backupProgressModal) closeProgressModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (backupConfirmModal.style.display !== 'none') closeBackupModal();
+                if (backupProgressModal.style.display !== 'none') closeProgressModal();
+            }
+        });
+
+        // Load backup data if on backup tab
+        if (document.getElementById('backup-tab')?.classList.contains('active')) {
+            loadBackupData();
+        }
     </script>
 </body>
 </html>
