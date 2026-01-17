@@ -124,6 +124,10 @@ try {
   console.log('\n🔨 Building...');
   ssh(`cd ${remotePath} && npm run build`);
 
+  // Step 7: Fix permissions for www-data (PHP/web server)
+  console.log('\n🔐 Fixing permissions...');
+  ssh(`chown -R www-data:www-data ${remotePath}/dist ${remotePath}/data ${remotePath}/public ${remotePath}/config.yaml 2>/dev/null; true`);
+
   console.log(`\n✅ Deployed successfully!`);
   console.log(`   ${env.url}\n`);
 } catch (error) {
