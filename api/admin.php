@@ -76,6 +76,211 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     exit();
 }
 
+// ============================================================================
+// Spam Detection Functions (for re-analyzing manual entries)
+// ============================================================================
+
+function analyzeGibberishName($name) {
+    $issues = [];
+
+    $vowelCount = preg_match_all('/[aeiouAEIOU]/', $name);
+    $consonantCount = preg_match_all('/[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]/', $name);
+    $letterCount = $vowelCount + $consonantCount;
+
+    if ($letterCount > 5 && $vowelCount == 0) {
+        $issues[] = 'no_vowels';
+    }
+
+    if ($letterCount > 8) {
+        $vowelRatio = $vowelCount / $letterCount;
+        if ($vowelRatio < 0.15) {
+            $issues[] = 'low_vowel_ratio';
+        }
+    }
+
+    if (preg_match('/[bcdfghjklmnpqrstvwxyz]{5,}/i', $name)) {
+        $issues[] = 'consonant_cluster';
+    }
+
+    $words = preg_split('/[\s\'-]+/', $name);
+    foreach ($words as $word) {
+        if (strlen($word) > 3) {
+            $midCaps = preg_match_all('/(?!^)[A-Z]/', $word);
+            if ($midCaps > 2) {
+                $issues[] = 'random_caps';
+                break;
+            }
+        }
+    }
+
+    return $issues;
+}
+
+function analyzePhoneAreaCode($phone, $validCodes) {
+    $phone = preg_replace('/\D/', '', $phone);
+
+    if (strlen($phone) == 11 && $phone[0] == '1') {
+        $phone = substr($phone, 1);
+    }
+
+    if (strlen($phone) < 10) {
+        return ['valid' => true, 'areaCode' => ''];
+    }
+
+    $areaCode = substr($phone, 0, 3);
+
+    return [
+        'valid' => in_array($areaCode, $validCodes),
+        'areaCode' => $areaCode
+    ];
+}
+
+function analyzeMessageWords($message) {
+    $commonWords = [
+        'the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'i',
+        'it', 'for', 'not', 'on', 'with', 'he', 'as', 'you', 'do', 'at',
+        'this', 'but', 'his', 'by', 'from', 'they', 'we', 'say', 'her', 'she',
+        'or', 'an', 'will', 'my', 'one', 'all', 'would', 'there', 'their', 'what',
+        'so', 'up', 'out', 'if', 'about', 'who', 'get', 'which', 'go', 'me',
+        'container', 'shipping', 'storage', 'delivery', 'pickup', 'quote', 'price',
+        'buy', 'sell', 'rent', 'lease', 'need', 'looking', 'interested', 'please',
+        'thanks', 'thank', 'hello', 'hi', 'hey', 'call', 'contact', 'email', 'phone',
+        'question', 'help', 'information', 'info', 'size', 'condition', 'new', 'used',
+        'yes', 'no', 'maybe', 'ok', 'okay', 'week', 'today', 'tomorrow', 'soon',
+    ];
+
+    $words = preg_split('/[\s\p{P}]+/u', strtolower($message));
+    $words = array_filter($words, fn($w) => strlen($w) >= 2);
+
+    $realWordCount = 0;
+    foreach ($words as $word) {
+        if (in_array($word, $commonWords)) {
+            $realWordCount++;
+        }
+    }
+
+    return ['count' => $realWordCount, 'hasRealWords' => $realWordCount > 0];
+}
+
+function analyzeRandomString($str) {
+    if (strlen($str) < 6) return false;
+
+    $str = strtolower($str);
+    $chars = count_chars($str, 1);
+    $len = strlen($str);
+
+    $entropy = 0;
+    foreach ($chars as $count) {
+        $p = $count / $len;
+        $entropy -= $p * log($p, 2);
+    }
+
+    if ($entropy > 4.3) {
+        $hasCommonPatterns = preg_match('/(th|he|in|er|an|re|on|at|en|es|or|te|of|ed|is|it|al|ar|st|to|nt|ng|se|ha|as|ou|io|le|ve|co|me|de|hi|ri|ro|ic|ne|ea|ra|ce)/i', $str);
+        if (!$hasCommonPatterns) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function analyzeGmailDots($email) {
+    if (!str_contains(strtolower($email), '@gmail.com')) {
+        return ['dots' => 0, 'suspicious' => false];
+    }
+    $username = explode('@', $email)[0];
+    $dots = substr_count($username, '.');
+    return ['dots' => $dots, 'suspicious' => $dots >= 3];
+}
+
+// Handle re-analyze manual entries action
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'reanalyze_manual') {
+    $spamLogFile = dirname(__DIR__) . '/data/spam-log.json';
+    $spamLog = [];
+    if (file_exists($spamLogFile)) {
+        $spamLog = json_decode(file_get_contents($spamLogFile), true) ?? [];
+    }
+
+    // Get valid area codes from config
+    $validAreaCodes = ['306', '639', '403', '587', '780', '825', '204', '431', '236', '250', '604', '672', '778', '416', '647', '905', '437', '514', '438'];
+    if ($config && isset($config['security']['valid_area_codes'])) {
+        $validAreaCodes = $config['security']['valid_area_codes'];
+    }
+
+    $updated = 0;
+    foreach ($spamLog as &$entry) {
+        if (!str_starts_with($entry['reason'] ?? '', 'manual_review')) {
+            continue;
+        }
+
+        $data = $entry['original_data'] ?? [];
+        $detections = [];
+
+        // Get name (handle both 'name' and 'firstName'+'lastName' formats)
+        $name = $data['name'] ?? '';
+        if (empty($name)) {
+            $name = trim(($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? ''));
+        }
+
+        $phone = preg_replace('/\D/', '', $data['phone'] ?? '');
+        $email = $data['email'] ?? '';
+        $message = $data['message'] ?? '';
+
+        // Analyze name
+        if (!empty($name)) {
+            $nameIssues = analyzeGibberishName($name);
+            if (!empty($nameIssues)) {
+                $detections[] = 'invalid_name:' . implode(',', $nameIssues);
+            }
+        }
+
+        // Analyze phone
+        if (!empty($phone)) {
+            $phoneResult = analyzePhoneAreaCode($phone, $validAreaCodes);
+            if (!$phoneResult['valid']) {
+                $detections[] = 'invalid_phone:invalid_area_code:' . $phoneResult['areaCode'];
+            }
+        }
+
+        // Analyze message
+        if (!empty($message)) {
+            $msgResult = analyzeMessageWords($message);
+            if (!$msgResult['hasRealWords']) {
+                $detections[] = 'gibberish_message:no_real_words';
+            }
+            if (analyzeRandomString($message)) {
+                $detections[] = 'gibberish_message:high_entropy';
+            }
+        }
+
+        // Analyze Gmail dots
+        if (!empty($email)) {
+            $gmailResult = analyzeGmailDots($email);
+            if ($gmailResult['suspicious']) {
+                $detections[] = 'gmail_dot_pattern:' . $gmailResult['dots'] . '_dots';
+            }
+        }
+
+        // Update reason with detections
+        if (!empty($detections)) {
+            // Preserve the manual note after the colon
+            $manualNote = '';
+            if (preg_match('/^manual_review:(.+)$/', $entry['reason'], $matches)) {
+                $manualNote = $matches[1];
+            }
+            $entry['reason'] = 'manual_review:' . $manualNote;
+            $entry['detected_issues'] = $detections;
+            $updated++;
+        }
+    }
+    unset($entry);
+
+    file_put_contents($spamLogFile, json_encode($spamLog, JSON_PRETTY_PRINT));
+    header('Location: ?key=' . urlencode($secretPath) . '&tab=spam&reanalyzed=' . $updated);
+    exit();
+}
+
 // Helper: Get display name for submission
 function getDisplayName($sub) {
     if (!empty($sub['name'])) {
@@ -637,6 +842,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     Blocked users see a fake "success" message so they don't know they were caught.
                 </p>
             </div>
+
+            <?php if (isset($_GET['reanalyzed'])): ?>
+            <div style="background: #d1fae5; border: 1px solid #10b981; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem;">
+                <p style="font-size: 0.875rem; color: #065f46;">
+                    ✓ Re-analyzed <?= (int)$_GET['reanalyzed'] ?> manual entries. Detection details have been added.
+                </p>
+            </div>
+            <?php endif; ?>
+
+            <!-- Re-analyze Button -->
+            <form method="POST" style="margin-bottom: 1rem;">
+                <input type="hidden" name="action" value="reanalyze_manual">
+                <button type="submit" style="background: #6366f1; color: white; padding: 0.5rem 1rem; border: none; border-radius: 0.375rem; cursor: pointer; font-size: 0.875rem;">
+                    🔄 Re-analyze Manual Entries
+                </button>
+                <span style="margin-left: 0.75rem; font-size: 0.8rem; color: #6b7280;">
+                    Runs detection analysis on manually-moved spam to populate detailed issue data
+                </span>
+            </form>
 
             <!-- Spam Filter Bar -->
             <div class="filter-bar">
@@ -1799,6 +2023,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 <strong style="color: #dc2626;">Blocked:</strong>
                                 <span style="color: #991b1b;">${escapeHtml(getReasonLabel(spam.reason))}</span>
                                 <code style="background: #fef2f2; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">${escapeHtml(spam.reason)}</code>
+                                ${spam.detected_issues && spam.detected_issues.length > 0 ? `
+                                <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #fecaca;">
+                                    <strong style="font-size: 0.75rem; color: #dc2626;">Detected Issues:</strong>
+                                    <div style="margin-top: 0.25rem;">
+                                        ${spam.detected_issues.map(issue => `<code style="background: #fef2f2; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.7rem; margin-right: 0.5rem; display: inline-block; margin-bottom: 0.25rem;">${escapeHtml(issue)}</code>`).join('')}
+                                    </div>
+                                </div>
+                                ` : ''}
                             </div>
 
                             <!-- Original Submission Data -->
@@ -1868,7 +2100,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             const phone = originalData.phone || '';
             const message = originalData.message || '';
 
-            // Define all checks
+            // For manual reviews, we'll analyze the data to show what WOULD have been caught
+            const isManualReview = reason.startsWith('manual_review');
+
+            // Check for pre-computed detected_issues from re-analysis
+            const detectedIssues = spam.detected_issues || [];
+            const hasDetectedIssue = (pattern) => detectedIssues.some(issue => issue.startsWith(pattern));
+
+            // Helper functions for client-side analysis
+            function analyzeGibberish(str) {
+                if (!str || str.length < 6) return { isGibberish: false };
+                const vowels = (str.match(/[aeiouAEIOU]/g) || []).length;
+                const consonants = (str.match(/[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]/g) || []).length;
+                const total = vowels + consonants;
+                if (total === 0) return { isGibberish: false };
+                const vowelRatio = vowels / total;
+                const midCaps = (str.match(/(?!^|\s)[A-Z]/g) || []).length;
+                const hasConsonantCluster = /[bcdfghjklmnpqrstvwxyz]{5,}/i.test(str);
+                return {
+                    isGibberish: vowelRatio < 0.15 || midCaps > 2 || hasConsonantCluster,
+                    vowelRatio: Math.round(vowelRatio * 100),
+                    midCaps: midCaps
+                };
+            }
+
+            function analyzePhone(ph) {
+                const digits = ph.replace(/\D/g, '');
+                if (digits.length < 10) return { valid: true };
+                const areaCode = digits.length === 11 && digits[0] === '1' ? digits.substring(1, 4) : digits.substring(0, 3);
+                const validCodes = ['306', '639', '403', '587', '780', '825', '204', '431', '236', '250', '604', '672', '778', '416', '647', '905', '437', '514', '438'];
+                return { valid: validCodes.includes(areaCode), areaCode: areaCode };
+            }
+
+            function analyzeMessage(msg) {
+                const commonWords = ['the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'i', 'it', 'for', 'not', 'on', 'with', 'you', 'do', 'at', 'this', 'container', 'shipping', 'storage', 'delivery', 'quote', 'price', 'buy', 'need', 'looking', 'please', 'thanks', 'hello', 'hi', 'help', 'new', 'used', 'yes', 'no'];
+                const words = msg.toLowerCase().split(/[\s\p{P}]+/u).filter(w => w.length >= 2);
+                let count = 0;
+                words.forEach(w => { if (commonWords.includes(w)) count++; });
+                return { realWords: count, hasRealWords: count > 0 };
+            }
+
+            // Run analysis
+            const nameAnalysis = analyzeGibberish(name);
+            const phoneAnalysis = phone ? analyzePhone(phone) : { valid: true };
+            const messageAnalysis = message ? analyzeMessage(message) : { realWords: 0, hasRealWords: true };
+            const gmailDots = email.includes('@gmail.com') ? (email.split('@')[0].match(/\./g) || []).length : 0;
+
+            // Define all checks - use client-side analysis for manual reviews
             const checks = [
                 {
                     name: 'Honeypot Field',
@@ -1923,35 +2201,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     name: 'Gmail Dot Pattern',
                     category: 'advanced',
                     value: email,
-                    triggered: reason.startsWith('gmail_dot_pattern'),
-                    description: email.includes('@gmail.com') ? (email.split('@')[0].split('.').length - 1) + ' dots in username' : 'N/A (not Gmail)'
+                    triggered: reason.startsWith('gmail_dot_pattern') || hasDetectedIssue('gmail_dot_pattern') || (isManualReview && gmailDots >= 3),
+                    description: gmailDots + ' dots in username' + (gmailDots >= 3 ? ' (suspicious)' : '')
                 },
                 {
                     name: 'Name Validation',
                     category: 'advanced',
                     value: name || '(no name)',
-                    triggered: reason.startsWith('invalid_name'),
-                    description: getNameAnalysis(name)
+                    triggered: reason.startsWith('invalid_name') || hasDetectedIssue('invalid_name') || (isManualReview && nameAnalysis.isGibberish),
+                    description: nameAnalysis.isGibberish ?
+                        `${nameAnalysis.vowelRatio}% vowels, ${nameAnalysis.midCaps} mid-caps (suspicious)` :
+                        getNameAnalysis(name)
                 },
                 {
                     name: 'Phone Area Code',
                     category: 'advanced',
                     value: phone || '(no phone)',
-                    triggered: reason.startsWith('invalid_phone'),
-                    description: phone ? 'Area code: ' + phone.replace(/\D/g, '').substring(0, 3) : 'N/A'
+                    triggered: reason.startsWith('invalid_phone') || hasDetectedIssue('invalid_phone') || (isManualReview && phone && !phoneAnalysis.valid),
+                    description: phone ? `Area code: ${phoneAnalysis.areaCode}` + (!phoneAnalysis.valid ? ' (invalid)' : '') : 'N/A'
                 },
                 {
                     name: 'Message Words',
                     category: 'advanced',
                     value: message ? message.substring(0, 40) + (message.length > 40 ? '...' : '') : '(no message)',
-                    triggered: reason.startsWith('gibberish_message'),
-                    description: message ? countRealWords(message) + ' real words found' : 'N/A'
+                    triggered: reason.startsWith('gibberish_message') || hasDetectedIssue('gibberish_message') || (isManualReview && message && !messageAnalysis.hasRealWords),
+                    description: message ? `${messageAnalysis.realWords} real words found` + (!messageAnalysis.hasRealWords ? ' (suspicious)' : '') : 'N/A'
                 },
                 {
                     name: 'Gibberish Detection',
                     category: 'advanced',
                     value: name || message?.substring(0, 30) || '',
-                    triggered: reason.startsWith('gibberish_'),
+                    triggered: reason.startsWith('gibberish_') || hasDetectedIssue('gibberish_') || hasDetectedIssue('invalid_name') || (isManualReview && (nameAnalysis.isGibberish || (message && !messageAnalysis.hasRealWords))),
                     description: 'High entropy / random characters'
                 }
             ];
