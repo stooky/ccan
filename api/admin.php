@@ -365,8 +365,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $output = [];
     $returnCode = 0;
 
-    // Use full path to node_modules/.bin for astro, and set PATH to include common node locations
-    $command = 'cd ' . escapeshellarg($rootDir) . ' && export PATH="/usr/local/bin:/usr/bin:$PATH" && ./node_modules/.bin/astro build 2>&1';
+    // Use full path to node_modules/.bin for astro
+    // Set HOME to project dir so astro telemetry can write config, and disable telemetry
+    $command = 'cd ' . escapeshellarg($rootDir) . ' && export HOME=' . escapeshellarg($rootDir) . ' && export ASTRO_TELEMETRY_DISABLED=1 && ./node_modules/.bin/astro build 2>&1';
     exec($command, $output, $returnCode);
 
     $outputText = implode("\n", $output);
