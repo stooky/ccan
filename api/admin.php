@@ -355,6 +355,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit();
 }
 
+// Handle rebuild site action
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'rebuild_site') {
+    header('Content-Type: application/json');
+
+    $rootDir = dirname(__DIR__);
+
+    // Run npm build
+    $output = [];
+    $returnCode = 0;
+
+    // Change to project directory and run build
+    $command = 'cd ' . escapeshellarg($rootDir) . ' && npm run build 2>&1';
+    exec($command, $output, $returnCode);
+
+    $outputText = implode("\n", $output);
+
+    if ($returnCode === 0) {
+        echo json_encode([
+            'success' => true,
+            'message' => 'Site rebuilt successfully!',
+            'output' => $outputText
+        ]);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Build failed with exit code ' . $returnCode,
+            'output' => $outputText
+        ]);
+    }
+    exit();
+}
+
 // ============================================================================
 // Spam Detection Functions (for re-analyzing manual entries)
 // ============================================================================
@@ -1008,8 +1040,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 </head>
 <body>
     <div class="container">
-        <h1>C-Can Sam Admin</h1>
-        <p class="subtitle">Manage submissions and reviews</p>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+            <div>
+                <h1 style="margin-bottom: 0.25rem;">C-Can Sam Admin</h1>
+                <p class="subtitle" style="margin: 0;">Manage submissions and reviews</p>
+            </div>
+            <button type="button" class="btn btn-primary" id="rebuild-site-btn" onclick="rebuildSite()" style="white-space: nowrap;">
+                Rebuild Site
+            </button>
+        </div>
 
         <?php if (isset($_GET['deleted'])): ?>
             <div class="alert">Submission deleted successfully.</div>
@@ -1570,6 +1609,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 <div class="modal-body" id="backup-progress-body">
                     <div class="spinner"></div>
                     <p style="text-align: center; margin-top: 1rem;" id="backup-progress-text">Creating backup and sending email...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rebuild Site Modal -->
+        <div id="rebuild-modal" class="modal" style="display: none;">
+            <div class="modal-content" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h3 id="rebuild-modal-title">Rebuilding Site</h3>
+                    <button class="modal-close" id="rebuild-close-btn" onclick="closeRebuildModal()" style="display: none;">&times;</button>
+                </div>
+                <div class="modal-body" id="rebuild-modal-body">
+                    <div class="spinner"></div>
+                    <p style="text-align: center; margin-top: 1rem;">Building site... This may take 15-30 seconds.</p>
                 </div>
             </div>
         </div>
@@ -3001,6 +3054,99 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         if (document.getElementById('backup-tab')?.classList.contains('active')) {
             loadBackupData();
         }
+
+        // ============================================
+        // Rebuild Site Functionality
+        // ============================================
+        const rebuildModal = document.getElementById('rebuild-modal');
+        const rebuildModalBody = document.getElementById('rebuild-modal-body');
+        const rebuildModalTitle = document.getElementById('rebuild-modal-title');
+        const rebuildCloseBtn = document.getElementById('rebuild-close-btn');
+
+        async function rebuildSite() {
+            const btn = document.getElementById('rebuild-site-btn');
+            btn.disabled = true;
+            btn.textContent = 'Rebuilding...';
+
+            // Show modal
+            rebuildModal.style.display = 'flex';
+            rebuildCloseBtn.style.display = 'none';
+            rebuildModalTitle.textContent = 'Rebuilding Site';
+            rebuildModalBody.innerHTML = `
+                <div class="spinner"></div>
+                <p style="text-align: center; margin-top: 1rem;">Building site... This may take 15-30 seconds.</p>
+            `;
+
+            try {
+                const formData = new FormData();
+                formData.append('key', secretPath);
+                formData.append('action', 'rebuild_site');
+
+                const response = await fetch('admin.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                rebuildCloseBtn.style.display = 'block';
+
+                if (data.success) {
+                    rebuildModalTitle.textContent = 'Rebuild Complete';
+                    rebuildModalBody.innerHTML = `
+                        <div style="text-align: center;">
+                            <div style="font-size: 3rem; color: #059669; margin-bottom: 1rem;">&#10004;</div>
+                            <p style="font-weight: 600; color: #065f46; margin-bottom: 1rem;">Site rebuilt successfully!</p>
+                            <details style="text-align: left; margin-top: 1rem;">
+                                <summary style="cursor: pointer; color: #6b7280; font-size: 0.875rem;">Show build output</summary>
+                                <pre style="background: #1f2937; color: #e5e7eb; padding: 1rem; border-radius: 0.375rem; font-size: 0.75rem; max-height: 300px; overflow: auto; margin-top: 0.5rem; white-space: pre-wrap;">${escapeHtml(data.output || 'No output')}</pre>
+                            </details>
+                            <button type="button" class="btn btn-primary" style="margin-top: 1rem;" onclick="closeRebuildModal()">Done</button>
+                        </div>
+                    `;
+                } else {
+                    rebuildModalTitle.textContent = 'Rebuild Failed';
+                    rebuildModalBody.innerHTML = `
+                        <div style="text-align: center;">
+                            <div style="font-size: 3rem; color: #dc2626; margin-bottom: 1rem;">&#10006;</div>
+                            <p style="font-weight: 600; color: #dc2626; margin-bottom: 0.5rem;">Build failed!</p>
+                            <p style="color: #6b7280; font-size: 0.875rem;">${escapeHtml(data.message)}</p>
+                            <details style="text-align: left; margin-top: 1rem;" open>
+                                <summary style="cursor: pointer; color: #6b7280; font-size: 0.875rem;">Build output</summary>
+                                <pre style="background: #1f2937; color: #e5e7eb; padding: 1rem; border-radius: 0.375rem; font-size: 0.75rem; max-height: 300px; overflow: auto; margin-top: 0.5rem; white-space: pre-wrap;">${escapeHtml(data.output || 'No output')}</pre>
+                            </details>
+                            <button type="button" class="btn btn-secondary" style="margin-top: 1rem;" onclick="closeRebuildModal()">Close</button>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                console.error('Rebuild failed:', error);
+                rebuildCloseBtn.style.display = 'block';
+                rebuildModalTitle.textContent = 'Rebuild Failed';
+                rebuildModalBody.innerHTML = `
+                    <div style="text-align: center;">
+                        <div style="font-size: 3rem; color: #dc2626; margin-bottom: 1rem;">&#10006;</div>
+                        <p style="font-weight: 600; color: #dc2626;">Error: ${escapeHtml(error.message)}</p>
+                        <button type="button" class="btn btn-secondary" style="margin-top: 1rem;" onclick="closeRebuildModal()">Close</button>
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Rebuild Site';
+            }
+        }
+
+        function closeRebuildModal() {
+            rebuildModal.style.display = 'none';
+        }
+
+        // Close rebuild modal on click outside
+        rebuildModal.addEventListener('click', (e) => {
+            if (e.target === rebuildModal && rebuildCloseBtn.style.display !== 'none') {
+                closeRebuildModal();
+            }
+        });
     </script>
 </body>
 </html>
