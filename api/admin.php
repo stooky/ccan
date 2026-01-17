@@ -82,6 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     $author = trim($_POST['author'] ?? '');
     $rating = (int)($_POST['rating'] ?? 0);
+    $date = trim($_POST['date'] ?? date('Y-m-d'));
     $text = trim($_POST['text'] ?? '');
     $ownerResponse = trim($_POST['ownerResponse'] ?? '');
 
@@ -92,6 +93,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
     if ($rating < 1 || $rating > 5) {
         echo json_encode(['success' => false, 'message' => 'Rating must be between 1 and 5']);
+        exit();
+    }
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        echo json_encode(['success' => false, 'message' => 'Invalid date format']);
         exit();
     }
 
@@ -111,13 +116,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
     $newId = 'review_' . str_pad($maxId + 1, 3, '0', STR_PAD_LEFT);
 
+    // Calculate relative date
+    $reviewDate = new DateTime($date);
+    $now = new DateTime();
+    $diff = $now->diff($reviewDate);
+    if ($diff->days == 0) {
+        $relativeDate = 'Today';
+    } elseif ($diff->days == 1) {
+        $relativeDate = 'Yesterday';
+    } elseif ($diff->days < 7) {
+        $relativeDate = $diff->days . ' days ago';
+    } elseif ($diff->days < 30) {
+        $weeks = floor($diff->days / 7);
+        $relativeDate = $weeks . ' week' . ($weeks > 1 ? 's' : '') . ' ago';
+    } elseif ($diff->days < 365) {
+        $months = floor($diff->days / 30);
+        $relativeDate = $months . ' month' . ($months > 1 ? 's' : '') . ' ago';
+    } else {
+        $years = floor($diff->days / 365);
+        $relativeDate = $years . ' year' . ($years > 1 ? 's' : '') . ' ago';
+    }
+
     // Create new review
     $newReview = [
         'id' => $newId,
         'author' => $author,
         'rating' => $rating,
-        'date' => date('Y-m-d'),
-        'relativeDate' => 'Just now',
+        'date' => $date,
+        'relativeDate' => $relativeDate,
         'text' => $text ?: null,
         'hasPhoto' => false,
         'isNew' => true,
@@ -154,6 +180,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     echo json_encode([
         'success' => true,
         'review' => $newReview,
+        'totalCount' => $reviewsData['totalCount'],
+        'averageRating' => $reviewsData['averageRating']
+    ]);
+    exit();
+}
+
+// Handle delete review action
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_review') {
+    header('Content-Type: application/json');
+
+    $reviewId = trim($_POST['review_id'] ?? '');
+
+    if (empty($reviewId)) {
+        echo json_encode(['success' => false, 'message' => 'Review ID is required']);
+        exit();
+    }
+
+    // Load reviews
+    $reviewsPath = dirname(__DIR__) . '/data/reviews.json';
+    if (!file_exists($reviewsPath)) {
+        echo json_encode(['success' => false, 'message' => 'Reviews file not found']);
+        exit();
+    }
+
+    $reviewsData = json_decode(file_get_contents($reviewsPath), true);
+
+    // Find and remove the review
+    $found = false;
+    $reviewsData['reviews'] = array_values(array_filter($reviewsData['reviews'], function($review) use ($reviewId, &$found) {
+        if ($review['id'] === $reviewId) {
+            $found = true;
+            return false;
+        }
+        return true;
+    }));
+
+    if (!$found) {
+        echo json_encode(['success' => false, 'message' => 'Review not found']);
+        exit();
+    }
+
+    // Update stats
+    $reviewsData['totalCount'] = count($reviewsData['reviews']);
+    if ($reviewsData['totalCount'] > 0) {
+        $totalRating = 0;
+        foreach ($reviewsData['reviews'] as $review) {
+            $totalRating += $review['rating'];
+        }
+        $reviewsData['averageRating'] = round($totalRating / $reviewsData['totalCount'], 2);
+    } else {
+        $reviewsData['averageRating'] = 0;
+    }
+
+    // Save
+    file_put_contents($reviewsPath, json_encode($reviewsData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+    echo json_encode([
+        'success' => true,
         'totalCount' => $reviewsData['totalCount'],
         'averageRating' => $reviewsData['averageRating']
     ]);
@@ -1032,18 +1116,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 </label>
                                 <input type="text" name="author" required style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;" placeholder="Customer name">
                             </div>
-                            <div style="margin-bottom: 1rem;">
-                                <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; font-size: 0.875rem;">
-                                    Star Rating <span style="color: #dc2626;">*</span>
-                                </label>
-                                <div id="star-rating-input" style="display: flex; gap: 0.25rem; font-size: 1.5rem; cursor: pointer;">
-                                    <span class="star-input" data-rating="1" style="color: #d1d5db;">★</span>
-                                    <span class="star-input" data-rating="2" style="color: #d1d5db;">★</span>
-                                    <span class="star-input" data-rating="3" style="color: #d1d5db;">★</span>
-                                    <span class="star-input" data-rating="4" style="color: #d1d5db;">★</span>
-                                    <span class="star-input" data-rating="5" style="color: #d1d5db;">★</span>
+                            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                                <div style="flex: 1;">
+                                    <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; font-size: 0.875rem;">
+                                        Star Rating <span style="color: #dc2626;">*</span>
+                                    </label>
+                                    <div id="star-rating-input" style="display: flex; gap: 0.25rem; font-size: 1.5rem; cursor: pointer;">
+                                        <span class="star-input" data-rating="1" style="color: #d1d5db;">★</span>
+                                        <span class="star-input" data-rating="2" style="color: #d1d5db;">★</span>
+                                        <span class="star-input" data-rating="3" style="color: #d1d5db;">★</span>
+                                        <span class="star-input" data-rating="4" style="color: #d1d5db;">★</span>
+                                        <span class="star-input" data-rating="5" style="color: #d1d5db;">★</span>
+                                    </div>
+                                    <input type="hidden" name="rating" id="rating-value" value="" required>
                                 </div>
-                                <input type="hidden" name="rating" id="rating-value" value="" required>
+                                <div style="flex: 1;">
+                                    <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; font-size: 0.875rem;">
+                                        Date <span style="color: #dc2626;">*</span>
+                                    </label>
+                                    <input type="date" name="date" required style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem;" value="<?= date('Y-m-d') ?>">
+                                </div>
                             </div>
                             <div style="margin-bottom: 1rem;">
                                 <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; font-size: 0.875rem;">
@@ -1763,20 +1855,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     `;
                 }
 
+                const sourceLabel = review.source === 'manual' ? '<span style="background: #dbeafe; color: #1e40af; font-size: 0.625rem; padding: 0.125rem 0.375rem; border-radius: 0.25rem; margin-left: 0.5rem;">Manual</span>' : '';
+
                 return `
-                    <div class="review-card">
+                    <div class="review-card" data-review-id="${escapeHtml(review.id)}">
                         <div class="review-header">
                             <div class="review-author">
                                 <div class="review-avatar">${getInitials(review.author)}</div>
                                 <div class="review-author-info">
-                                    <div class="review-author-name">${escapeHtml(review.author)}</div>
+                                    <div class="review-author-name">${escapeHtml(review.author)}${sourceLabel}</div>
                                     <div class="review-author-meta">
                                         <div class="review-rating">${renderStars(review.rating)}</div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="review-date">
-                                ${getRelativeTime(review.date)}
+                            <div class="review-date" style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span>${getRelativeTime(review.date)}</span>
+                                <button type="button" class="btn btn-secondary" style="font-size: 0.625rem; padding: 0.125rem 0.375rem; color: #dc2626;" onclick="deleteReview('${escapeHtml(review.id)}', '${escapeHtml(review.author)}')">Delete</button>
                             </div>
                         </div>
                         ${review.text ? `<div class="review-text">${escapeHtml(review.text)}</div>` : '<div class="review-text" style="color: #9ca3af; font-style: italic;">(No written review)</div>'}
@@ -2443,6 +2538,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Add Review';
+            }
+        }
+
+        async function deleteReview(reviewId, authorName) {
+            if (!confirm(`Are you sure you want to delete the review by "${authorName}"?\n\nThis action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('key', secretPath);
+                formData.append('action', 'delete_review');
+                formData.append('review_id', reviewId);
+
+                const response = await fetch('admin.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to delete review');
+                }
+
+                // Success - reload page to show updated reviews
+                alert('Review deleted successfully! Rebuild the site to update the frontend.');
+                window.location.reload();
+
+            } catch (error) {
+                console.error('Delete review failed:', error);
+                alert('Failed to delete review: ' + error.message);
             }
         }
 
