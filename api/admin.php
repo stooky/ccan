@@ -361,12 +361,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     $rootDir = dirname(__DIR__);
 
-    // Run npm build
+    // Run npm build with proper PATH for node binaries
     $output = [];
     $returnCode = 0;
 
-    // Change to project directory and run build
-    $command = 'cd ' . escapeshellarg($rootDir) . ' && npm run build 2>&1';
+    // Use full path to node_modules/.bin for astro, and set PATH to include common node locations
+    $command = 'cd ' . escapeshellarg($rootDir) . ' && export PATH="/usr/local/bin:/usr/bin:$PATH" && ./node_modules/.bin/astro build 2>&1';
     exec($command, $output, $returnCode);
 
     $outputText = implode("\n", $output);
