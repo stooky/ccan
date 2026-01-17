@@ -2201,7 +2201,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     name: 'Gmail Dot Pattern',
                     category: 'advanced',
                     value: email,
-                    triggered: reason.startsWith('gmail_dot_pattern') || hasDetectedIssue('gmail_dot_pattern') || (isManualReview && gmailDots >= 3),
+                    triggered: reason.includes('gmail_dot_pattern') || hasDetectedIssue('gmail_dot_pattern') || (isManualReview && gmailDots >= 3),
                     description: gmailDots + ' dots in username' + (gmailDots >= 3 ? ' (suspicious)' : '')
                 },
                 {
