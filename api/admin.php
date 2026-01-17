@@ -320,6 +320,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             flex-shrink: 0;
         }
         .badge-quote { background: #fef3c7; color: #92400e; }
+        .badge-spam { background: #fee2e2; color: #dc2626; }
+        .badge-manual { background: #f3f4f6; color: #4b5563; }
         .badge-message { background: #dbeafe; color: #1e40af; }
         .summary-name { font-weight: 600; min-width: 120px; flex-shrink: 0; }
         .summary-email { color: #d97706; min-width: 180px; flex-shrink: 0; }
@@ -642,9 +644,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     <label>Reason:</label>
                     <select id="spam-reason-filter">
                         <option value="all">All</option>
-                        <option value="honeypot">Honeypot</option>
-                        <option value="time_check">Time Check</option>
-                        <option value="content_filter">Content Filter</option>
+                        <optgroup label="Basic Protection">
+                            <option value="honeypot">Honeypot</option>
+                            <option value="time_check">Time Check</option>
+                            <option value="rate_limit">Rate Limit</option>
+                        </optgroup>
+                        <optgroup label="Content Filtering">
+                            <option value="content_filter:spam_phrase">Spam Phrases</option>
+                            <option value="content_filter:excessive_urls">Excessive URLs</option>
+                            <option value="excessive_caps">Excessive Caps</option>
+                            <option value="disposable_email">Disposable Email</option>
+                        </optgroup>
+                        <optgroup label="Advanced Bot Detection">
+                            <option value="gmail_dot_pattern">Gmail Dot Pattern</option>
+                            <option value="invalid_name">Name Validation</option>
+                            <option value="invalid_phone">Phone Area Code</option>
+                            <option value="gibberish_message">Gibberish Message</option>
+                            <option value="gibberish_">Gibberish Detection</option>
+                        </optgroup>
+                        <optgroup label="Manual">
+                            <option value="manual_review">Manual Review</option>
+                        </optgroup>
                     </select>
                 </div>
                 <div class="filter-group">
@@ -1663,19 +1683,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         const spamFilteredCountEl = document.getElementById('spam-filtered-count');
 
         function getReasonBadgeClass(reason) {
-            if (reason.startsWith('honeypot')) return 'badge-quote';
-            if (reason.startsWith('time_check')) return 'badge-message';
+            // Basic Protection - orange
+            if (reason === 'honeypot') return 'badge-quote';
+            if (reason === 'time_check') return 'badge-quote';
+            if (reason.startsWith('rate_limit')) return 'badge-quote';
+
+            // Content Filtering - blue
+            if (reason.startsWith('content_filter') || reason.startsWith('disposable_email') || reason === 'excessive_caps') return 'badge-message';
+
+            // Advanced Bot Detection - red (custom)
+            if (reason.startsWith('gmail_dot') || reason.startsWith('invalid_') || reason.startsWith('gibberish_')) return 'badge-spam';
+
+            // Manual Review - gray
+            if (reason.startsWith('manual_review')) return 'badge-manual';
+
             return 'badge-quote';
         }
 
         function getReasonLabel(reason) {
+            // Basic Protection
             if (reason === 'honeypot') return 'Honeypot';
             if (reason === 'time_check') return 'Too Fast';
+            if (reason.startsWith('rate_limit')) return 'Rate Limited';
+
+            // Content Filtering
             if (reason.startsWith('content_filter:spam_phrase:')) return 'Spam Phrase: ' + reason.split(':')[2];
-            if (reason.startsWith('content_filter:excessive_urls')) return 'Too Many URLs';
-            if (reason.startsWith('content_filter:disposable_email:')) return 'Disposable Email';
-            if (reason.startsWith('content_filter:excessive_caps')) return 'Excessive Caps';
+            if (reason === 'content_filter:excessive_urls') return 'Too Many URLs';
+            if (reason === 'content_filter:excessive_caps' || reason === 'excessive_caps') return 'Excessive Caps';
+            if (reason.startsWith('content_filter:disposable_email:') || reason.startsWith('disposable_email:')) return 'Disposable Email';
             if (reason.startsWith('content_filter:')) return 'Content: ' + reason.split(':')[1];
+
+            // Advanced Bot Detection
+            if (reason.startsWith('gmail_dot_pattern')) return 'Gmail Dot Pattern';
+            if (reason.startsWith('invalid_name:')) return 'Invalid Name: ' + reason.split(':')[1].replace(/_/g, ' ');
+            if (reason.startsWith('invalid_phone:invalid_area_code:')) return 'Invalid Area Code: ' + reason.split(':')[2];
+            if (reason.startsWith('invalid_phone:')) return 'Invalid Phone';
+            if (reason === 'gibberish_message:no_real_words') return 'No Real Words';
+            if (reason.startsWith('gibberish_message')) return 'Gibberish Message';
+            if (reason.startsWith('gibberish_name')) return 'Gibberish Name';
+            if (reason.startsWith('gibberish_')) return 'Gibberish: ' + reason.split('_')[1];
+
+            // Manual Review
+            if (reason.startsWith('manual_review:')) return 'Manual: ' + reason.split(':')[1].replace(/_/g, ' ');
+            if (reason === 'manual_review') return 'Manual Review';
+
             return reason;
         }
 
@@ -1725,6 +1776,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 const date = new Date(spam.timestamp);
                 const dateStr = date.toLocaleDateString();
                 const timeStr = date.toLocaleTimeString();
+                const originalData = spam.original_data || {};
+
+                // Build the security check matrix
+                const checkMatrix = buildSecurityCheckMatrix(spam, originalData);
 
                 return `
                     <div class="submission-row" id="spam-row-${index}">
@@ -1735,28 +1790,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             </span>
                             <span class="summary-email">${escapeHtml(spam.email || '(no email)')}</span>
                             <span class="summary-phone">${escapeHtml(spam.ip || '')}</span>
-                            <span class="summary-preview">${escapeHtml((spam.userAgent || '').substring(0, 50))}</span>
+                            <span class="summary-preview">${escapeHtml((originalData.name || originalData.firstName || '').substring(0, 30))}</span>
                             <span class="summary-date">${escapeHtml(dateStr)}</span>
                         </div>
                         <div class="submission-details">
-                            <div class="details-grid">
-                                <div class="detail-item">
-                                    <div class="detail-label">Blocked Reason</div>
-                                    <div class="detail-value">${escapeHtml(spam.reason)}</div>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-label">Email</div>
-                                    <div class="detail-value">${escapeHtml(spam.email || '')}</div>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-label">IP Address</div>
-                                    <div class="detail-value">${escapeHtml(spam.ip || '')}</div>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-label">Date & Time</div>
-                                    <div class="detail-value">${escapeHtml(dateStr + ' ' + timeStr)}</div>
-                                </div>
+                            <!-- Blocked Reason Banner -->
+                            <div style="background: #fee2e2; border: 1px solid #fecaca; border-radius: 0.5rem; padding: 0.75rem 1rem; margin-bottom: 1rem;">
+                                <strong style="color: #dc2626;">Blocked:</strong>
+                                <span style="color: #991b1b;">${escapeHtml(getReasonLabel(spam.reason))}</span>
+                                <code style="background: #fef2f2; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">${escapeHtml(spam.reason)}</code>
                             </div>
+
+                            <!-- Original Submission Data -->
+                            ${Object.keys(originalData).length > 0 ? `
+                            <div style="margin-bottom: 1rem;">
+                                <div style="font-weight: 600; margin-bottom: 0.5rem; color: #374151;">Original Submission</div>
+                                <div class="details-grid">
+                                    ${originalData.name ? `<div class="detail-item"><div class="detail-label">Name</div><div class="detail-value">${escapeHtml(originalData.name)}</div></div>` : ''}
+                                    ${originalData.firstName ? `<div class="detail-item"><div class="detail-label">First Name</div><div class="detail-value">${escapeHtml(originalData.firstName)}</div></div>` : ''}
+                                    ${originalData.lastName ? `<div class="detail-item"><div class="detail-label">Last Name</div><div class="detail-value">${escapeHtml(originalData.lastName)}</div></div>` : ''}
+                                    <div class="detail-item"><div class="detail-label">Email</div><div class="detail-value">${escapeHtml(spam.email || originalData.email || '')}</div></div>
+                                    ${originalData.phone ? `<div class="detail-item"><div class="detail-label">Phone</div><div class="detail-value">${escapeHtml(originalData.phone)}</div></div>` : ''}
+                                    <div class="detail-item"><div class="detail-label">IP Address</div><div class="detail-value">${escapeHtml(spam.ip || '')}</div></div>
+                                    <div class="detail-item"><div class="detail-label">Date & Time</div><div class="detail-value">${escapeHtml(dateStr + ' ' + timeStr)}</div></div>
+                                    ${originalData.formType ? `<div class="detail-item"><div class="detail-label">Form Type</div><div class="detail-value">${escapeHtml(originalData.formType)}</div></div>` : ''}
+                                </div>
+                                ${originalData.message ? `
+                                <div class="message-section" style="margin-top: 0.75rem;">
+                                    <div class="message-label">Message</div>
+                                    <div class="message-content">${escapeHtml(originalData.message)}</div>
+                                </div>
+                                ` : ''}
+                            </div>
+                            ` : `
+                            <div class="details-grid" style="margin-bottom: 1rem;">
+                                <div class="detail-item"><div class="detail-label">Email</div><div class="detail-value">${escapeHtml(spam.email || '')}</div></div>
+                                <div class="detail-item"><div class="detail-label">IP Address</div><div class="detail-value">${escapeHtml(spam.ip || '')}</div></div>
+                                <div class="detail-item"><div class="detail-label">Date & Time</div><div class="detail-value">${escapeHtml(dateStr + ' ' + timeStr)}</div></div>
+                            </div>
+                            `}
+
+                            <!-- Security Check Matrix -->
+                            <div style="margin-bottom: 1rem;">
+                                <div style="font-weight: 600; margin-bottom: 0.5rem; color: #374151;">Security Check Matrix</div>
+                                <table style="width: 100%; border-collapse: collapse; font-size: 0.8125rem;">
+                                    <thead>
+                                        <tr style="background: #f3f4f6;">
+                                            <th style="padding: 0.5rem; text-align: left; border: 1px solid #e5e7eb;">Check</th>
+                                            <th style="padding: 0.5rem; text-align: left; border: 1px solid #e5e7eb;">Value Tested</th>
+                                            <th style="padding: 0.5rem; text-align: center; border: 1px solid #e5e7eb; width: 80px;">Result</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${checkMatrix}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- User Agent -->
                             <div class="message-section">
                                 <div class="message-label">User Agent</div>
                                 <div class="message-content" style="font-size: 0.75rem;">${escapeHtml(spam.userAgent || '')}</div>
@@ -1765,6 +1856,175 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     </div>
                 `;
             }).join('');
+        }
+
+        /**
+         * Build the security check matrix for a spam entry
+         */
+        function buildSecurityCheckMatrix(spam, originalData) {
+            const reason = spam.reason || '';
+            const email = spam.email || originalData.email || '';
+            const name = originalData.name || ((originalData.firstName || '') + ' ' + (originalData.lastName || '')).trim();
+            const phone = originalData.phone || '';
+            const message = originalData.message || '';
+
+            // Define all checks
+            const checks = [
+                {
+                    name: 'Honeypot Field',
+                    category: 'basic',
+                    value: '(hidden field)',
+                    triggered: reason === 'honeypot',
+                    description: 'Hidden field filled by bots'
+                },
+                {
+                    name: 'Time Check',
+                    category: 'basic',
+                    value: '< 3 seconds',
+                    triggered: reason === 'time_check',
+                    description: 'Form submitted too quickly'
+                },
+                {
+                    name: 'Rate Limit',
+                    category: 'basic',
+                    value: spam.ip || '',
+                    triggered: reason.startsWith('rate_limit'),
+                    description: 'Too many submissions from IP'
+                },
+                {
+                    name: 'Spam Phrases',
+                    category: 'content',
+                    value: message ? message.substring(0, 50) + (message.length > 50 ? '...' : '') : '(no message)',
+                    triggered: reason.startsWith('content_filter:spam_phrase'),
+                    description: reason.startsWith('content_filter:spam_phrase') ? reason.split(':')[2] : ''
+                },
+                {
+                    name: 'Excessive URLs',
+                    category: 'content',
+                    value: message ? (message.match(/https?:\/\/|www\./gi) || []).length + ' URLs' : '0 URLs',
+                    triggered: reason === 'content_filter:excessive_urls',
+                    description: 'Too many links in message'
+                },
+                {
+                    name: 'Excessive Caps',
+                    category: 'content',
+                    value: message ? message.substring(0, 30) : '',
+                    triggered: reason === 'content_filter:excessive_caps' || reason === 'excessive_caps',
+                    description: 'Message is mostly uppercase'
+                },
+                {
+                    name: 'Disposable Email',
+                    category: 'content',
+                    value: email,
+                    triggered: reason.startsWith('content_filter:disposable_email') || reason.startsWith('disposable_email'),
+                    description: 'Throwaway email domain'
+                },
+                {
+                    name: 'Gmail Dot Pattern',
+                    category: 'advanced',
+                    value: email,
+                    triggered: reason.startsWith('gmail_dot_pattern'),
+                    description: email.includes('@gmail.com') ? (email.split('@')[0].split('.').length - 1) + ' dots in username' : 'N/A (not Gmail)'
+                },
+                {
+                    name: 'Name Validation',
+                    category: 'advanced',
+                    value: name || '(no name)',
+                    triggered: reason.startsWith('invalid_name'),
+                    description: getNameAnalysis(name)
+                },
+                {
+                    name: 'Phone Area Code',
+                    category: 'advanced',
+                    value: phone || '(no phone)',
+                    triggered: reason.startsWith('invalid_phone'),
+                    description: phone ? 'Area code: ' + phone.replace(/\D/g, '').substring(0, 3) : 'N/A'
+                },
+                {
+                    name: 'Message Words',
+                    category: 'advanced',
+                    value: message ? message.substring(0, 40) + (message.length > 40 ? '...' : '') : '(no message)',
+                    triggered: reason.startsWith('gibberish_message'),
+                    description: message ? countRealWords(message) + ' real words found' : 'N/A'
+                },
+                {
+                    name: 'Gibberish Detection',
+                    category: 'advanced',
+                    value: name || message?.substring(0, 30) || '',
+                    triggered: reason.startsWith('gibberish_'),
+                    description: 'High entropy / random characters'
+                }
+            ];
+
+            // Build table rows
+            let html = '';
+            let currentCategory = '';
+
+            checks.forEach(check => {
+                // Add category header
+                if (check.category !== currentCategory) {
+                    currentCategory = check.category;
+                    const categoryLabel = currentCategory === 'basic' ? 'Basic Protection' :
+                                         currentCategory === 'content' ? 'Content Filtering' : 'Advanced Bot Detection';
+                    html += `<tr style="background: #f9fafb;"><td colspan="3" style="padding: 0.375rem 0.5rem; font-weight: 600; font-size: 0.75rem; color: #6b7280; border: 1px solid #e5e7eb;">${categoryLabel}</td></tr>`;
+                }
+
+                const bgColor = check.triggered ? '#fef2f2' : '#ffffff';
+                const resultIcon = check.triggered ? '❌ BLOCKED' : '✓ Pass';
+                const resultColor = check.triggered ? '#dc2626' : '#16a34a';
+
+                html += `
+                    <tr style="background: ${bgColor};">
+                        <td style="padding: 0.375rem 0.5rem; border: 1px solid #e5e7eb;">
+                            <strong>${escapeHtml(check.name)}</strong>
+                            ${check.triggered && check.description ? `<br><span style="font-size: 0.7rem; color: #dc2626;">${escapeHtml(check.description)}</span>` : ''}
+                        </td>
+                        <td style="padding: 0.375rem 0.5rem; border: 1px solid #e5e7eb; font-family: monospace; font-size: 0.75rem; word-break: break-all;">
+                            ${escapeHtml(check.value)}
+                        </td>
+                        <td style="padding: 0.375rem 0.5rem; border: 1px solid #e5e7eb; text-align: center; color: ${resultColor}; font-weight: ${check.triggered ? '600' : '400'}; font-size: 0.75rem;">
+                            ${resultIcon}
+                        </td>
+                    </tr>
+                `;
+            });
+
+            return html;
+        }
+
+        /**
+         * Analyze name for potential issues
+         */
+        function getNameAnalysis(name) {
+            if (!name || name.trim() === '') return 'N/A';
+
+            const vowels = (name.match(/[aeiouAEIOU]/g) || []).length;
+            const consonants = (name.match(/[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]/g) || []).length;
+            const total = vowels + consonants;
+
+            if (total === 0) return 'No letters';
+
+            const vowelRatio = Math.round((vowels / total) * 100);
+            const midCaps = (name.match(/(?!^|\s)[A-Z]/g) || []).length;
+
+            let analysis = `${vowelRatio}% vowels`;
+            if (midCaps > 2) analysis += `, ${midCaps} mid-word caps`;
+
+            return analysis;
+        }
+
+        /**
+         * Count real English words in message
+         */
+        function countRealWords(message) {
+            const commonWords = ['the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'i', 'it', 'for', 'not', 'on', 'with', 'he', 'as', 'you', 'do', 'at', 'this', 'but', 'his', 'by', 'from', 'they', 'we', 'say', 'her', 'she', 'or', 'an', 'will', 'my', 'one', 'all', 'would', 'there', 'their', 'what', 'so', 'up', 'out', 'if', 'about', 'who', 'get', 'which', 'go', 'me', 'container', 'shipping', 'storage', 'delivery', 'quote', 'price', 'buy', 'need', 'looking', 'interested', 'please', 'thanks', 'hello', 'hi', 'call', 'help', 'information', 'new', 'used', 'deliver', 'available', 'cost', 'much', 'yes', 'no', 'ok'];
+
+            const words = message.toLowerCase().split(/[\s\p{P}]+/u).filter(w => w.length >= 2);
+            let count = 0;
+            words.forEach(word => {
+                if (commonWords.includes(word)) count++;
+            });
+            return count;
         }
 
         function toggleSpamRow(index) {
