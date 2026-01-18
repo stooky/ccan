@@ -64,13 +64,17 @@ const shippingDetails = {
   }
 };
 
-// Return policy - Must inspect before delivery, 20% restocking if refused
+// Return policy - 14 days, 20% restocking fee, drop-off at location
 const returnPolicy = {
   "@type": "MerchantReturnPolicy",
   "applicableCountry": "CA",
-  "returnPolicyCategory": "https://schema.org/MerchantReturnNotPermitted",
-  "returnFees": "https://schema.org/ReturnShippingFees",
-  "description": "Purchaser must inspect and accept container before delivery. If refused upon delivery, customer pays delivery, return charges, and a 20% restocking fee."
+  "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+  "merchantReturnDays": 14,
+  "returnMethod": "https://schema.org/ReturnAtKiosk",
+  "returnFees": "https://schema.org/RestockingFees",
+  "refundType": "https://schema.org/FullRefund",
+  "returnPolicySeasonalOverride": false,
+  "description": "14-day return window. Returns accepted for new and used containers. 20% restocking fee applies. Drop-off at our Martensville location. Refunds processed within 30 days."
 };
 
 // Build offers array based on condition and availability
