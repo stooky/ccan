@@ -33,6 +33,47 @@ if (!product) {
   console.warn(`ProductSchema: No product found for slug "${slug}"`);
 }
 
+// Shipping details - Free within 50km, available throughout Saskatchewan
+const shippingDetails = {
+  "@type": "OfferShippingDetails",
+  "shippingRate": {
+    "@type": "MonetaryAmount",
+    "value": "0",
+    "currency": currency
+  },
+  "shippingDestination": {
+    "@type": "DefinedRegion",
+    "addressCountry": "CA",
+    "addressRegion": "SK"
+  },
+  "deliveryTime": {
+    "@type": "ShippingDeliveryTime",
+    "handlingTime": {
+      "@type": "QuantitativeValue",
+      "minValue": 1,
+      "maxValue": 3,
+      "unitCode": "d"
+    },
+    "transitTime": {
+      "@type": "QuantitativeValue",
+      "minValue": 1,
+      "maxValue": 5,
+      "unitCode": "d"
+    }
+  }
+};
+
+// Return policy - satisfaction guarantee with inspection period
+const returnPolicy = {
+  "@type": "MerchantReturnPolicy",
+  "applicableCountry": "CA",
+  "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+  "merchantReturnDays": 7,
+  "returnMethod": "https://schema.org/ReturnByMail",
+  "returnFees": "https://schema.org/FreeReturn",
+  "description": "7-day inspection period. Contact us if the container doesn't meet the described condition."
+};
+
 // Build offers array based on condition and availability
 const offers: any[] = [];
 
@@ -49,7 +90,9 @@ if (product) {
       "seller": {
         "@type": "Organization",
         "name": siteConfig.name
-      }
+      },
+      "shippingDetails": shippingDetails,
+      "hasMerchantReturnPolicy": returnPolicy
     });
   }
 
@@ -65,7 +108,9 @@ if (product) {
       "seller": {
         "@type": "Organization",
         "name": siteConfig.name
-      }
+      },
+      "shippingDetails": shippingDetails,
+      "hasMerchantReturnPolicy": returnPolicy
     });
   }
 }
