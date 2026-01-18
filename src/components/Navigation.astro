@@ -34,24 +34,24 @@ const logoWidth = Math.round(logoHeight * 2.13);
             <a
               href={link.href}
               class:list={[
-                "inline-flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary-600",
+                "inline-flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary-600 focus:text-primary-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded",
                 currentPath === link.href || link.children.some(child => currentPath === child.href)
                   ? "text-primary-600"
                   : "text-gray-600",
               ]}
             >
               {link.name}
-              <svg class="h-4 w-4 transition-transform group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <svg class="h-4 w-4 transition-transform group-hover:rotate-180 group-focus-within:rotate-180" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
             </a>
             <!-- Dropdown Menu -->
-            <div class="invisible absolute left-0 top-full z-50 mt-1 w-48 origin-top-left scale-95 transform rounded-lg bg-white py-2 opacity-0 shadow-lg ring-1 ring-black ring-opacity-5 transition-all duration-150 group-hover:visible group-hover:scale-100 group-hover:opacity-100">
+            <div class="invisible absolute left-0 top-full z-50 mt-1 w-48 origin-top-left scale-95 transform rounded-lg bg-white py-2 opacity-0 shadow-lg ring-1 ring-black ring-opacity-5 transition-all duration-150 group-hover:visible group-hover:scale-100 group-hover:opacity-100 group-focus-within:visible group-focus-within:scale-100 group-focus-within:opacity-100">
               {link.children.map((child) => (
                 <a
                   href={child.href}
                   class:list={[
-                    "block px-4 py-2 text-sm transition-colors hover:bg-primary-50 hover:text-primary-600",
+                    "block px-4 py-2 text-sm transition-colors hover:bg-primary-50 hover:text-primary-600 focus:bg-primary-50 focus:text-primary-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500",
                     currentPath === child.href ? "bg-primary-50 text-primary-600" : "text-gray-700",
                   ]}
                 >
@@ -64,7 +64,7 @@ const logoWidth = Math.round(logoHeight * 2.13);
           <a
             href={link.href}
             class:list={[
-              "text-sm font-medium transition-colors hover:text-primary-600",
+              "text-sm font-medium transition-colors hover:text-primary-600 focus:text-primary-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded",
               currentPath === link.href ? "text-primary-600" : "text-gray-600",
             ]}
           >
@@ -101,6 +101,7 @@ const logoWidth = Math.round(logoHeight * 2.13);
         stroke-width="1.5"
         stroke="currentColor"
         id="menu-icon-open"
+        aria-hidden="true"
       >
         <path
           stroke-linecap="round"
@@ -116,6 +117,7 @@ const logoWidth = Math.round(logoHeight * 2.13);
         stroke-width="1.5"
         stroke="currentColor"
         id="menu-icon-close"
+        aria-hidden="true"
       >
         <path
           stroke-linecap="round"
@@ -127,7 +129,7 @@ const logoWidth = Math.round(logoHeight * 2.13);
   </nav>
 
   <!-- Mobile Menu -->
-  <div class="hidden md:hidden" id="mobile-menu">
+  <nav class="hidden md:hidden" id="mobile-menu" aria-label="Mobile navigation">
     <div class="space-y-1 px-4 pb-4 pt-2">
       {siteConfig.navigation.map((link) => (
         link.children ? (
@@ -182,7 +184,7 @@ const logoWidth = Math.round(logoHeight * 2.13);
         </a>
       </div>
     </div>
-  </div>
+  </nav>
 </header>
 
 <script>
@@ -191,11 +193,43 @@ const logoWidth = Math.round(logoHeight * 2.13);
   const openIcon = document.getElementById('menu-icon-open');
   const closeIcon = document.getElementById('menu-icon-close');
 
-  menuButton?.addEventListener('click', () => {
-    const isExpanded = menuButton.getAttribute('aria-expanded') === 'true';
-    menuButton.setAttribute('aria-expanded', (!isExpanded).toString());
-    mobileMenu?.classList.toggle('hidden');
-    openIcon?.classList.toggle('hidden');
-    closeIcon?.classList.toggle('hidden');
+  function toggleMenu(forceClose = false) {
+    const isExpanded = menuButton?.getAttribute('aria-expanded') === 'true';
+    const shouldClose = forceClose || isExpanded;
+
+    menuButton?.setAttribute('aria-expanded', (!shouldClose).toString());
+
+    if (shouldClose) {
+      mobileMenu?.classList.add('hidden');
+      openIcon?.classList.remove('hidden');
+      closeIcon?.classList.add('hidden');
+    } else {
+      mobileMenu?.classList.remove('hidden');
+      openIcon?.classList.add('hidden');
+      closeIcon?.classList.remove('hidden');
+      // Focus first link in menu when opened
+      const firstLink = mobileMenu?.querySelector('a');
+      firstLink?.focus();
+    }
+  }
+
+  menuButton?.addEventListener('click', () => toggleMenu());
+
+  // Close on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && menuButton?.getAttribute('aria-expanded') === 'true') {
+      toggleMenu(true);
+      menuButton?.focus();
+    }
+  });
+
+  // Close when clicking outside
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (menuButton?.getAttribute('aria-expanded') === 'true' &&
+        !mobileMenu?.contains(target) &&
+        !menuButton?.contains(target)) {
+      toggleMenu(true);
+    }
   });
 </script>

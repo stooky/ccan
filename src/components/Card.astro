@@ -47,7 +47,7 @@ const Tag = href ? 'a' : 'div';
   )}
 
   {icon && (
-    <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100 text-primary-600">
+    <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100 text-primary-600" aria-hidden="true">
       <Fragment set:html={icon} />
     </div>
   )}

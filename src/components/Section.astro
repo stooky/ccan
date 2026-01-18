@@ -6,6 +6,7 @@ interface Props {
   background?: 'white' | 'gray' | 'primary';
   padding?: 'sm' | 'md' | 'lg';
   id?: string;
+  ariaLabel?: string;
 }
 
 const {
@@ -15,6 +16,7 @@ const {
   background = 'white',
   padding = 'lg',
   id,
+  ariaLabel,
 } = Astro.props;
 
 const bgClasses = {
@@ -33,7 +35,7 @@ const textColor = background === 'primary' ? 'text-white' : 'text-gray-900';
 const subtitleColor = background === 'primary' ? 'text-primary-100' : 'text-gray-600';
 ---
 
-<section id={id} class={`${bgClasses[background]} ${paddingClasses[padding]}`}>
+<section id={id} class={`${bgClasses[background]} ${paddingClasses[padding]}`} aria-label={ariaLabel}>
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     {(title || subtitle) && (
       <div class={`${centered ? 'mx-auto max-w-2xl text-center' : 'max-w-2xl'} mb-12 sm:mb-16`}>
