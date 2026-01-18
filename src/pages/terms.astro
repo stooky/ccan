@@ -10,7 +10,7 @@ import { siteConfig } from '../config/site';
   <section class="bg-gradient-to-br from-gray-900 via-gray-800 to-primary-900 py-16">
     <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
       <h1 class="text-4xl font-bold tracking-tight text-white">Terms and Conditions</h1>
-      <p class="mt-4 text-lg text-gray-300">Last updated: December 2024</p>
+      <p class="mt-4 text-lg text-gray-300">Last updated: January 2026</p>
     </div>
   </section>
 
@@ -51,6 +51,38 @@ import { siteConfig } from '../config/site';
           <li>Customer presence or authorized representative during delivery</li>
         </ul>
 
+        <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4">Shipping Policy</h2>
+        <p class="text-gray-700">
+          We offer container delivery throughout Saskatchewan with the following terms:
+        </p>
+        <ul class="list-disc list-inside text-gray-700 space-y-2 mt-4">
+          <li><strong>Free delivery</strong> within 50km of our Martensville location</li>
+          <li>Delivery rates apply for locations beyond 50km — contact us for a quote</li>
+          <li>Delivery typically within 1-5 business days, depending on location and availability</li>
+          <li>Delivery scheduling is subject to weather conditions and road accessibility</li>
+        </ul>
+
+        <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4">Return Policy</h2>
+        <p class="text-gray-700">
+          Due to the nature of our products, we have the following return policy for container purchases:
+        </p>
+        <div class="mt-4 p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <p class="text-gray-800 font-medium">
+            Purchaser must inspect and accept the container before delivery.
+          </p>
+          <p class="text-gray-700 mt-2">
+            If refused upon delivery, the customer is responsible for:
+          </p>
+          <ul class="list-disc list-inside text-gray-700 space-y-1 mt-2">
+            <li>Delivery charges</li>
+            <li>Return shipping charges</li>
+            <li>A 20% restocking fee</li>
+          </ul>
+        </div>
+        <p class="text-gray-700 mt-4">
+          We encourage all customers to inspect containers at our yard prior to purchase when possible, or to review photos and condition reports we provide. If you have any concerns about container condition, please contact us before delivery is scheduled.
+        </p>
+
         <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-4">Liability</h2>
         <p class="text-gray-700">
           We deliver all containers safe and secure. However, we are not liable for:
@@ -81,7 +113,8 @@ import { siteConfig } from '../config/site';
         </p>
         <div class="mt-4 p-6 bg-gray-50 rounded-lg">
           <p class="font-semibold text-gray-900">{siteConfig.name}</p>
-          <p class="text-gray-700">{siteConfig.contact.address}</p>
+          <p class="text-gray-700">{siteConfig.contact.address.street}</p>
+          <p class="text-gray-700">{siteConfig.contact.address.city}, {siteConfig.contact.address.state} {siteConfig.contact.address.zip}</p>
           <p class="text-gray-700">Phone: {siteConfig.contact.phone}</p>
           <p class="text-gray-700">Email: {siteConfig.contact.email}</p>
         </div>

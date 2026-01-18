@@ -98,7 +98,8 @@ import { siteConfig } from '../config/site';
         </p>
         <div class="mt-4 p-6 bg-gray-50 rounded-lg">
           <p class="font-semibold text-gray-900">{siteConfig.name}</p>
-          <p class="text-gray-700">{siteConfig.contact.address}</p>
+          <p class="text-gray-700">{siteConfig.contact.address.street}</p>
+          <p class="text-gray-700">{siteConfig.contact.address.city}, {siteConfig.contact.address.state} {siteConfig.contact.address.zip}</p>
           <p class="text-gray-700">Phone: {siteConfig.contact.phone}</p>
           <p class="text-gray-700">Email: {siteConfig.contact.email}</p>
         </div>
