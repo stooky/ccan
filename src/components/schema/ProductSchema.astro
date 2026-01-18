@@ -64,26 +64,13 @@ const shippingDetails = {
   }
 };
 
-// Return policy - 14 days, $500 restocking fee, buyer pays return shipping
+// Return policy - Must inspect before delivery, 20% restocking if refused
 const returnPolicy = {
   "@type": "MerchantReturnPolicy",
   "applicableCountry": "CA",
-  "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-  "merchantReturnDays": 14,
-  "returnMethod": "https://schema.org/ReturnByMail",
-  "returnFees": "https://schema.org/RestockingFees",
-  "restockingFee": {
-    "@type": "MonetaryAmount",
-    "value": "500",
-    "currency": currency
-  },
-  "returnShippingFeesAmount": {
-    "@type": "MonetaryAmount",
-    "value": "0",
-    "currency": currency,
-    "description": "Return shipping is buyer's responsibility"
-  },
-  "description": "14-day return window. $500 restocking fee applies. Return shipping is buyer's responsibility."
+  "returnPolicyCategory": "https://schema.org/MerchantReturnNotPermitted",
+  "returnFees": "https://schema.org/ReturnShippingFees",
+  "description": "Purchaser must inspect and accept container before delivery. If refused upon delivery, customer pays delivery, return charges, and a 20% restocking fee."
 };
 
 // Build offers array based on condition and availability
