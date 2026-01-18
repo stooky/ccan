@@ -33,13 +33,14 @@ if (!product) {
   console.warn(`ProductSchema: No product found for slug "${slug}"`);
 }
 
-// Shipping details - Free within 50km, available throughout Saskatchewan
+// Shipping details - Free within 50km, rates apply beyond
 const shippingDetails = {
   "@type": "OfferShippingDetails",
   "shippingRate": {
     "@type": "MonetaryAmount",
     "value": "0",
-    "currency": currency
+    "currency": currency,
+    "description": "Free delivery within 50km. Shipping rates apply outside 50km."
   },
   "shippingDestination": {
     "@type": "DefinedRegion",
@@ -63,15 +64,26 @@ const shippingDetails = {
   }
 };
 
-// Return policy - satisfaction guarantee with inspection period
+// Return policy - 14 days, $500 restocking fee, buyer pays return shipping
 const returnPolicy = {
   "@type": "MerchantReturnPolicy",
   "applicableCountry": "CA",
   "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-  "merchantReturnDays": 7,
+  "merchantReturnDays": 14,
   "returnMethod": "https://schema.org/ReturnByMail",
-  "returnFees": "https://schema.org/FreeReturn",
-  "description": "7-day inspection period. Contact us if the container doesn't meet the described condition."
+  "returnFees": "https://schema.org/RestockingFees",
+  "restockingFee": {
+    "@type": "MonetaryAmount",
+    "value": "500",
+    "currency": currency
+  },
+  "returnShippingFeesAmount": {
+    "@type": "MonetaryAmount",
+    "value": "0",
+    "currency": currency,
+    "description": "Return shipping is buyer's responsibility"
+  },
+  "description": "14-day return window. $500 restocking fee applies. Return shipping is buyer's responsibility."
 };
 
 // Build offers array based on condition and availability
