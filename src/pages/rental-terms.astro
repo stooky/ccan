@@ -1,0 +1,261 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import Section from '../components/Section.astro';
+import CTA from '../components/CTA.astro';
+import FAQSchema from '../components/schema/FAQSchema.astro';
+import { siteConfig } from '../config/site';
+
+const phoneLink = `tel:${siteConfig.contact.phone.replace(/\D/g, '')}`;
+
+// Rental Pricing
+const rentalPricing = [
+  { size: "20ft Standard", monthlyRate: "$150 - $175", deposit: "$300", deliveryFee: "Free within 50km" },
+  { size: "40ft Standard", monthlyRate: "$200 - $250", deposit: "$400", deliveryFee: "Free within 50km" },
+  { size: "40ft High Cube", monthlyRate: "$225 - $275", deposit: "$400", deliveryFee: "Free within 50km" },
+];
+
+// What's Included
+const included = [
+  "Wind & watertight container",
+  "Secure lockbox for your padlock",
+  "Delivery to your location",
+  "Pickup when you're done",
+  "Flexible month-to-month terms",
+  "No long-term contract required",
+];
+
+// Customer Responsibilities
+const responsibilities = [
+  "Provide level ground for container placement",
+  "Ensure adequate access for delivery truck",
+  "Supply your own padlock for security",
+  "Keep container clean and free of prohibited items",
+  "Report any damage promptly",
+  "Maintain adequate insurance for contents",
+];
+
+// FAQs
+const faqs = [
+  {
+    question: "What is included in the monthly rental rate?",
+    answer: "The monthly rental rate includes the container itself (wind & watertight guaranteed), delivery to your location within 50km of Saskatoon, and pickup when your rental ends. You provide your own padlock. Delivery beyond 50km incurs an additional fee based on distance."
+  },
+  {
+    question: "What is the security deposit for?",
+    answer: "The security deposit is fully refundable when the container is returned in the same condition it was delivered. It covers any potential damage beyond normal wear and tear. Deposits are returned within 7-14 business days after container inspection."
+  },
+  {
+    question: "Is there a minimum rental period?",
+    answer: "There is a 1-month minimum rental period. After that, you can keep the container month-to-month for as long as you need with no long-term contract. Cancel anytime with 14 days notice."
+  },
+  {
+    question: "What if I need to keep the container longer than expected?",
+    answer: "No problem! Our month-to-month terms mean you can extend your rental at any time. Just let us know and continue paying the monthly rate. There's no paperwork or new contracts needed."
+  },
+  {
+    question: "Can I purchase my rental container?",
+    answer: "Yes! We offer a rent-to-own option. A portion of your rental payments can be applied toward the purchase price. Contact us for details on converting your rental to a purchase."
+  },
+  {
+    question: "What happens if the container is damaged during my rental?",
+    answer: "Normal wear and tear is expected and won't affect your deposit. For significant damage, you'll be responsible for repair costs deducted from your deposit. We recommend insurance for valuable contents and liability protection."
+  },
+  {
+    question: "Can I modify the rental container?",
+    answer: "Minor modifications like adding shelving are generally okay. However, any permanent modifications (cutting holes, painting, welding) must be approved in advance and may result in additional charges. Contact us first."
+  },
+  {
+    question: "How do I return the container when I'm done?",
+    answer: "Simply contact us with 14 days notice. We'll schedule a pickup at your convenience. Empty the container, remove your padlock, and we'll handle the rest. Your deposit is returned after inspection."
+  },
+];
+---
+
+<Layout
+  title="Container Rental Terms & Pricing"
+  description="Transparent rental terms and pricing for shipping container rentals in Saskatchewan. Month-to-month rates from $150/month. No hidden fees. Free delivery within 50km."
+>
+  <FAQSchema faqs={faqs} />
+
+  <Hero
+    title="Rental Terms & Pricing"
+    subtitle="Transparent pricing, flexible terms, no surprises"
+    size="sm"
+  />
+
+  <!-- Pricing Table -->
+  <Section
+    title="Monthly Rental Rates"
+    subtitle="All prices in CAD. Rates may vary based on availability and condition."
+  >
+    <div class="overflow-x-auto">
+      <table class="w-full border-collapse">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900 border-b">Container Size</th>
+            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900 border-b">Monthly Rate</th>
+            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900 border-b">Security Deposit</th>
+            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900 border-b">Delivery</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rentalPricing.map((item, index) => (
+            <tr class={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+              <td class="px-6 py-4 text-sm text-gray-900 font-medium border-b">{item.size}</td>
+              <td class="px-6 py-4 text-sm text-gray-900 border-b">
+                <span class="font-semibold text-primary-600">{item.monthlyRate}</span>/month
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-600 border-b">{item.deposit}</td>
+              <td class="px-6 py-4 text-sm text-gray-600 border-b">{item.deliveryFee}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-6 rounded-lg bg-blue-50 border border-blue-200 p-4">
+      <div class="flex items-start gap-3">
+        <svg class="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+        </svg>
+        <div>
+          <p class="text-sm font-medium text-blue-800">Delivery Beyond 50km</p>
+          <p class="text-sm text-blue-700 mt-1">For deliveries beyond 50km from Saskatoon, additional delivery fees apply based on distance. Contact us for a quote.</p>
+        </div>
+      </div>
+    </div>
+  </Section>
+
+  <!-- What's Included -->
+  <Section
+    title="What's Included"
+    subtitle="Everything you need for secure, hassle-free storage"
+    background="gray"
+  >
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto">
+      {included.map((item) => (
+        <div class="flex items-center gap-3 bg-white rounded-lg p-4 shadow-sm">
+          <svg class="h-5 w-5 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span class="text-gray-700">{item}</span>
+        </div>
+      ))}
+    </div>
+  </Section>
+
+  <!-- Key Terms -->
+  <Section
+    title="Key Rental Terms"
+    subtitle="Important information for renters"
+  >
+    <div class="max-w-3xl mx-auto space-y-6">
+      <div class="rounded-lg border border-gray-200 p-6">
+        <h3 class="font-semibold text-gray-900 mb-3">Minimum Rental Period</h3>
+        <p class="text-gray-600">
+          <strong>1 month minimum.</strong> After the first month, rentals continue month-to-month with no long-term contract. You can cancel anytime with 14 days written notice.
+        </p>
+      </div>
+
+      <div class="rounded-lg border border-gray-200 p-6">
+        <h3 class="font-semibold text-gray-900 mb-3">Payment Terms</h3>
+        <ul class="text-gray-600 space-y-2">
+          <li><strong>First payment:</strong> First month's rent + security deposit due at booking</li>
+          <li><strong>Monthly payments:</strong> Due on the same date each month</li>
+          <li><strong>Payment methods:</strong> E-transfer, credit card, or cheque</li>
+          <li><strong>Late fees:</strong> $25 fee for payments more than 7 days late</li>
+        </ul>
+      </div>
+
+      <div class="rounded-lg border border-gray-200 p-6">
+        <h3 class="font-semibold text-gray-900 mb-3">Cancellation Policy</h3>
+        <p class="text-gray-600 mb-3">
+          <strong>14 days notice required</strong> to end your rental. We'll schedule pickup at a mutually convenient time.
+        </p>
+        <ul class="text-gray-600 space-y-1 text-sm">
+          <li>- Full deposit refunded if container returned in good condition</li>
+          <li>- Pro-rated refunds for cancellations mid-month</li>
+          <li>- No refunds for first month's rent (minimum rental period)</li>
+        </ul>
+      </div>
+
+      <div class="rounded-lg border border-gray-200 p-6">
+        <h3 class="font-semibold text-gray-900 mb-3">Insurance & Liability</h3>
+        <p class="text-gray-600">
+          <strong>Contents insurance is your responsibility.</strong> We recommend ensuring your stored items are covered under your homeowner's/business insurance policy. The container itself is covered by C-Can Sam for structural issues, but not for theft or damage to your contents.
+        </p>
+      </div>
+
+      <div class="rounded-lg border border-gray-200 p-6">
+        <h3 class="font-semibold text-gray-900 mb-3">Site Requirements</h3>
+        <ul class="text-gray-600 space-y-2">
+          <li><strong>Ground:</strong> Reasonably level surface (gravel, concrete, or compacted earth)</li>
+          <li><strong>Access:</strong> Minimum 12ft wide access for delivery truck</li>
+          <li><strong>Clearance:</strong> No overhead obstructions (power lines, trees) within delivery path</li>
+          <li><strong>Space:</strong> Allow 5ft clearance around container for door access</li>
+        </ul>
+      </div>
+    </div>
+  </Section>
+
+  <!-- Customer Responsibilities -->
+  <Section
+    title="Renter Responsibilities"
+    subtitle="What we ask of our rental customers"
+    background="gray"
+  >
+    <div class="max-w-3xl mx-auto">
+      <div class="grid gap-4 sm:grid-cols-2">
+        {responsibilities.map((item) => (
+          <div class="flex items-start gap-3 bg-white rounded-lg p-4 shadow-sm">
+            <svg class="h-5 w-5 text-primary-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+            <span class="text-gray-700">{item}</span>
+          </div>
+        ))}
+      </div>
+
+      <div class="mt-6 rounded-lg bg-red-50 border border-red-200 p-4">
+        <div class="flex items-start gap-3">
+          <svg class="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+          <div>
+            <p class="text-sm font-medium text-red-800">Prohibited Items</p>
+            <p class="text-sm text-red-700 mt-1">Hazardous materials, explosives, flammable liquids, illegal substances, perishable food, and live animals are strictly prohibited. Violation may result in immediate termination of rental and forfeiture of deposit.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Section>
+
+  <!-- FAQs -->
+  <Section
+    title="Frequently Asked Questions"
+    subtitle="Common questions about container rentals"
+  >
+    <div class="mx-auto max-w-3xl space-y-4">
+      {faqs.map((faq) => (
+        <details class="group rounded-lg bg-gray-50 p-6">
+          <summary class="flex cursor-pointer items-center justify-between font-semibold text-gray-900">
+            {faq.question}
+            <svg class="h-5 w-5 text-gray-500 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            </svg>
+          </summary>
+          <p class="mt-4 text-gray-600">{faq.answer}</p>
+        </details>
+      ))}
+    </div>
+  </Section>
+
+  <!-- CTA -->
+  <CTA
+    title="Ready to Rent a Container?"
+    description="Contact us today for current availability and to start your rental. Flexible terms, no long-term commitment."
+    primaryButton={{ text: "Call Now", href: phoneLink }}
+    secondaryButton={{ text: "Request Quote", href: "/contact" }}
+  />
+</Layout>

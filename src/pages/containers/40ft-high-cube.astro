@@ -4,7 +4,39 @@ import Section from '../../components/Section.astro';
 import CTA from '../../components/CTA.astro';
 import ReviewWidget from '../../components/ReviewWidget.astro';
 import ProductSchema from '../../components/schema/ProductSchema.astro';
-import { siteConfig } from '../../config/site';
+import FAQSchema from '../../components/schema/FAQSchema.astro';
+import AvailabilityChecker from '../../components/AvailabilityChecker.astro';
+import { siteConfig, getContainerBySlug } from '../../config/site';
+
+// Get pricing from config
+const container = getContainerBySlug('40ft-high-cube');
+const priceRange = container?.price?.used
+  ? `$${container.price.used.toLocaleString()}+`
+  : 'Contact for pricing';
+
+// Product-specific FAQs
+const faqs = [
+  {
+    question: "What's the difference between a high cube and standard container?",
+    answer: "A 40ft high cube container is 1 foot taller than standard containers (9'6\" vs 8'6\"), providing an extra 304 cubic feet of space. This extra height makes it ideal for tall equipment, conversions, and more comfortable living/working spaces."
+  },
+  {
+    question: "What are 40ft high cube containers used for?",
+    answer: "High cubes are popular for container homes, offices, workshops, retail spaces, and storing tall equipment like machinery, vehicles, or racking systems. The extra headroom creates more comfortable converted spaces."
+  },
+  {
+    question: "Can a 40ft high cube container be delivered to my property?",
+    answer: "Yes, we deliver throughout Saskatchewan. You'll need a level area at least 45ft long and 12ft wide. Due to the extra height (9'6\"), check for overhead clearance from power lines and tree branches."
+  },
+  {
+    question: "Are high cube containers more expensive than standard?",
+    answer: "High cube containers typically cost $500-1,000 more than standard containers due to their extra height and material. Rentals are approximately $225-275/month for high cubes."
+  },
+  {
+    question: "Can I insulate a high cube container?",
+    answer: "Absolutely! The extra 1 foot of height is perfect for adding spray foam or panel insulation while maintaining comfortable interior headroom. Many customers convert high cubes into climate-controlled spaces."
+  }
+];
 
 const whatsappLink = `${siteConfig.social.whatsapp}?text=${encodeURIComponent("Hi! I'm interested in the 40ft High Cube Container.")}`;
 const phoneLink = `tel:${siteConfig.contact.phone.replace(/\D/g, '')}`;
@@ -40,6 +72,7 @@ const useCases = [
   description="40ft high cube shipping container for sale or rent in Saskatchewan. Extra height: 40ft L x 8ft W x 9ft 6in H. Perfect for oversized items, workshops, studios, and container conversions."
 >
   <ProductSchema slug="40ft-high-cube" image="/images/containers/40ft-highcube-new.jpg" />
+  <FAQSchema faqs={faqs} />
 
   <!-- Hero Section -->
   <section class="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-primary-900 py-20 sm:py-28">
@@ -78,6 +111,15 @@ const useCases = [
               <span class="text-primary-300 text-sm">Height</span>
               <p class="text-white font-semibold">9'6" (+1')</p>
             </div>
+            <div class="rounded-lg bg-green-500/20 px-4 py-2 ring-2 ring-green-400">
+              <span class="text-green-300 text-sm">Starting at</span>
+              <p class="text-white font-semibold">{priceRange}</p>
+            </div>
+          </div>
+
+          <!-- Availability -->
+          <div class="mt-6">
+            <AvailabilityChecker containerType="40ft High Cube" variant="inline" />
           </div>
 
           <!-- CTAs -->
@@ -255,6 +297,29 @@ const useCases = [
           <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
         </a>
       </div>
+    </div>
+  </Section>
+
+  <!-- FAQs -->
+  <Section
+    title="Frequently Asked Questions"
+    subtitle="Common questions about 40ft high cube containers."
+    background="gray"
+  >
+    <div class="max-w-3xl mx-auto">
+      <dl class="space-y-4">
+        {faqs.map((faq, index) => (
+          <details class="group rounded-xl bg-white p-6 shadow-sm" open={index === 0}>
+            <summary class="flex cursor-pointer items-center justify-between text-left">
+              <h3 class="text-lg font-semibold text-gray-900 pr-4">{faq.question}</h3>
+              <svg class="h-5 w-5 flex-shrink-0 text-gray-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </summary>
+            <dd class="mt-4 text-gray-600 leading-relaxed">{faq.answer}</dd>
+          </details>
+        ))}
+      </dl>
     </div>
   </Section>
 

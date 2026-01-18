@@ -11,25 +11,31 @@ import heroImage from '../assets/images/sales-hero.webp';
 const whatsappLink = `${siteConfig.social.whatsapp}?text=${encodeURIComponent("Hi! I'm interested in renting a shipping container.")}`;
 const phoneLink = `tel:${siteConfig.contact.phone.replace(/\D/g, '')}`;
 
-// Container Types for Rent
+// Container Types for Rent with pricing
 const containers = [
   {
     size: "20' Standard",
     dimensions: "20' L × 8' W × 8'6\" H",
     capacity: "1,172 cubic feet",
     ideal: "Short-term projects, seasonal storage, small moves",
+    priceRange: "$150 - $175",
+    deposit: "$300",
   },
   {
     size: "40' Standard",
     dimensions: "40' L × 8' W × 8'6\" H",
     capacity: "2,390 cubic feet",
     ideal: "Renovations, business overflow, construction sites",
+    priceRange: "$200 - $250",
+    deposit: "$400",
   },
   {
     size: "40' High Cube",
     dimensions: "40' L × 8' W × 9'6\" H",
     capacity: "2,694 cubic feet",
     ideal: "Large projects, event storage, maximum flexibility",
+    priceRange: "$225 - $275",
+    deposit: "$400",
   },
 ];
 
@@ -251,6 +257,12 @@ const process = [
 
           <h3 class="mt-4 text-xl font-bold text-gray-900">{container.size}</h3>
 
+          <!-- Pricing -->
+          <div class="mt-4 rounded-lg bg-blue-50 p-3 text-center">
+            <p class="text-2xl font-bold text-blue-700">{container.priceRange}</p>
+            <p class="text-sm text-blue-600">/month</p>
+          </div>
+
           <dl class="mt-4 space-y-2 text-sm">
             <div class="flex justify-between">
               <dt class="text-gray-500">Dimensions</dt>
@@ -259,6 +271,10 @@ const process = [
             <div class="flex justify-between">
               <dt class="text-gray-500">Capacity</dt>
               <dd class="font-medium text-gray-900">{container.capacity}</dd>
+            </div>
+            <div class="flex justify-between">
+              <dt class="text-gray-500">Deposit</dt>
+              <dd class="font-medium text-gray-900">{container.deposit}</dd>
             </div>
             <div class="flex justify-between">
               <dt class="text-gray-500">Ideal for</dt>
@@ -290,10 +306,14 @@ const process = [
       ))}
     </div>
 
-    <p class="mt-8 text-center text-gray-600">
-      Monthly rental rates vary based on container size and condition.
-      <br /><strong>Delivery & pickup included within 50km.</strong> <a href={phoneLink} class="font-medium text-blue-600 hover:text-blue-700">Call us</a> for current rates.
-    </p>
+    <div class="mt-8 text-center">
+      <p class="text-gray-600">
+        <strong>Delivery & pickup included within 50km.</strong> Prices may vary based on availability.
+      </p>
+      <a href="/rental-terms" class="mt-2 inline-block text-sm font-medium text-blue-600 hover:text-blue-700">
+        View full rental terms & conditions →
+      </a>
+    </div>
   </Section>
 
   <!-- Why Rent Section -->

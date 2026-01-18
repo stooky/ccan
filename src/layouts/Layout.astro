@@ -1,6 +1,8 @@
 ---
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/Footer.astro';
+import MobileStickyCTA from '../components/MobileStickyCTA.astro';
+import ExitIntentModal from '../components/ExitIntentModal.astro';
 import BreadcrumbSchema from '../components/schema/BreadcrumbSchema.astro';
 import { siteConfig, getReviewStats } from '../config/site';
 import '../styles/global.css';
@@ -198,5 +200,7 @@ const fullTitle = `${title} | ${siteConfig.name}`;
       <slot />
     </main>
     <Footer />
+    <MobileStickyCTA />
+    <ExitIntentModal />
   </body>
 </html>

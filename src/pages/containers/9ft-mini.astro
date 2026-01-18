@@ -3,7 +3,39 @@ import Layout from '../../layouts/Layout.astro';
 import Section from '../../components/Section.astro';
 import CTA from '../../components/CTA.astro';
 import ProductSchema from '../../components/schema/ProductSchema.astro';
-import { siteConfig } from '../../config/site';
+import FAQSchema from '../../components/schema/FAQSchema.astro';
+import AvailabilityChecker from '../../components/AvailabilityChecker.astro';
+import { siteConfig, getContainerBySlug } from '../../config/site';
+
+// Get pricing from config
+const container = getContainerBySlug('9ft-mini');
+const priceRange = container?.price?.new
+  ? `$${container.price.new.toLocaleString()}+`
+  : 'Contact for pricing';
+
+// Product-specific FAQs
+const faqs = [
+  {
+    question: "How big is a 9ft mini container?",
+    answer: "The 9ft mini container measures 9ft long x 7ft wide x 7'2\" tall, providing 390 cubic feet of storage space. It's comparable to a large garden shed but with superior security and weather protection."
+  },
+  {
+    question: "Will a 9ft container fit in my driveway?",
+    answer: "Most likely yes! The compact 9ft x 7ft footprint fits in standard driveways, backyards, and tight urban lots where 20ft or 40ft containers wouldn't fit. It requires a level area of about 10ft x 8ft."
+  },
+  {
+    question: "Can I rent a 9ft mini container?",
+    answer: "Currently, 9ft mini containers are available for purchase only (not rental). Due to their compact size and specialized construction, they're primarily sold as new units for permanent storage solutions."
+  },
+  {
+    question: "What can I store in a 9ft container?",
+    answer: "A 9ft container is perfect for garden tools, lawn equipment, bicycles, seasonal decorations, outdoor furniture, small workshop tools, and household overflow. It holds roughly the equivalent of a single garage bay."
+  },
+  {
+    question: "How is a 9ft container delivered?",
+    answer: "We deliver 9ft containers using a flatbed truck with a crane or forklift. The lighter weight (~2,200 lbs) makes placement easier in tight spaces. We just need vehicle access and a level surface."
+  }
+];
 
 const whatsappLink = `${siteConfig.social.whatsapp}?text=${encodeURIComponent("Hi! I'm interested in the 9ft Mini Container.")}`;
 const phoneLink = `tel:${siteConfig.contact.phone.replace(/\D/g, '')}`;
@@ -39,6 +71,7 @@ const useCases = [
   description="9ft mini shipping container for sale in Saskatchewan. Compact dimensions: 9ft L x 7ft W x 7ft 2in H. Perfect for tight spaces, urban properties, and small storage needs."
 >
   <ProductSchema slug="9ft-mini" condition="new" image="/images/containers/9ft-mini.jpg" />
+  <FAQSchema faqs={faqs} />
 
   <!-- Hero Section -->
   <section class="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-primary-900 py-20 sm:py-28">
@@ -77,6 +110,15 @@ const useCases = [
               <span class="text-gray-400 text-sm">Height</span>
               <p class="text-white font-semibold">7'2"</p>
             </div>
+            <div class="rounded-lg bg-green-500/20 px-4 py-2 ring-2 ring-green-400">
+              <span class="text-green-300 text-sm">Starting at</span>
+              <p class="text-white font-semibold">{priceRange}</p>
+            </div>
+          </div>
+
+          <!-- Availability -->
+          <div class="mt-6">
+            <AvailabilityChecker containerType="9ft Mini" variant="inline" />
           </div>
 
           <!-- CTAs -->
@@ -237,6 +279,29 @@ const useCases = [
           </a>
         </div>
       </div>
+    </div>
+  </Section>
+
+  <!-- FAQs -->
+  <Section
+    title="Frequently Asked Questions"
+    subtitle="Common questions about 9ft mini containers."
+    background="gray"
+  >
+    <div class="max-w-3xl mx-auto">
+      <dl class="space-y-4">
+        {faqs.map((faq, index) => (
+          <details class="group rounded-xl bg-white p-6 shadow-sm" open={index === 0}>
+            <summary class="flex cursor-pointer items-center justify-between text-left">
+              <h3 class="text-lg font-semibold text-gray-900 pr-4">{faq.question}</h3>
+              <svg class="h-5 w-5 flex-shrink-0 text-gray-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </summary>
+            <dd class="mt-4 text-gray-600 leading-relaxed">{faq.answer}</dd>
+          </details>
+        ))}
+      </dl>
     </div>
   </Section>
 

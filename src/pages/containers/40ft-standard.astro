@@ -4,7 +4,39 @@ import Section from '../../components/Section.astro';
 import CTA from '../../components/CTA.astro';
 import ReviewWidget from '../../components/ReviewWidget.astro';
 import ProductSchema from '../../components/schema/ProductSchema.astro';
-import { siteConfig } from '../../config/site';
+import FAQSchema from '../../components/schema/FAQSchema.astro';
+import AvailabilityChecker from '../../components/AvailabilityChecker.astro';
+import { siteConfig, getContainerBySlug } from '../../config/site';
+
+// Get pricing from config
+const container = getContainerBySlug('40ft-standard');
+const priceRange = container?.price?.used
+  ? `$${container.price.used.toLocaleString()}+`
+  : 'Contact for pricing';
+
+// Product-specific FAQs
+const faqs = [
+  {
+    question: "What can I store in a 40ft container?",
+    answer: "A 40ft container offers 2,390 cubic feet of space - enough for the contents of a 3-4 bedroom home, large equipment, vehicles, or significant business inventory. It's our most popular size for commercial applications."
+  },
+  {
+    question: "How much does a 40ft container weigh?",
+    answer: "A 40ft standard container has a tare weight of approximately 8,333 lbs (3,780 kg). The maximum payload capacity is 59,040 lbs (26,780 kg), for a total gross weight of about 67,373 lbs."
+  },
+  {
+    question: "Can I modify a 40ft container?",
+    answer: "Yes! 40ft containers are excellent for modifications including roll-up doors, windows, ventilation, insulation, electrical wiring, and even full conversions into offices, workshops, or retail spaces."
+  },
+  {
+    question: "What's the difference between buying and renting a 40ft container?",
+    answer: "Purchasing ($" + (container?.price?.used?.toLocaleString() || '4,500') + "+) gives you full ownership with no monthly payments. Renting ($200-250/month) is ideal for temporary needs with delivery and pickup included."
+  },
+  {
+    question: "How is a 40ft container delivered?",
+    answer: "We deliver using a tilt-bed truck or crane. You'll need a level area at least 45ft long and 12ft wide with good ground access. We handle all the logistics and placement."
+  }
+];
 
 const whatsappLink = `${siteConfig.social.whatsapp}?text=${encodeURIComponent("Hi! I'm interested in the 40ft Standard Container.")}`;
 const phoneLink = `tel:${siteConfig.contact.phone.replace(/\D/g, '')}`;
@@ -40,6 +72,7 @@ const useCases = [
   description="40ft standard shipping container for sale or rent in Saskatchewan. Dimensions: 40ft L x 8ft W x 8ft 6in H. Ideal for business inventory, construction sites, and commercial applications."
 >
   <ProductSchema slug="40ft-standard" condition="used" image="/images/containers/40ft-standard-new.jpg" />
+  <FAQSchema faqs={faqs} />
 
   <!-- Hero Section -->
   <section class="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-primary-900 py-20 sm:py-28">
@@ -78,6 +111,15 @@ const useCases = [
               <span class="text-gray-400 text-sm">Height</span>
               <p class="text-white font-semibold">8'6"</p>
             </div>
+            <div class="rounded-lg bg-green-500/20 px-4 py-2 ring-2 ring-green-400">
+              <span class="text-green-300 text-sm">Starting at</span>
+              <p class="text-white font-semibold">{priceRange}</p>
+            </div>
+          </div>
+
+          <!-- Availability -->
+          <div class="mt-6">
+            <AvailabilityChecker containerType="40ft Standard" variant="inline" />
           </div>
 
           <!-- CTAs -->
@@ -235,6 +277,29 @@ const useCases = [
           <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
         </a>
       </div>
+    </div>
+  </Section>
+
+  <!-- FAQs -->
+  <Section
+    title="Frequently Asked Questions"
+    subtitle="Common questions about 40ft standard containers."
+    background="gray"
+  >
+    <div class="max-w-3xl mx-auto">
+      <dl class="space-y-4">
+        {faqs.map((faq, index) => (
+          <details class="group rounded-xl bg-white p-6 shadow-sm" open={index === 0}>
+            <summary class="flex cursor-pointer items-center justify-between text-left">
+              <h3 class="text-lg font-semibold text-gray-900 pr-4">{faq.question}</h3>
+              <svg class="h-5 w-5 flex-shrink-0 text-gray-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </summary>
+            <dd class="mt-4 text-gray-600 leading-relaxed">{faq.answer}</dd>
+          </details>
+        ))}
+      </dl>
     </div>
   </Section>
 

@@ -157,6 +157,8 @@ navigation:
         href: "/storage-container-leasing"
       - name: "On-Site Storage"
         href: "/on-site-storage-rentals"
+      - name: "Rental Terms"
+        href: "/rental-terms"
     # Products - specific container types (product SEO)
     products:
       - name: "9ft Mini Container"
@@ -173,6 +175,8 @@ navigation:
         href: "/about"
       - name: "Container Guide"
         href: "/shipping-container-guide"
+      - name: "Maintenance Guide"
+        href: "/container-maintenance-guide"
       - name: "Blog"
         href: "/blog"
       - name: "Referral Program"

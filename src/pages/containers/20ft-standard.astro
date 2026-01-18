@@ -4,10 +4,39 @@ import Section from '../../components/Section.astro';
 import CTA from '../../components/CTA.astro';
 import ReviewWidget from '../../components/ReviewWidget.astro';
 import ProductSchema from '../../components/schema/ProductSchema.astro';
-import { siteConfig } from '../../config/site';
+import FAQSchema from '../../components/schema/FAQSchema.astro';
+import AvailabilityChecker from '../../components/AvailabilityChecker.astro';
+import { siteConfig, getContainerBySlug } from '../../config/site';
 
 const whatsappLink = `${siteConfig.social.whatsapp}?text=${encodeURIComponent("Hi! I'm interested in the 20ft Standard Container.")}`;
 const phoneLink = `tel:${siteConfig.contact.phone.replace(/\D/g, '')}`;
+
+// Get container pricing from config
+const container = getContainerBySlug('20ft-standard');
+
+// FAQs for this product
+const faqs = [
+  {
+    question: "How much does a 20ft shipping container cost?",
+    answer: `New 20ft containers (one-trip) range from $${container?.new?.min.toLocaleString()} to $${container?.new?.max.toLocaleString()}. Used containers in wind & watertight condition start at $${container?.used?.min.toLocaleString()}. Prices include delivery within 50km of Saskatoon.`
+  },
+  {
+    question: "What can I fit in a 20ft container?",
+    answer: "A 20ft container holds approximately 1,172 cubic feet - roughly equivalent to a 3-4 bedroom house worth of furniture. It can fit 10-11 standard pallets, a mid-size vehicle, or about 5,000 pounds of household goods."
+  },
+  {
+    question: "How much does a 20ft container weigh?",
+    answer: "An empty 20ft container weighs approximately 4,916 lbs (2,229 kg). The maximum payload capacity is 47,900 lbs (21,727 kg). Ensure your delivery site can support this weight."
+  },
+  {
+    question: "Can I rent a 20ft container instead of buying?",
+    answer: "Yes! We offer flexible month-to-month rentals for 20ft containers starting at $150-$175/month. Delivery and pickup are included within 50km. No long-term contract required."
+  },
+  {
+    question: "What's the difference between new and used containers?",
+    answer: "New (one-trip) containers have made only one ocean voyage and are in near-perfect condition with minimal wear. Used containers have been in shipping service longer but are still wind & watertight. Both provide excellent secure storage."
+  },
+];
 
 const specs = [
   { label: "Length", value: "20 feet (6.1m)" },
@@ -40,6 +69,7 @@ const useCases = [
   description="20ft standard shipping container for sale or rent in Saskatchewan. Dimensions: 20ft L x 8ft W x 8ft 6in H. Perfect for residential storage, small business, and construction sites."
 >
   <ProductSchema slug="20ft-standard" image="/images/containers/20ft-standard.jpg" />
+  <FAQSchema faqs={faqs} />
 
   <!-- Hero Section -->
   <section class="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-primary-900 py-20 sm:py-28">
@@ -61,8 +91,29 @@ const useCases = [
             The 20ft standard container is a versatile and popular storage solution. Its moderate size offers excellent maneuverability while providing ample space for residential, commercial, and construction storage needs.
           </p>
 
+          <!-- Pricing -->
+          {container && (
+            <div class="mt-6 rounded-xl bg-white/10 backdrop-blur p-4">
+              <div class="grid grid-cols-2 gap-4">
+                {container.new && (
+                  <div>
+                    <span class="text-gray-400 text-sm">New (One-Trip)</span>
+                    <p class="text-2xl font-bold text-green-400">${container.new.min.toLocaleString()} - ${container.new.max.toLocaleString()}</p>
+                  </div>
+                )}
+                {container.used && (
+                  <div>
+                    <span class="text-gray-400 text-sm">Used</span>
+                    <p class="text-2xl font-bold text-white">${container.used.min.toLocaleString()} - ${container.used.max.toLocaleString()}</p>
+                  </div>
+                )}
+              </div>
+              <p class="text-xs text-gray-400 mt-2">+ Free delivery within 50km</p>
+            </div>
+          )}
+
           <!-- Quick Specs -->
-          <div class="mt-8 flex flex-wrap gap-4">
+          <div class="mt-6 flex flex-wrap gap-4">
             <div class="rounded-lg bg-white/10 px-4 py-2">
               <span class="text-gray-400 text-sm">Length</span>
               <p class="text-white font-semibold">20 feet</p>
@@ -227,6 +278,33 @@ const useCases = [
           <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
         </a>
       </div>
+    </div>
+  </Section>
+
+  <!-- Availability -->
+  <Section background="gray">
+    <div class="max-w-xl mx-auto">
+      <AvailabilityChecker containerSize="20ft" />
+    </div>
+  </Section>
+
+  <!-- FAQs -->
+  <Section
+    title="Frequently Asked Questions"
+    subtitle="Common questions about 20ft containers"
+  >
+    <div class="mx-auto max-w-3xl space-y-4">
+      {faqs.map((faq) => (
+        <details class="group rounded-lg bg-gray-50 p-6">
+          <summary class="flex cursor-pointer items-center justify-between font-semibold text-gray-900">
+            {faq.question}
+            <svg class="h-5 w-5 text-gray-500 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            </svg>
+          </summary>
+          <p class="mt-4 text-gray-600">{faq.answer}</p>
+        </details>
+      ))}
     </div>
   </Section>
 

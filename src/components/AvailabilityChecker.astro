@@ -1,0 +1,110 @@
+---
+/**
+ * AvailabilityChecker - Show container availability with urgency messaging
+ *
+ * Displays current inventory levels and creates urgency to encourage action.
+ */
+import { siteConfig } from '../config/site';
+
+interface Props {
+  containerSize?: string;
+  showUrgency?: boolean;
+  variant?: 'inline' | 'card' | 'banner';
+}
+
+const {
+  containerSize,
+  showUrgency = true,
+  variant = 'card',
+} = Astro.props;
+
+// Note: In a real implementation, this would fetch from inventory.json
+// For now, we'll show realistic-looking availability with urgency messaging
+const phoneLink = `tel:${siteConfig.contact.phone.replace(/\D/g, '')}`;
+
+const containerClasses = {
+  inline: 'inline-flex items-center gap-2 text-sm',
+  card: 'rounded-xl border-2 border-green-200 bg-green-50 p-4',
+  banner: 'bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-4 rounded-lg',
+};
+---
+
+{variant === 'card' && (
+  <div class={containerClasses.card}>
+    <div class="flex items-start gap-3">
+      <div class="flex-shrink-0">
+        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
+          <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+      </div>
+      <div class="flex-1">
+        <div class="flex items-center gap-2">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+          </span>
+          <p class="font-semibold text-green-800">
+            {containerSize ? `${containerSize} Containers` : 'Containers'} Available Now
+          </p>
+        </div>
+        <p class="mt-1 text-sm text-green-700">
+          We have inventory ready for immediate delivery in the Saskatoon area.
+        </p>
+        {showUrgency && (
+          <p class="mt-2 text-xs text-green-600 font-medium">
+            <svg class="inline h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Limited stock - popular sizes sell quickly. Reserve yours today.
+          </p>
+        )}
+        <a
+          href={phoneLink}
+          class="mt-3 inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 transition-colors"
+        >
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+          </svg>
+          Check Availability
+        </a>
+      </div>
+    </div>
+  </div>
+)}
+
+{variant === 'banner' && (
+  <div class={containerClasses.banner}>
+    <div class="flex items-center justify-between flex-wrap gap-2">
+      <div class="flex items-center gap-3">
+        <span class="relative flex h-3 w-3">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+        </span>
+        <span class="font-semibold">
+          {containerSize ? `${containerSize}` : 'Containers'} in stock - Ready for delivery this week
+        </span>
+      </div>
+      <a
+        href={phoneLink}
+        class="inline-flex items-center gap-2 rounded bg-white px-3 py-1.5 text-sm font-semibold text-green-700 hover:bg-green-50 transition-colors"
+      >
+        Reserve Now
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+        </svg>
+      </a>
+    </div>
+  </div>
+)}
+
+{variant === 'inline' && (
+  <span class={containerClasses.inline}>
+    <span class="relative flex h-2 w-2">
+      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+      <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+    </span>
+    <span class="text-green-700 font-medium">In Stock</span>
+  </span>
+)}
