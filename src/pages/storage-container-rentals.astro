@@ -8,48 +8,54 @@ import { siteConfig } from '../config/site';
 import heroImage from '../assets/images/sales-hero.webp';
 
 // WhatsApp link with pre-filled message
-const whatsappLink = `${siteConfig.social.whatsapp}?text=${encodeURIComponent("Hi! I'm interested in renting a shipping container.")}`;
+const whatsappLink = `${siteConfig.social.whatsapp}?text=${encodeURIComponent("Hi! I'm interested in renting a shipping container delivered to my location.")}`;
 const phoneLink = `tel:${siteConfig.contact.phone.replace(/\D/g, '')}`;
 
-// Container Types for Rent with pricing
+// Container Types for Rent - delivered to customer location
 const containers = [
   {
     size: "20' Standard",
     dimensions: "20' L × 8' W × 8'6\" H",
     capacity: "1,172 cubic feet",
-    ideal: "Short-term projects, seasonal storage, small moves",
-    priceRange: "$150 - $175",
-    deposit: "$300",
+    ideal: "Residential storage, renovations, small moves",
+    image: "/images/containers/20-standard.png",
+    popular: false,
+    rental: { min: 150, max: 175 },
+    deposit: 300,
   },
   {
     size: "40' Standard",
     dimensions: "40' L × 8' W × 8'6\" H",
     capacity: "2,390 cubic feet",
-    ideal: "Renovations, business overflow, construction sites",
-    priceRange: "$200 - $250",
-    deposit: "$400",
+    ideal: "Construction sites, business overflow, large projects",
+    image: "/images/containers/40-standard.png",
+    popular: true,
+    rental: { min: 200, max: 250 },
+    deposit: 400,
   },
   {
     size: "40' High Cube",
     dimensions: "40' L × 8' W × 9'6\" H",
     capacity: "2,694 cubic feet",
-    ideal: "Large projects, event storage, maximum flexibility",
-    priceRange: "$225 - $275",
-    deposit: "$400",
+    ideal: "Tall equipment, workshops, maximum flexibility",
+    image: "/images/containers/40-high-cube.png",
+    popular: false,
+    rental: { min: 225, max: 275 },
+    deposit: 400,
   },
 ];
 
-// Benefits of Renting
+// Benefits of Renting (delivered to your location)
 const benefits = [
   {
-    title: "Flexible Terms",
-    description: "Month-to-month rentals with no long-term commitment. Keep it as long as you need, return when you're done.",
-    icon: `<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>`,
+    title: "On Your Property",
+    description: "Container stays at your location for convenient 24/7 access. No trips to a storage facility needed.",
+    icon: `<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>`,
   },
   {
-    title: "Lower Upfront Cost",
-    description: "No large purchase required. Just a simple monthly rental fee that fits your budget.",
-    icon: `<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
+    title: "Flexible Terms",
+    description: "Month-to-month rentals with no long-term commitment. Keep it as long as you need.",
+    icon: `<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>`,
   },
   {
     title: "We Handle Delivery",
@@ -57,66 +63,42 @@ const benefits = [
     icon: `<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" /></svg>`,
   },
   {
-    title: "Perfect for Projects",
-    description: "Ideal for renovations, construction, seasonal business, or any temporary storage need.",
-    icon: `<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z" /></svg>`,
+    title: "Lower Upfront Cost",
+    description: "No large purchase required. Simple monthly payments that fit your budget.",
+    icon: `<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
   },
 ];
 
 // Who rents containers
 const renters = [
-  { title: "Home Renovators", description: "Store furniture and belongings safely during your renovation project." },
+  { title: "Home Renovators", description: "Store furniture and belongings on-site during your renovation project." },
+  { title: "Construction Sites", description: "Secure tools and materials right on your job site for the duration." },
   { title: "People Moving", description: "Bridge the gap between homes. Take your time packing and unpacking." },
   { title: "Seasonal Businesses", description: "Expand storage capacity during busy seasons without permanent commitment." },
-  { title: "Construction Sites", description: "Secure tools and materials on-site for the duration of your project." },
-  { title: "Event Organizers", description: "Store equipment, supplies, and materials for festivals and events." },
-  { title: "Retailers", description: "Handle overflow inventory during peak seasons or sales events." },
-];
-
-// Rental process
-const process = [
-  {
-    step: 1,
-    title: "Choose Your Size",
-    description: "Select the container size that fits your storage needs.",
-  },
-  {
-    step: 2,
-    title: "We Deliver",
-    description: "We bring the container to your location at your convenience.",
-  },
-  {
-    step: 3,
-    title: "Use It",
-    description: "Store your items securely for as long as you need.",
-  },
-  {
-    step: 4,
-    title: "We Pick Up",
-    description: "When you're done, we come and pick it up. Simple!",
-  },
+  { title: "Farmers & Ranchers", description: "Store equipment and supplies on your property during harvest or off-season." },
+  { title: "Event Organizers", description: "Keep equipment and supplies on-site for multi-day events and festivals." },
 ];
 ---
 
 <Layout
-  title="Storage Container Rentals"
-  description="Rent shipping containers in Saskatchewan. Flexible month-to-month terms. 20ft and 40ft containers available. Delivery and pickup included."
+  title="Container Rentals - Delivered to Your Location | Saskatchewan"
+  description="Rent shipping containers delivered to your property in Saskatchewan. 20ft, 40ft & High Cube containers from $150/month. We deliver, you use it, we pick up. No long-term contracts. Call 306-850-9675."
 >
   <!-- Hero Section -->
-  <section class="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-primary-900 py-20 sm:py-28">
+  <section class="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-blue-900 py-20 sm:py-28">
     <div class="absolute inset-0 bg-[url('/images/grid-pattern.svg')] opacity-10"></div>
     <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
         <div>
           <span class="inline-flex items-center rounded-full bg-blue-500/10 px-4 py-1.5 text-sm font-medium text-blue-300 ring-1 ring-inset ring-blue-500/20">
-            Flexible Month-to-Month Terms
+            Delivered to Your Location
           </span>
           <h1 class="mt-6 text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-            Storage Container
+            Container
             <span class="text-blue-400">Rentals</span>
           </h1>
           <p class="mt-6 text-lg leading-8 text-gray-300">
-            Need temporary storage? Rent a shipping container with flexible month-to-month terms. We deliver, you use it, we pick up when you're done. No long-term commitment required.
+            Need storage at your property? We deliver a container to your location and pick it up when you're done. Flexible month-to-month terms with no long-term commitment.
           </p>
 
           <!-- Primary CTAs -->
@@ -149,7 +131,7 @@ const process = [
           <div class="overflow-hidden rounded-2xl shadow-2xl">
             <Image
               src={heroImage}
-              alt="Shipping containers available for rent"
+              alt="Shipping containers available for rent in Saskatchewan"
               class="w-full h-auto object-cover"
               widths={[600, 900, 1200, 1400]}
               sizes="(max-width: 768px) 100vw, 50vw"
@@ -158,7 +140,7 @@ const process = [
           </div>
           <!-- Floating badge -->
           <div class="absolute -bottom-4 -left-4 rounded-xl bg-blue-600 px-4 py-3 shadow-lg">
-            <p class="text-sm font-semibold text-white">No Commitment</p>
+            <p class="text-sm font-semibold text-white">Delivered To You</p>
             <p class="text-lg font-bold text-white">Month-to-Month</p>
           </div>
         </div>
@@ -170,7 +152,7 @@ const process = [
   <div class="bg-blue-600 py-4">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 text-center font-bold text-white">
-        <span>Flexible Terms</span>
+        <span>Delivered to Your Property</span>
         <span class="hidden sm:inline">•</span>
         <span>Delivery & Pickup Included</span>
         <span class="hidden sm:inline">•</span>
@@ -182,85 +164,50 @@ const process = [
   <!-- Google Reviews Widget (after hero) -->
   <ReviewWidget pagePath="/storage-container-rentals" />
 
-  <!-- Container Types -->
+  <!-- Container Types - matching sales page layout -->
   <Section
     title="Containers For Rent"
-    subtitle="Choose your size. Flexible month-to-month rentals with delivery throughout Saskatchewan."
+    subtitle="Delivered to your location. Flexible month-to-month rentals throughout Saskatchewan."
     background="gray"
   >
-    <div class="grid gap-6 lg:grid-cols-3">
-      {containers.map((container, index) => (
-        <div class={`relative rounded-2xl bg-white p-6 shadow-sm transition-shadow hover:shadow-lg ${index === 1 ? 'ring-2 ring-blue-500' : ''}`}>
-          {index === 1 && (
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      {containers.map((container) => (
+        <div class={`relative rounded-2xl bg-white p-6 shadow-sm transition-all hover:shadow-xl ${container.popular ? 'ring-2 ring-blue-500' : ''}`}>
+          {container.popular && (
             <span class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-blue-500 px-4 py-1 text-sm font-semibold text-white">
               Most Popular
             </span>
           )}
 
           <!-- Container Visual -->
-          <div class="aspect-[3/2] overflow-hidden rounded-xl bg-gray-100">
-            {index === 0 && (
-              <picture>
-                <source
-                  srcset="/images/containers/20ft-standard-400w.webp 400w, /images/containers/20ft-standard-600w.webp 600w, /images/containers/20ft-standard-800w.webp 800w"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  type="image/webp"
-                />
-                <img
-                  src="/images/containers/20ft-standard.jpg"
-                  alt="20 foot standard shipping container for rent"
-                  class="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
-                  loading="lazy"
-                  decoding="async"
-                  width="600"
-                  height="400"
-                />
-              </picture>
-            )}
-            {index === 1 && (
-              <picture>
-                <source
-                  srcset="/images/containers/40ft-standard-400w.webp 400w, /images/containers/40ft-standard-600w.webp 600w, /images/containers/40ft-standard-800w.webp 800w"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  type="image/webp"
-                />
-                <img
-                  src="/images/containers/40ft-standard-new.jpg"
-                  alt="40 foot standard shipping container for rent"
-                  class="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
-                  loading="lazy"
-                  decoding="async"
-                  width="600"
-                  height="400"
-                />
-              </picture>
-            )}
-            {index === 2 && (
-              <picture>
-                <source
-                  srcset="/images/containers/40ft-highcube-400w.webp 400w, /images/containers/40ft-highcube-600w.webp 600w, /images/containers/40ft-highcube-800w.webp 800w"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  type="image/webp"
-                />
-                <img
-                  src="/images/containers/40ft-highcube-new.jpg"
-                  alt="40 foot high cube shipping container for rent"
-                  class="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
-                  loading="lazy"
-                  decoding="async"
-                  width="600"
-                  height="400"
-                />
-              </picture>
-            )}
+          <div class="flex items-center justify-center bg-transparent p-4">
+            <img
+              src={container.image}
+              alt={`${container.size} shipping container for rent in Saskatchewan`}
+              class="h-auto w-full max-h-48 object-contain"
+              loading="lazy"
+              decoding="async"
+            />
           </div>
 
-          <h3 class="mt-4 text-xl font-bold text-gray-900">{container.size}</h3>
+          <h3 class="mt-4 text-2xl font-bold text-gray-900">{container.size}</h3>
 
-          <!-- Pricing -->
-          <div class="mt-4 rounded-lg bg-blue-50 p-3 text-center">
-            <p class="text-2xl font-bold text-blue-700">{container.priceRange}</p>
-            <p class="text-sm text-blue-600">/month</p>
+          <!-- Pricing Section - similar to sales page -->
+          <div class="mt-4 grid grid-cols-2 gap-3">
+            {/* Monthly Rental - Blue */}
+            <div class="rounded-lg bg-blue-50 p-3 border border-blue-100">
+              <p class="text-xs font-medium text-blue-700 uppercase tracking-wide">Monthly</p>
+              <p class="mt-1 text-lg font-bold text-blue-800">
+                ${container.rental.min}<span class="text-sm font-normal">-${container.rental.max}</span>
+              </p>
+            </div>
+            {/* Deposit - Gray */}
+            <div class="rounded-lg bg-gray-100 p-3 border border-gray-300">
+              <p class="text-xs font-medium text-gray-700 uppercase tracking-wide">Deposit</p>
+              <p class="mt-1 text-lg font-bold text-gray-900">
+                ${container.deposit}
+              </p>
+            </div>
           </div>
 
           <dl class="mt-4 space-y-2 text-sm">
@@ -271,10 +218,6 @@ const process = [
             <div class="flex justify-between">
               <dt class="text-gray-500">Capacity</dt>
               <dd class="font-medium text-gray-900">{container.capacity}</dd>
-            </div>
-            <div class="flex justify-between">
-              <dt class="text-gray-500">Deposit</dt>
-              <dd class="font-medium text-gray-900">{container.deposit}</dd>
             </div>
             <div class="flex justify-between">
               <dt class="text-gray-500">Ideal for</dt>
@@ -306,20 +249,21 @@ const process = [
       ))}
     </div>
 
-    <div class="mt-8 text-center">
-      <p class="text-gray-600">
-        <strong>Delivery & pickup included within 50km.</strong> Prices may vary based on availability.
-      </p>
-      <a href="/rental-terms" class="mt-2 inline-block text-sm font-medium text-blue-600 hover:text-blue-700">
+    <p class="mt-8 text-center text-gray-600">
+      Prices shown are monthly rates. Final price depends on location and rental duration.
+      <br /><strong>Delivery & pickup included within 50km.</strong> <a href={phoneLink} class="font-medium text-blue-600 hover:text-blue-700">Call us</a> for rates beyond 50km.
+    </p>
+    <p class="mt-2 text-center">
+      <a href="/rental-terms" class="text-sm font-medium text-blue-600 hover:text-blue-700">
         View full rental terms & conditions →
       </a>
-    </div>
+    </p>
   </Section>
 
   <!-- Why Rent Section -->
   <Section
     title="Why Rent a Container?"
-    subtitle="The smart choice for temporary storage needs."
+    subtitle="The smart choice for on-site storage at your location."
   >
     <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
       {benefits.map((benefit) => (
@@ -336,27 +280,38 @@ const process = [
 
   <!-- How It Works -->
   <Section
-    title="How Renting Works"
-    subtitle="Simple, hassle-free process from start to finish."
+    title="How It Works"
+    subtitle="Simple process from start to finish."
     background="gray"
   >
     <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-      {process.map((item) => (
-        <div class="relative text-center">
-          <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-xl font-bold text-white">
-            {item.step}
-          </div>
-          <h3 class="mt-4 text-lg font-semibold text-gray-900">{item.title}</h3>
-          <p class="mt-2 text-gray-600">{item.description}</p>
-        </div>
-      ))}
+      <div class="relative text-center">
+        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-xl font-bold text-white">1</div>
+        <h3 class="mt-4 text-lg font-semibold text-gray-900">Choose Your Size</h3>
+        <p class="mt-2 text-gray-600">Pick the container size that fits your storage needs.</p>
+      </div>
+      <div class="relative text-center">
+        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-xl font-bold text-white">2</div>
+        <h3 class="mt-4 text-lg font-semibold text-gray-900">We Deliver</h3>
+        <p class="mt-2 text-gray-600">We bring the container directly to your property.</p>
+      </div>
+      <div class="relative text-center">
+        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-xl font-bold text-white">3</div>
+        <h3 class="mt-4 text-lg font-semibold text-gray-900">Use It</h3>
+        <p class="mt-2 text-gray-600">Store your items with 24/7 access at your location.</p>
+      </div>
+      <div class="relative text-center">
+        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-xl font-bold text-white">4</div>
+        <h3 class="mt-4 text-lg font-semibold text-gray-900">We Pick Up</h3>
+        <p class="mt-2 text-gray-600">When you're done, we come and pick it up. Simple!</p>
+      </div>
     </div>
   </Section>
 
   <!-- Who Rents Section -->
   <Section
     title="Who Rents Containers?"
-    subtitle="Perfect for temporary storage needs of all kinds."
+    subtitle="Perfect for anyone needing storage at their location."
   >
     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {renters.map((renter) => (
@@ -370,16 +325,16 @@ const process = [
 
   <!-- On-Site Storage Callout -->
   <Section background="gray">
-    <div class="rounded-2xl bg-blue-50 p-8 text-center border-2 border-blue-200">
-      <h3 class="text-2xl font-bold text-gray-900">Looking for On-Site Storage?</h3>
+    <div class="rounded-2xl bg-primary-50 p-8 text-center border-2 border-primary-200">
+      <h3 class="text-2xl font-bold text-gray-900">Don't Have Space on Your Property?</h3>
       <p class="mt-2 text-gray-600 max-w-2xl mx-auto">
-        We also offer secure container storage at our Martensville facility. Store your belongings with us and access them during business hours.
+        We also offer secure container storage at our Martensville facility. Store your belongings with us and access them during business hours. Lower monthly rates, no delivery fees.
       </p>
       <a
         href="/on-site-storage-rentals"
-        class="mt-6 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-500 transition-colors"
+        class="mt-6 inline-flex items-center gap-2 rounded-lg bg-primary-600 px-6 py-3 font-semibold text-white hover:bg-primary-500 transition-colors"
       >
-        Learn About On-Site Storage
+        Learn About Yard Storage
         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
         </svg>
@@ -390,7 +345,7 @@ const process = [
   <!-- CTA -->
   <CTA
     title="Ready to Rent a Container?"
-    description="Contact us today for current availability and rental rates. Flexible terms to fit your project timeline."
+    description="Contact us today for current availability and rental rates. We'll deliver right to your property."
     primaryButton={{ text: "Call Now", href: phoneLink }}
     secondaryButton={{ text: "Contact Us", href: "/contact" }}
   />
