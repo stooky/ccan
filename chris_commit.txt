@@ -1,0 +1,1 @@
+3b41b00f86370fecda7a04e52180fd8c04eec60b Update rental pages and remove CaseStudies component

@@ -8,6 +8,9 @@ import ReviewWidget from '../components/ReviewWidget.astro';
 import FAQSchema from '../components/schema/FAQSchema.astro';
 import WebSiteSchema from '../components/schema/WebSiteSchema.astro';
 import ServiceSchema from '../components/schema/ServiceSchema.astro';
+import ContactPointSchema from '../components/schema/ContactPointSchema.astro';
+import SpeakableSchema from '../components/schema/SpeakableSchema.astro';
+import PlaceSchema from '../components/schema/PlaceSchema.astro';
 import { siteConfig, getContainerBySlug } from '../config/site';
 import heroBg from '../assets/images/hero-bg.webp';
 
@@ -114,6 +117,24 @@ const features = [
   <FAQSchema faqs={faqs} />
   <WebSiteSchema />
   <ServiceSchema />
+  <ContactPointSchema />
+  <SpeakableSchema
+    title="Sea Can Sales & Rentals Saskatoon SK"
+    description="C-Can Sam is Saskatchewan's trusted shipping container supplier. Buy new sea cans from $4,450, used from $3,000. Rentals from $125/month. Fast delivery across the province."
+    cssSelectors={['.entity-statement', 'h1', '.key-facts']}
+  />
+  <PlaceSchema cities={[
+    { name: 'Saskatoon' },
+    { name: 'Martensville' },
+    { name: 'Warman' },
+    { name: 'Regina' },
+    { name: 'Prince Albert' },
+    { name: 'Moose Jaw' },
+    { name: 'Swift Current' },
+    { name: 'Yorkton' },
+    { name: 'North Battleford' },
+    { name: 'Lloydminster' },
+  ]} />
 
   <!-- Hero Section -->
   <Hero
@@ -137,8 +158,8 @@ const features = [
     </div>
   </div>
 
-  <!-- Entity Statement - About C-Can Sam -->
-  <section class="bg-white py-12 border-b border-gray-100">
+  <!-- Entity Statement - About C-Can Sam (LLM Optimized) -->
+  <section class="entity-statement bg-white py-12 border-b border-gray-100">
     <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
       <p class="text-lg text-gray-700 leading-relaxed">
         <strong class="text-gray-900">C-Can Sam</strong> is a family-owned shipping container company based in

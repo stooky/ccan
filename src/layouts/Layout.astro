@@ -64,7 +64,7 @@ const fullTitle = `${title} | ${siteConfig.name}`;
     <meta name="title" content={fullTitle} />
     <meta name="description" content={description} />
     <meta name="author" content={author || siteConfig.name} />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
     <meta name="theme-color" content="#E8B84A" />
 
     <!-- Open Graph / Facebook -->
@@ -147,6 +147,28 @@ const fullTitle = `${title} | ${siteConfig.name}`;
         }
       ],
       "priceRange": "$$",
+      "foundingDate": "2022",
+      "founder": {
+        "@type": "Person",
+        "name": "Sam"
+      },
+      "areaServed": [
+        { "@type": "City", "name": "Saskatoon" },
+        { "@type": "City", "name": "Martensville" },
+        { "@type": "City", "name": "Warman" },
+        { "@type": "City", "name": "Regina" },
+        { "@type": "City", "name": "Prince Albert" },
+        { "@type": "AdministrativeArea", "name": "Saskatchewan" }
+      ],
+      "knowsAbout": [
+        "Shipping Containers",
+        "Storage Containers",
+        "Sea Cans",
+        "Container Rentals",
+        "Container Sales",
+        "Portable Storage"
+      ],
+      "slogan": "Saskatchewan's Premier Seacan Solutions Provider",
       "sameAs": sameAsLinks,
       "serviceArea": {
         "@type": "GeoCircle",

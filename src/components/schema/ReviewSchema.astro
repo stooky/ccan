@@ -1,0 +1,81 @@
+---
+/**
+ * Individual Review Schema Component
+ *
+ * Generates structured data for individual customer reviews.
+ * This enables review rich snippets in search results and helps LLMs
+ * understand and cite specific customer testimonials.
+ *
+ * @see https://schema.org/Review
+ */
+import { siteConfig } from '../../config/site';
+
+interface Review {
+  id: string;
+  author: string;
+  rating: number;
+  date: string;
+  text: string;
+  isLocalGuide?: boolean;
+}
+
+interface Props {
+  /** Array of reviews to include in schema */
+  reviews: Review[];
+  /** Maximum number of reviews to include */
+  maxReviews?: number;
+  /** Item being reviewed (defaults to LocalBusiness) */
+  itemReviewed?: {
+    type: string;
+    name: string;
+  };
+}
+
+const {
+  reviews,
+  maxReviews = 10,
+  itemReviewed = {
+    type: 'LocalBusiness',
+    name: siteConfig.name
+  }
+} = Astro.props;
+
+// Filter to reviews with actual text content and limit
+const validReviews = reviews
+  .filter(r => r.text && r.text.length > 10)
+  .slice(0, maxReviews);
+
+const reviewSchemas = validReviews.map(review => ({
+  "@context": "https://schema.org",
+  "@type": "Review",
+  "itemReviewed": {
+    "@type": itemReviewed.type,
+    "name": itemReviewed.name,
+    "image": `${siteConfig.url}/images/logo.png`,
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": siteConfig.contact.address.street,
+      "addressLocality": siteConfig.contact.address.city,
+      "addressRegion": siteConfig.contact.address.state,
+      "postalCode": siteConfig.contact.address.zip,
+      "addressCountry": "CA"
+    }
+  },
+  "reviewRating": {
+    "@type": "Rating",
+    "ratingValue": review.rating,
+    "bestRating": 5,
+    "worstRating": 1
+  },
+  "author": {
+    "@type": "Person",
+    "name": review.author
+  },
+  "datePublished": review.date,
+  "reviewBody": review.text
+}));
+---
+
+{reviewSchemas.map(schema => (
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />
+))}

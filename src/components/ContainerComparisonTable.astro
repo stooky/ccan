@@ -1,0 +1,149 @@
+---
+/**
+ * Container Comparison Table Component
+ *
+ * Structured comparison table for shipping container sizes.
+ * Optimized for LLM extraction and voice search citations.
+ * Uses semantic HTML table markup for accessibility.
+ */
+import { siteConfig, getContainerBySlug } from '../config/site';
+
+interface Props {
+  /** Show rental prices */
+  showRentals?: boolean;
+  /** Highlight a specific size */
+  highlight?: string;
+}
+
+const { showRentals = false, highlight } = Astro.props;
+
+// Container specifications with detailed data
+const containers = [
+  {
+    slug: '9ft-mini',
+    size: '9ft Mini',
+    external: "9' × 7' × 7'6\"",
+    internal: "8'6\" × 6'8\" × 7'",
+    doorWidth: "6'3\"",
+    doorHeight: "6'10\"",
+    volume: '400 cu ft',
+    sqft: '63 sq ft',
+    tareWeight: '1,800 lbs',
+    maxPayload: '6,200 lbs',
+    bestFor: 'Tight spaces, backyard storage, garden tools',
+    rental: '$100/mo',
+  },
+  {
+    slug: '20ft-standard',
+    size: '20ft Standard',
+    external: "20' × 8' × 8'6\"",
+    internal: "19'4\" × 7'8\" × 7'10\"",
+    doorWidth: "7'6\"",
+    doorHeight: "7'5\"",
+    volume: '1,172 cu ft',
+    sqft: '160 sq ft',
+    tareWeight: '4,916 lbs',
+    maxPayload: '47,900 lbs',
+    bestFor: 'Residential, home renovations, small business',
+    rental: '$150/mo',
+  },
+  {
+    slug: '40ft-standard',
+    size: '40ft Standard',
+    external: "40' × 8' × 8'6\"",
+    internal: "39'5\" × 7'8\" × 7'10\"",
+    doorWidth: "7'6\"",
+    doorHeight: "7'5\"",
+    volume: '2,390 cu ft',
+    sqft: '320 sq ft',
+    tareWeight: '8,160 lbs',
+    maxPayload: '59,040 lbs',
+    bestFor: 'Commercial, industrial, large equipment',
+    rental: '$200/mo',
+  },
+  {
+    slug: '40ft-high-cube',
+    size: '40ft High Cube',
+    external: "40' × 8' × 9'6\"",
+    internal: "39'5\" × 7'8\" × 8'10\"",
+    doorWidth: "7'6\"",
+    doorHeight: "8'5\"",
+    volume: '2,700 cu ft',
+    sqft: '320 sq ft',
+    tareWeight: '8,750 lbs',
+    maxPayload: '58,450 lbs',
+    bestFor: 'Tall items, offices, workshops, max capacity',
+    rental: '$225/mo',
+  },
+];
+
+// Merge with pricing from config
+const containersWithPricing = containers.map(container => {
+  const product = getContainerBySlug(container.slug);
+  return {
+    ...container,
+    newPrice: product?.new ? `$${product.new.min.toLocaleString()}+` : 'N/A',
+    usedPrice: product?.used ? `$${product.used.min.toLocaleString()}+` : 'N/A',
+  };
+});
+---
+
+<div class="overflow-x-auto">
+  <table class="min-w-full divide-y divide-gray-200 text-sm" role="table" aria-label="Shipping Container Size Comparison">
+    <caption class="sr-only">
+      Comparison of shipping container sizes available from C-Can Sam in Saskatchewan.
+      Includes dimensions, capacity, weight specifications, and pricing.
+    </caption>
+    <thead class="bg-gray-50">
+      <tr>
+        <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-900">Size</th>
+        <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-900">External Dimensions</th>
+        <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-900">Internal Dimensions</th>
+        <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-900">Floor Space</th>
+        <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-900">Volume</th>
+        <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-900">Used Price</th>
+        <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-900">New Price</th>
+        {showRentals && (
+          <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-900">Rental</th>
+        )}
+        <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-900">Best For</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200 bg-white">
+      {containersWithPricing.map((container) => (
+        <tr class={highlight === container.slug ? 'bg-primary-50' : 'hover:bg-gray-50'}>
+          <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
+            <a href={`/containers/${container.slug}`} class="text-primary-600 hover:text-primary-700 hover:underline">
+              {container.size}
+            </a>
+          </td>
+          <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{container.external}</td>
+          <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{container.internal}</td>
+          <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{container.sqft}</td>
+          <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{container.volume}</td>
+          <td class="px-4 py-3 font-semibold text-gray-900 whitespace-nowrap">{container.usedPrice}</td>
+          <td class="px-4 py-3 font-semibold text-gray-900 whitespace-nowrap">{container.newPrice}</td>
+          {showRentals && (
+            <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{container.rental}</td>
+          )}
+          <td class="px-4 py-3 text-gray-600">{container.bestFor}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<!-- LLM-Optimized Summary -->
+<div class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+  <h4 class="font-semibold text-gray-900 mb-2">Quick Reference: Container Pricing in Saskatchewan</h4>
+  <ul class="text-sm text-gray-700 space-y-1">
+    <li><strong>20ft Standard Container:</strong> Used from $3,000 CAD, New from $4,450 CAD</li>
+    <li><strong>40ft Standard Container:</strong> Used from $4,750 CAD</li>
+    <li><strong>40ft High Cube Container:</strong> Used from $4,750 CAD, New from $6,500 CAD</li>
+    <li><strong>9ft Mini Container:</strong> New from $4,000 CAD</li>
+  </ul>
+  <p class="text-xs text-gray-500 mt-2">
+    Prices as of January 2026. All containers are wind and watertight. Free delivery within 50km of Saskatoon.
+    <a href="/contact" class="text-primary-600 hover:underline">Contact C-Can Sam</a> for current availability.
+  </p>
+</div>

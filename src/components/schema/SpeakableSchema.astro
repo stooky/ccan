@@ -1,0 +1,43 @@
+---
+/**
+ * Speakable Schema Component
+ *
+ * Marks content sections as suitable for text-to-speech playback by voice assistants.
+ * This helps Google Assistant and other voice search tools read specific content aloud.
+ *
+ * @see https://schema.org/speakable
+ * @see https://developers.google.com/search/docs/appearance/structured-data/speakable
+ */
+
+interface Props {
+  /** Page title */
+  title: string;
+  /** Page description for voice readout */
+  description: string;
+  /** CSS selectors for speakable content sections */
+  cssSelectors?: string[];
+  /** Page URL */
+  url?: string;
+}
+
+const {
+  title,
+  description,
+  cssSelectors = ['.entity-statement', '.key-facts', 'h1', '.hero-subtitle'],
+  url = Astro.url.href,
+} = Astro.props;
+
+const speakableSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": title,
+  "description": description,
+  "url": url,
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": cssSelectors
+  }
+};
+---
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(speakableSchema)} />

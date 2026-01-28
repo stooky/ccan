@@ -1,0 +1,65 @@
+---
+/**
+ * ContactPoint Schema Component
+ *
+ * Generates structured data for contact points, helping LLMs and voice assistants
+ * discover contact options for the business.
+ *
+ * @see https://schema.org/ContactPoint
+ */
+import { siteConfig } from '../../config/site';
+
+interface Props {
+  /** Contact type: customer service, sales, technical support, etc. */
+  contactType?: string;
+  /** Available languages */
+  availableLanguage?: string | string[];
+  /** Hours available (e.g., "Mo-Fr 09:00-17:00") */
+  hoursAvailable?: string;
+}
+
+const {
+  contactType = 'customer service',
+  availableLanguage = 'English',
+  hoursAvailable = 'Mo-Fr 09:00-17:00',
+} = Astro.props;
+
+const contactPointSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": siteConfig.name,
+  "url": siteConfig.url,
+  "contactPoint": [
+    {
+      "@type": "ContactPoint",
+      "telephone": siteConfig.contact.phone,
+      "contactType": contactType,
+      "areaServed": "CA",
+      "availableLanguage": availableLanguage,
+      "hoursAvailable": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        "opens": "09:00",
+        "closes": "17:00"
+      }
+    },
+    {
+      "@type": "ContactPoint",
+      "telephone": siteConfig.contact.phoneLocal,
+      "contactType": "sales",
+      "areaServed": ["Saskatchewan", "CA"],
+      "availableLanguage": availableLanguage,
+      "contactOption": "TollFree"
+    },
+    {
+      "@type": "ContactPoint",
+      "email": siteConfig.contact.email,
+      "contactType": "customer service",
+      "areaServed": "CA",
+      "availableLanguage": availableLanguage
+    }
+  ]
+};
+---
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(contactPointSchema)} />

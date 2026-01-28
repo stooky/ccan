@@ -1,0 +1,72 @@
+---
+/**
+ * Place Schema Component
+ *
+ * Generates structured data for service areas/cities.
+ * Helps search engines and LLMs understand geographic service coverage.
+ *
+ * @see https://schema.org/Place
+ * @see https://schema.org/City
+ */
+import { siteConfig } from '../../config/site';
+
+interface ServiceCity {
+  name: string;
+  region?: string;
+  deliveryTime?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+interface Props {
+  /** Array of cities served */
+  cities: ServiceCity[];
+}
+
+const { cities } = Astro.props;
+
+// Default coordinates for major Saskatchewan cities
+const cityCoordinates: Record<string, { lat: number; lng: number }> = {
+  'Saskatoon': { lat: 52.1579, lng: -106.6702 },
+  'Regina': { lat: 50.4452, lng: -104.6189 },
+  'Prince Albert': { lat: 53.2033, lng: -105.7531 },
+  'Moose Jaw': { lat: 50.3934, lng: -105.5519 },
+  'Swift Current': { lat: 50.2881, lng: -107.7939 },
+  'Yorkton': { lat: 51.2139, lng: -102.4628 },
+  'North Battleford': { lat: 52.7575, lng: -108.2861 },
+  'Martensville': { lat: 52.2897, lng: -106.6667 },
+  'Warman': { lat: 52.3219, lng: -106.5842 },
+  'Lloydminster': { lat: 53.2783, lng: -110.0050 },
+};
+
+const serviceAreaSchema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "serviceType": "Shipping Container Sales and Rentals",
+  "provider": {
+    "@type": "LocalBusiness",
+    "name": siteConfig.name,
+    "url": siteConfig.url
+  },
+  "areaServed": cities.map(city => {
+    const coords = cityCoordinates[city.name];
+    return {
+      "@type": "City",
+      "name": city.name,
+      "containedInPlace": {
+        "@type": "AdministrativeArea",
+        "name": city.region || "Saskatchewan"
+      },
+      ...(coords && {
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": city.latitude || coords.lat,
+          "longitude": city.longitude || coords.lng
+        }
+      })
+    };
+  })
+};
+---
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(serviceAreaSchema)} />
