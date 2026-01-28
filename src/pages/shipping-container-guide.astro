@@ -12,6 +12,7 @@ import Layout from '../layouts/Layout.astro';
 import Section from '../components/Section.astro';
 import CTA from '../components/CTA.astro';
 import FAQSchema from '../components/schema/FAQSchema.astro';
+import HowToSchema from '../components/schema/HowToSchema.astro';
 
 // Glossary terms for schema and display
 const glossaryTerms = [
@@ -224,6 +225,34 @@ const sizeComparison = [
     usedPrice: "$4,750-$5,000"
   }
 ];
+
+// HowTo steps for choosing a container
+const howToSteps = [
+  {
+    name: "Determine your storage needs",
+    text: "Calculate the volume of items you need to store. A 20ft container holds about 1,170 cubic feet (equivalent to a 3-bedroom home's contents), while a 40ft container holds 2,390 cubic feet. Consider future needs and choose a size with some extra room."
+  },
+  {
+    name: "Choose between new and used",
+    text: "One-trip (new) containers cost $4,450-$6,900 and are in pristine condition. Used containers cost $3,000-$5,000 and offer excellent value for storage. Choose new if appearance matters; used if you want maximum value."
+  },
+  {
+    name: "Decide on standard or high cube height",
+    text: "Standard containers are 8'6\" tall inside. High cube containers add an extra foot of height (9'6\"), providing 13% more volume. High cube is ideal for tall items or if you plan to convert the container into workspace."
+  },
+  {
+    name: "Check delivery access at your site",
+    text: "Ensure you have adequate access for delivery: minimum 10ft wide path, 14ft overhead clearance, and 60-100ft straight approach for the delivery truck. The ground should be firm and level."
+  },
+  {
+    name: "Prepare your site",
+    text: "Level the ground where the container will sit. Common foundation options include compacted gravel, concrete blocks at corners, or railway ties. Ensure water drains away from the container location."
+  },
+  {
+    name: "Contact a reputable supplier",
+    text: "Request quotes from local suppliers. Ask about condition guarantees (wind and watertight certification), delivery costs, and warranty. C-Can Sam in Martensville serves all of Saskatchewan with quality containers starting at $3,000."
+  }
+];
 ---
 
 <Layout
@@ -231,6 +260,13 @@ const sizeComparison = [
   description="The definitive guide to sea cans, shipping containers, and storage solutions in Saskatchewan. Learn about sizes, prices, terminology, and find the right container for your needs. Expert advice from C-Can Sam."
 >
   <FAQSchema faqs={faqs} />
+  <HowToSchema
+    name="How to Choose and Buy a Shipping Container in Saskatchewan"
+    description="A step-by-step guide to selecting the right shipping container for your storage needs in Saskatchewan. Learn how to determine size, choose between new and used, prepare your site, and find a reputable supplier."
+    steps={howToSteps}
+    totalTime="P1D"
+    estimatedCost={{ currency: "CAD", value: "3000-6900" }}
+  />
 
   <!-- Hero -->
   <section class="bg-gradient-to-b from-gray-900 to-gray-800 py-16 sm:py-24">

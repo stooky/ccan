@@ -29,7 +29,9 @@ export default defineConfig({
         else if (
           item.url.includes('/containers-saskatoon') ||
           item.url.includes('/containers-regina') ||
-          item.url.includes('/containers-prince-albert')
+          item.url.includes('/containers-prince-albert') ||
+          item.url.includes('/containers-moose-jaw') ||
+          item.url.includes('/containers-swift-current')
         ) {
           item.priority = 0.85;
           item.changefreq = 'weekly';

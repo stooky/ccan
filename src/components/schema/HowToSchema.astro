@@ -1,0 +1,85 @@
+---
+/**
+ * HowToSchema Component
+ * Generates JSON-LD structured data for HowTo content
+ * Enables rich snippets for step-by-step guides in search results
+ */
+
+interface HowToStep {
+  name: string;
+  text: string;
+  image?: string;
+  url?: string;
+}
+
+interface HowToSupply {
+  name: string;
+}
+
+interface HowToTool {
+  name: string;
+}
+
+interface Props {
+  name: string;
+  description: string;
+  steps: HowToStep[];
+  totalTime?: string; // ISO 8601 duration format, e.g., "PT30M" for 30 minutes
+  estimatedCost?: {
+    currency: string;
+    value: string;
+  };
+  supplies?: HowToSupply[];
+  tools?: HowToTool[];
+  image?: string;
+}
+
+const { name, description, steps, totalTime, estimatedCost, supplies, tools, image } = Astro.props;
+
+const schema: Record<string, unknown> = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": name,
+  "description": description,
+  "step": steps.map((step, index) => ({
+    "@type": "HowToStep",
+    "position": index + 1,
+    "name": step.name,
+    "text": step.text,
+    ...(step.image && { "image": step.image }),
+    ...(step.url && { "url": step.url })
+  }))
+};
+
+if (totalTime) {
+  schema.totalTime = totalTime;
+}
+
+if (estimatedCost) {
+  schema.estimatedCost = {
+    "@type": "MonetaryAmount",
+    "currency": estimatedCost.currency,
+    "value": estimatedCost.value
+  };
+}
+
+if (supplies && supplies.length > 0) {
+  schema.supply = supplies.map(supply => ({
+    "@type": "HowToSupply",
+    "name": supply.name
+  }));
+}
+
+if (tools && tools.length > 0) {
+  schema.tool = tools.map(tool => ({
+    "@type": "HowToTool",
+    "name": tool.name
+  }));
+}
+
+if (image) {
+  schema.image = image;
+}
+---
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />
