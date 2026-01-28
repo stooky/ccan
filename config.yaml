@@ -157,44 +157,48 @@ navigation:
         href: "/storage-container-leasing"
       - name: "On-Site Storage"
         href: "/on-site-storage-rentals"
-      - name: "Rental Terms"
-        href: "/rental-terms"
-    # Products - specific container types (product SEO)
+      - name: "View Inventory"
+        href: "/inventory-checker"
+    # Products - specific container types and resources
     products:
       - name: "9ft Mini Container"
         href: "/containers/9ft-mini"
-      - name: "20ft Standard Container"
+      - name: "20ft Standard"
         href: "/containers/20ft-standard"
-      - name: "40ft Standard Container"
+      - name: "40ft Standard"
         href: "/containers/40ft-standard"
-      - name: "40ft High Cube Container"
+      - name: "40ft High Cube"
         href: "/containers/40ft-high-cube"
-      - name: "View Inventory"
-        href: "/inventory-checker"
-    # Company - trust signals and engagement
-    company:
-      - name: "About Us"
-        href: "/about"
-      - name: "Saskatoon Containers"
-        href: "/containers-saskatoon"
       - name: "Container Guide"
         href: "/shipping-container-guide"
-      - name: "Container Types & Sizes"
-        href: "/shipping-containers"
       - name: "Maintenance Guide"
         href: "/container-maintenance-guide"
+    # Company - service areas and trust signals
+    company:
+      - name: "Saskatoon"
+        href: "/containers-saskatoon"
+      - name: "Regina"
+        href: "/containers-regina"
+      - name: "Moose Jaw"
+        href: "/containers-moose-jaw"
+      - name: "Swift Current"
+        href: "/containers-swift-current"
+      - name: "Prince Albert"
+        href: "/containers-prince-albert"
+      - name: "About Us"
+        href: "/about"
       - name: "Blog"
         href: "/blog"
       - name: "Referral Program"
         href: "/referrals"
-      - name: "Contact"
-        href: "/contact"
     # Legal - compliance (required)
     legal:
       - name: "Privacy Policy"
         href: "/privacy"
       - name: "Terms & Conditions"
         href: "/terms"
+      - name: "Rental Terms"
+        href: "/rental-terms"
 
 # -----------------------------------------------------------------------------
 # Analytics & Tracking
