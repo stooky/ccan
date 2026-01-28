@@ -169,12 +169,18 @@ navigation:
         href: "/containers/40ft-standard"
       - name: "40ft High Cube Container"
         href: "/containers/40ft-high-cube"
+      - name: "View Inventory"
+        href: "/inventory-checker"
     # Company - trust signals and engagement
     company:
       - name: "About Us"
         href: "/about"
+      - name: "Saskatoon Containers"
+        href: "/containers-saskatoon"
       - name: "Container Guide"
         href: "/shipping-container-guide"
+      - name: "Container Types & Sizes"
+        href: "/shipping-containers"
       - name: "Maintenance Guide"
         href: "/container-maintenance-guide"
       - name: "Blog"
@@ -193,9 +199,6 @@ navigation:
 # -----------------------------------------------------------------------------
 # Analytics & Tracking
 # -----------------------------------------------------------------------------
-# All tracking scripts only load after user accepts "Analytics" cookies.
-# Leave IDs empty to disable.
-#
 analytics:
   # Google Analytics 4
   # Note: GA4 is configured through GTM to avoid loading ~150KB of redundant JS

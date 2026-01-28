@@ -77,7 +77,7 @@ const aboutFaqs = [
 
 <Layout
   title="About C-Can Sam - Saskatchewan Sea Can Company Since 2022"
-  description="C-Can Sam is a Saskatchewan shipping container company based in Martensville, serving Saskatoon and all of SK since 2022. 55+ five-star reviews. Buy, rent, or store sea cans. Call 306-850-9675."
+  description="C-Can Sam is a Saskatchewan shipping container company based in Martensville, serving Saskatoon and all of SK since 2022. 55+ five-star reviews. Buy, rent, or store sea cans. Call 1-844-473-2226."
 >
   <!-- FAQ Schema for About Page -->
   <FAQSchema faqs={aboutFaqs} />
@@ -122,7 +122,7 @@ const aboutFaqs = [
         <div class="rounded-lg bg-white p-4 shadow-sm border border-gray-100">
           <dt class="text-sm font-medium text-gray-500">Phone</dt>
           <dd class="mt-1 text-lg font-semibold text-gray-900">
-            <a href="tel:3068509675" class="text-primary-600 hover:text-primary-700">{siteConfig.contact.phone}</a>
+            <a href={`tel:${siteConfig.contact.phone.replace(/\D/g, '')}`} class="text-primary-600 hover:text-primary-700">{siteConfig.contact.phone}</a>
           </dd>
         </div>
         <div class="rounded-lg bg-white p-4 shadow-sm border border-gray-100">
@@ -469,7 +469,7 @@ const aboutFaqs = [
   <CTA
     title="Ready to Get Started?"
     description="Call C-Can Sam today for shipping container sales, rentals, or storage in Saskatchewan."
-    primaryButton={{ text: "Call 306-850-9675", href: `tel:${siteConfig.contact.phone.replace(/\D/g, '')}` }}
+    primaryButton={{ text: `Call ${siteConfig.contact.phone}`, href: `tel:${siteConfig.contact.phone.replace(/\D/g, '')}` }}
     variant="gray"
   />
 </Layout>
