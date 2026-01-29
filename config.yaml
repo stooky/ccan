@@ -186,7 +186,7 @@ navigation:
         href: "/shipping-container-guide"
       - name: "Maintenance Guide"
         href: "/container-maintenance-guide"
-    # Company - service areas and trust signals
+    # Company - service areas
     company:
       - name: "Saskatoon"
         href: "/containers-saskatoon"
@@ -198,12 +198,16 @@ navigation:
         href: "/containers-swift-current"
       - name: "Prince Albert"
         href: "/containers-prince-albert"
+    # Useful links - company info and resources
+    useful:
       - name: "About Us"
         href: "/about"
       - name: "Blog"
         href: "/blog"
       - name: "Referral Program"
         href: "/referrals"
+      - name: "Contact"
+        href: "/contact"
     # Legal - compliance (required)
     legal:
       - name: "Privacy Policy"
