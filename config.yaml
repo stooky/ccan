@@ -236,6 +236,66 @@ analytics:
     container_id: "GTM-MTTG4KTT"
 
 # -----------------------------------------------------------------------------
+# Visitor Tracking (Custom Analytics)
+# -----------------------------------------------------------------------------
+# Lightweight page view tracking to identify traffic sources
+# Especially useful for tracking LLM-referred visitors
+#
+visitor_tracking:
+  enabled: true
+
+  # Raw data retention (days) - older data is aggregated into daily summaries
+  retention_days: 30
+
+  # LLM referrer domains to detect as AI traffic
+  llm_domains:
+    - "chat.openai.com"
+    - "chatgpt.com"
+    - "perplexity.ai"
+    - "claude.ai"
+    - "you.com"
+    - "copilot.microsoft.com"
+    - "bing.com/chat"
+    - "bard.google.com"
+    - "gemini.google.com"
+    - "phind.com"
+
+  # UTM sources/mediums that indicate LLM traffic
+  llm_utm_sources:
+    - "chatgpt"
+    - "openai"
+    - "perplexity"
+    - "claude"
+    - "gemini"
+    - "copilot"
+    - "phind"
+
+  # Search engine domains (organic traffic)
+  search_engines:
+    - "google.com"
+    - "google.ca"
+    - "google.co.uk"
+    - "bing.com"
+    - "duckduckgo.com"
+    - "yahoo.com"
+    - "ecosia.org"
+    - "yandex.com"
+    - "baidu.com"
+
+  # Social media domains
+  social_domains:
+    - "facebook.com"
+    - "fb.com"
+    - "twitter.com"
+    - "x.com"
+    - "linkedin.com"
+    - "instagram.com"
+    - "reddit.com"
+    - "youtube.com"
+    - "tiktok.com"
+    - "pinterest.com"
+
+# -----------------------------------------------------------------------------
 # Contact Form Settings (PHP Backend)
 # -----------------------------------------------------------------------------
 contact_form:

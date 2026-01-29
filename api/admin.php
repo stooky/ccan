@@ -676,6 +676,29 @@ $spamCount = count($spamLog);
 $spamToday = count(array_filter($spamLog, fn($s) => date('Y-m-d', strtotime($s['timestamp'] ?? '1970-01-01')) === date('Y-m-d')));
 $spamJson = json_encode($spamLog);
 
+// Load traffic data
+$trafficFile = dirname(__DIR__) . '/data/traffic.json';
+$trafficData = [
+    'version' => 1,
+    'lastUpdated' => null,
+    'raw' => [],
+    'daily' => [],
+    'totals' => [
+        'allTime' => 0,
+        'last7Days' => 0,
+        'last30Days' => 0,
+        'bySource' => []
+    ]
+];
+if (file_exists($trafficFile)) {
+    $trafficContent = file_get_contents($trafficFile);
+    $trafficData = json_decode($trafficContent, true) ?? $trafficData;
+}
+$trafficJson = json_encode($trafficData);
+$trafficTotalViews = $trafficData['totals']['allTime'] ?? 0;
+$trafficLast7Days = $trafficData['totals']['last7Days'] ?? 0;
+$trafficLast30Days = $trafficData['totals']['last30Days'] ?? 0;
+
 // Load products config for Rich Snippets tab
 $productsConfig = [];
 if ($config && isset($config['products']['containers'])) {
@@ -1068,6 +1091,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             </a>
             <a href="?key=<?= urlencode($secretPath) ?>&tab=rich-snippets" class="tab <?= $currentTab === 'rich-snippets' ? 'active' : '' ?>">
                 Rich Snippets
+            </a>
+            <a href="?key=<?= urlencode($secretPath) ?>&tab=traffic" class="tab <?= $currentTab === 'traffic' ? 'active' : '' ?>">
+                Traffic
             </a>
             <a href="?key=<?= urlencode($secretPath) ?>&tab=backup" class="tab <?= $currentTab === 'backup' ? 'active' : '' ?>">
                 Backup
@@ -1581,6 +1607,138 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 </ul>
             </div>
         </div><!-- End Backup Tab -->
+
+        <!-- Traffic Tab -->
+        <div class="tab-content <?= $currentTab === 'traffic' ? 'active' : '' ?>" id="traffic-tab">
+            <!-- Header Stats -->
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="traffic-total"><?= number_format($trafficTotalViews) ?></div>
+                    <div class="stat-label">All Time Views</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="traffic-7days"><?= number_format($trafficLast7Days) ?></div>
+                    <div class="stat-label">Last 7 Days</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="traffic-30days"><?= number_format($trafficLast30Days) ?></div>
+                    <div class="stat-label">Last 30 Days</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="traffic-llm-pct">0%</div>
+                    <div class="stat-label">LLM Traffic</div>
+                </div>
+            </div>
+
+            <!-- Quick Filters -->
+            <div class="filter-bar">
+                <div class="quick-filters">
+                    <button class="quick-filter active" data-days="30" onclick="setTrafficRange(30)">Last 30 Days</button>
+                    <button class="quick-filter" data-days="7" onclick="setTrafficRange(7)">Last 7 Days</button>
+                    <button class="quick-filter" data-days="0" onclick="setTrafficRange(0)">Today</button>
+                    <button class="quick-filter" data-days="-1" onclick="setTrafficRange(-1)">All Time</button>
+                </div>
+                <span class="results-count">Last updated: <span id="traffic-last-updated">-</span></span>
+            </div>
+
+            <!-- Traffic Source Breakdown -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                <!-- Source Distribution -->
+                <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem;">
+                    <h3 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; color: #374151;">Traffic Sources</h3>
+                    <div id="traffic-source-bars">
+                        <p style="color: #9ca3af; font-size: 0.875rem;">No traffic data yet</p>
+                    </div>
+                </div>
+
+                <!-- LLM Breakdown -->
+                <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem;">
+                    <h3 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; color: #374151;">LLM Traffic Breakdown</h3>
+                    <div id="traffic-llm-breakdown">
+                        <p style="color: #9ca3af; font-size: 0.875rem;">No LLM traffic detected yet</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Pages & Referrers Tables -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                <!-- Top Pages -->
+                <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem;">
+                    <h3 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; color: #374151;">Top Pages</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.75rem;">
+                        <thead>
+                            <tr style="background: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+                                <th style="padding: 0.5rem; text-align: left;">Page</th>
+                                <th style="padding: 0.5rem; text-align: right;">Views</th>
+                                <th style="padding: 0.5rem; text-align: right;">LLM</th>
+                            </tr>
+                        </thead>
+                        <tbody id="traffic-top-pages">
+                            <tr><td colspan="3" style="padding: 1rem; text-align: center; color: #9ca3af;">No data</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Top Referrers -->
+                <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem;">
+                    <h3 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; color: #374151;">Top Referrers</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.75rem;">
+                        <thead>
+                            <tr style="background: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+                                <th style="padding: 0.5rem; text-align: left;">Source</th>
+                                <th style="padding: 0.5rem; text-align: right;">Views</th>
+                            </tr>
+                        </thead>
+                        <tbody id="traffic-top-referrers">
+                            <tr><td colspan="2" style="padding: 1rem; text-align: center; color: #9ca3af;">No data</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Daily Trend Chart -->
+            <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem; margin-top: 1.5rem;">
+                <h3 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; color: #374151;">Daily Trend (Last 30 Days)</h3>
+                <div id="traffic-daily-chart" style="display: flex; align-items: flex-end; gap: 2px; height: 120px; padding: 0.5rem 0;">
+                    <p style="color: #9ca3af; font-size: 0.875rem; width: 100%; text-align: center;">No data</p>
+                </div>
+                <div id="traffic-daily-labels" style="display: flex; justify-content: space-between; font-size: 0.625rem; color: #9ca3af; margin-top: 0.25rem;">
+                </div>
+            </div>
+
+            <!-- Recent Visits -->
+            <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem; margin-top: 1.5rem;">
+                <h3 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; color: #374151;">Recent Visits</h3>
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.75rem;">
+                    <thead>
+                        <tr style="background: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+                            <th style="padding: 0.5rem; text-align: left;">Time</th>
+                            <th style="padding: 0.5rem; text-align: left;">Page</th>
+                            <th style="padding: 0.5rem; text-align: left;">Source</th>
+                            <th style="padding: 0.5rem; text-align: left;">Detail</th>
+                            <th style="padding: 0.5rem; text-align: center;">Device</th>
+                        </tr>
+                    </thead>
+                    <tbody id="traffic-recent-visits">
+                        <tr><td colspan="5" style="padding: 1rem; text-align: center; color: #9ca3af;">No recent visits</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Info Box -->
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 0.5rem; padding: 1rem; margin-top: 1.5rem;">
+                <p style="font-size: 0.875rem; font-weight: 500; color: #1e40af; margin-bottom: 0.5rem;">
+                    Traffic Tracking Info
+                </p>
+                <ul style="font-size: 0.75rem; color: #1e40af; margin: 0; padding-left: 1.25rem;">
+                    <li><strong>LLM</strong> - Traffic from AI assistants (ChatGPT, Perplexity, Claude, Copilot, etc.)</li>
+                    <li><strong>Organic</strong> - Traffic from search engines (Google, Bing, DuckDuckGo)</li>
+                    <li><strong>Direct</strong> - Users who typed the URL directly or used bookmarks</li>
+                    <li><strong>Social</strong> - Traffic from social media platforms</li>
+                    <li><strong>Referral</strong> - Traffic from other websites</li>
+                </ul>
+            </div>
+        </div><!-- End Traffic Tab -->
 
         <!-- Backup Confirmation Modal -->
         <div id="backup-confirm-modal" class="modal" style="display: none;">
@@ -2611,7 +2769,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             filterSpam();
         }
 
-        // Render spam when tab is clicked
+        // Render spam/backup/traffic when tab is clicked
         document.querySelectorAll('.tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 setTimeout(() => {
@@ -2620,6 +2778,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     }
                     if (document.getElementById('backup-tab')?.classList.contains('active')) {
                         loadBackupData();
+                    }
+                    if (document.getElementById('traffic-tab')?.classList.contains('active')) {
+                        renderTrafficData();
                     }
                 }, 0);
             });
@@ -3054,6 +3215,327 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         // Load backup data if on backup tab
         if (document.getElementById('backup-tab')?.classList.contains('active')) {
             loadBackupData();
+        }
+
+        // ============================================
+        // Traffic Tab Functionality
+        // ============================================
+        const trafficData = <?= $trafficJson ?>;
+        let trafficDaysFilter = 30;
+
+        function setTrafficRange(days) {
+            trafficDaysFilter = days;
+            // Update active filter button
+            document.querySelectorAll('#traffic-tab .quick-filter').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.days) === days);
+            });
+            renderTrafficData();
+        }
+
+        function getFilteredTrafficData() {
+            if (!trafficData || !trafficData.daily) return { daily: {}, raw: [] };
+
+            const now = new Date();
+            let startDate;
+
+            if (trafficDaysFilter === -1) {
+                // All time
+                return trafficData;
+            } else if (trafficDaysFilter === 0) {
+                // Today
+                startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            } else {
+                // Last N days
+                startDate = new Date(now.getTime() - (trafficDaysFilter * 24 * 60 * 60 * 1000));
+            }
+
+            const startStr = startDate.toISOString().split('T')[0];
+
+            // Filter daily data
+            const filteredDaily = {};
+            Object.entries(trafficData.daily || {}).forEach(([date, data]) => {
+                if (date >= startStr) {
+                    filteredDaily[date] = data;
+                }
+            });
+
+            // Filter raw data
+            const filteredRaw = (trafficData.raw || []).filter(visit => {
+                const visitDate = new Date(visit.ts);
+                return visitDate >= startDate;
+            });
+
+            return { daily: filteredDaily, raw: filteredRaw };
+        }
+
+        function renderTrafficData() {
+            const filtered = getFilteredTrafficData();
+
+            // Calculate totals from filtered data
+            let totalViews = 0;
+            const bySource = {};
+            const byPage = {};
+            const llmBreakdown = {};
+            const byReferrer = {};
+
+            Object.values(filtered.daily).forEach(day => {
+                totalViews += day.total || 0;
+
+                // Aggregate by source
+                Object.entries(day.bySource || {}).forEach(([source, count]) => {
+                    bySource[source] = (bySource[source] || 0) + count;
+                });
+
+                // Aggregate by page
+                Object.entries(day.byPage || {}).forEach(([page, count]) => {
+                    byPage[page] = (byPage[page] || 0) + count;
+                });
+
+                // Aggregate LLM breakdown
+                Object.entries(day.llmBreakdown || {}).forEach(([detail, count]) => {
+                    llmBreakdown[detail] = (llmBreakdown[detail] || 0) + count;
+                });
+            });
+
+            // Get referrers from raw data
+            filtered.raw.forEach(visit => {
+                if (visit.sourceDetail && visit.sourceDetail !== 'no_referrer' && visit.sourceDetail !== 'self_referral') {
+                    byReferrer[visit.sourceDetail] = (byReferrer[visit.sourceDetail] || 0) + 1;
+                }
+            });
+
+            // Update stats
+            const llmCount = bySource.llm || 0;
+            const llmPct = totalViews > 0 ? ((llmCount / totalViews) * 100).toFixed(1) : 0;
+            document.getElementById('traffic-llm-pct').textContent = llmPct + '%';
+
+            // Last updated
+            if (trafficData.lastUpdated) {
+                const lastUpdate = new Date(trafficData.lastUpdated);
+                document.getElementById('traffic-last-updated').textContent = lastUpdate.toLocaleString();
+            }
+
+            // Render source bars
+            renderSourceBars(bySource, totalViews);
+
+            // Render LLM breakdown
+            renderLLMBreakdown(llmBreakdown);
+
+            // Render top pages
+            renderTopPages(byPage, filtered.raw);
+
+            // Render top referrers
+            renderTopReferrers(byReferrer);
+
+            // Render daily chart
+            renderDailyChart();
+
+            // Render recent visits
+            renderRecentVisits(filtered.raw.slice(0, 20));
+        }
+
+        function renderSourceBars(bySource, total) {
+            const container = document.getElementById('traffic-source-bars');
+            if (total === 0) {
+                container.innerHTML = '<p style="color: #9ca3af; font-size: 0.875rem;">No traffic data yet</p>';
+                return;
+            }
+
+            const sourceColors = {
+                organic: '#22c55e',
+                llm: '#8b5cf6',
+                direct: '#3b82f6',
+                social: '#f59e0b',
+                referral: '#ec4899'
+            };
+
+            const sourceLabels = {
+                organic: 'Organic Search',
+                llm: 'LLM / AI',
+                direct: 'Direct',
+                social: 'Social Media',
+                referral: 'Referral'
+            };
+
+            const sorted = Object.entries(bySource).sort((a, b) => b[1] - a[1]);
+
+            container.innerHTML = sorted.map(([source, count]) => {
+                const pct = ((count / total) * 100).toFixed(1);
+                const color = sourceColors[source] || '#6b7280';
+                const label = sourceLabels[source] || source;
+                return `
+                    <div style="margin-bottom: 0.75rem;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.25rem;">
+                            <span style="color: #374151;">${escapeHtml(label)}</span>
+                            <span style="color: #6b7280;">${count} (${pct}%)</span>
+                        </div>
+                        <div style="height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                            <div style="height: 100%; width: ${pct}%; background: ${color}; border-radius: 4px;"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderLLMBreakdown(llmBreakdown) {
+            const container = document.getElementById('traffic-llm-breakdown');
+            const entries = Object.entries(llmBreakdown).sort((a, b) => b[1] - a[1]);
+
+            if (entries.length === 0) {
+                container.innerHTML = '<p style="color: #9ca3af; font-size: 0.875rem;">No LLM traffic detected yet</p>';
+                return;
+            }
+
+            const total = entries.reduce((sum, [, count]) => sum + count, 0);
+
+            container.innerHTML = entries.map(([source, count]) => {
+                const pct = ((count / total) * 100).toFixed(1);
+                return `
+                    <div style="display: flex; justify-content: space-between; padding: 0.375rem 0; border-bottom: 1px solid #f3f4f6; font-size: 0.75rem;">
+                        <span style="color: #374151;">${escapeHtml(source)}</span>
+                        <span style="color: #8b5cf6; font-weight: 500;">${count} (${pct}%)</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderTopPages(byPage, rawData) {
+            const tbody = document.getElementById('traffic-top-pages');
+            const entries = Object.entries(byPage).sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+            if (entries.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="padding: 1rem; text-align: center; color: #9ca3af;">No data</td></tr>';
+                return;
+            }
+
+            // Count LLM visits per page
+            const llmByPage = {};
+            rawData.forEach(visit => {
+                if (visit.source === 'llm') {
+                    llmByPage[visit.page] = (llmByPage[visit.page] || 0) + 1;
+                }
+            });
+
+            tbody.innerHTML = entries.map(([page, count]) => {
+                const llmCount = llmByPage[page] || 0;
+                return `
+                    <tr style="border-bottom: 1px solid #f3f4f6;">
+                        <td style="padding: 0.5rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(page)}">${escapeHtml(page)}</td>
+                        <td style="padding: 0.5rem; text-align: right;">${count}</td>
+                        <td style="padding: 0.5rem; text-align: right; color: ${llmCount > 0 ? '#8b5cf6' : '#9ca3af'};">${llmCount}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderTopReferrers(byReferrer) {
+            const tbody = document.getElementById('traffic-top-referrers');
+            const entries = Object.entries(byReferrer).sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+            if (entries.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" style="padding: 1rem; text-align: center; color: #9ca3af;">No data</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = entries.map(([source, count]) => `
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                    <td style="padding: 0.5rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(source)}">${escapeHtml(source)}</td>
+                    <td style="padding: 0.5rem; text-align: right;">${count}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderDailyChart() {
+            const container = document.getElementById('traffic-daily-chart');
+            const labelsContainer = document.getElementById('traffic-daily-labels');
+
+            // Get last 30 days of data
+            const days = [];
+            const now = new Date();
+            for (let i = 29; i >= 0; i--) {
+                const date = new Date(now.getTime() - (i * 24 * 60 * 60 * 1000));
+                const dateStr = date.toISOString().split('T')[0];
+                const dayData = trafficData.daily?.[dateStr];
+                days.push({
+                    date: dateStr,
+                    total: dayData?.total || 0,
+                    llm: dayData?.bySource?.llm || 0,
+                    label: date.getDate()
+                });
+            }
+
+            const maxViews = Math.max(...days.map(d => d.total), 1);
+
+            if (maxViews <= 1 && days.every(d => d.total === 0)) {
+                container.innerHTML = '<p style="color: #9ca3af; font-size: 0.875rem; width: 100%; text-align: center;">No data</p>';
+                labelsContainer.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = days.map(day => {
+                const height = (day.total / maxViews) * 100;
+                const llmHeight = day.total > 0 ? (day.llm / day.total) * height : 0;
+                return `
+                    <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end; height: 100%;" title="${day.date}: ${day.total} views (${day.llm} LLM)">
+                        <div style="width: 100%; background: #e5e7eb; border-radius: 2px 2px 0 0; position: relative; height: ${height}%;">
+                            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: ${llmHeight}%; background: #8b5cf6; border-radius: 0 0 2px 2px;"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Show labels for first, middle, and last day
+            labelsContainer.innerHTML = `
+                <span>${days[0].label}</span>
+                <span>${days[14].label}</span>
+                <span>${days[29].label}</span>
+            `;
+        }
+
+        function renderRecentVisits(visits) {
+            const tbody = document.getElementById('traffic-recent-visits');
+
+            if (visits.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="padding: 1rem; text-align: center; color: #9ca3af;">No recent visits</td></tr>';
+                return;
+            }
+
+            const sourceColors = {
+                organic: '#22c55e',
+                llm: '#8b5cf6',
+                direct: '#3b82f6',
+                social: '#f59e0b',
+                referral: '#ec4899'
+            };
+
+            const deviceIcons = {
+                desktop: '💻',
+                mobile: '📱',
+                tablet: '📟',
+                bot: '🤖'
+            };
+
+            tbody.innerHTML = visits.map(visit => {
+                const time = new Date(visit.ts);
+                const timeStr = time.toLocaleString();
+                const color = sourceColors[visit.source] || '#6b7280';
+                const icon = deviceIcons[visit.device] || '❓';
+
+                return `
+                    <tr style="border-bottom: 1px solid #f3f4f6;">
+                        <td style="padding: 0.5rem; white-space: nowrap;">${escapeHtml(timeStr)}</td>
+                        <td style="padding: 0.5rem; max-width: 150px; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(visit.page)}">${escapeHtml(visit.page)}</td>
+                        <td style="padding: 0.5rem;"><span style="background: ${color}; color: white; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.625rem;">${escapeHtml(visit.source)}</span></td>
+                        <td style="padding: 0.5rem; max-width: 150px; overflow: hidden; text-overflow: ellipsis; color: #6b7280;" title="${escapeHtml(visit.sourceDetail || '')}">${escapeHtml(visit.sourceDetail || '-')}</td>
+                        <td style="padding: 0.5rem; text-align: center;">${icon}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Load traffic data if on traffic tab
+        if (document.getElementById('traffic-tab')?.classList.contains('active')) {
+            renderTrafficData();
         }
 
         // ============================================

@@ -224,5 +224,32 @@ const fullTitle = `${title} | ${siteConfig.name}`;
     <Footer />
     <MobileStickyCTA />
     <ExitIntentModal />
+
+    <!-- Visitor Tracking (privacy-conscious, respects DNT) -->
+    <script is:inline>
+    (function() {
+      // Respect Do Not Track
+      if (navigator.doNotTrack === '1' || window.doNotTrack === '1') return;
+
+      // Build tracking data
+      var params = new URLSearchParams(location.search);
+      var data = {
+        p: location.pathname,
+        r: document.referrer || '',
+        s: params.get('utm_source') || '',
+        m: params.get('utm_medium') || '',
+        c: params.get('utm_campaign') || ''
+      };
+
+      // Use Beacon API if available (non-blocking)
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon('/api/track.php', new URLSearchParams(data));
+      } else {
+        // Fallback to image pixel
+        var img = new Image();
+        img.src = '/api/track.php?' + new URLSearchParams(data).toString();
+      }
+    })();
+    </script>
   </body>
 </html>
