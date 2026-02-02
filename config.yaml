@@ -414,14 +414,17 @@ security:
   # --- Advanced Bot Detection (catches gibberish spam) ---
 
   # Gibberish detection: enable checking for random character strings
-  gibberish_detection: true
+  # DISABLED: Was too aggressive, flagging legitimate names
+  gibberish_detection: false
 
   # Name validation: require names to have vowels and reasonable structure
-  name_validation: true
+  # DISABLED: Was rejecting legitimate ethnic names
+  name_validation: false
 
   # Phone validation: require valid North American area codes
   # Set to false if you expect international customers
-  phone_area_code_validation: true
+  # DISABLED: Was rejecting legitimate customers with unlisted area codes
+  phone_area_code_validation: false
   valid_area_codes:
     # Saskatchewan
     - "306"

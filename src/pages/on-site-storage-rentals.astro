@@ -4,6 +4,7 @@ import { Image } from 'astro:assets';
 import Section from '../components/Section.astro';
 import CTA from '../components/CTA.astro';
 import ReviewWidget from '../components/ReviewWidget.astro';
+import FAQSchema from '../components/schema/FAQSchema.astro';
 import { siteConfig } from '../config/site';
 import heroImage from '../assets/images/onsite-storage-hero.webp';
 
@@ -108,6 +109,8 @@ const faqs = [
   title="Yard Storage - Containers at Our Martensville Facility | Saskatchewan"
   description="Affordable container storage at our secure Martensville yard near Saskatoon. 20ft, 40ft & High Cube containers from $75/month. No delivery fees, flexible access. Call 1-844-473-2226."
 >
+  <FAQSchema faqs={faqs} />
+
   <!-- Hero Section -->
   <section class="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-primary-900 py-20 sm:py-28">
     <div class="absolute inset-0 bg-[url('/images/grid-pattern.svg')] opacity-10"></div>

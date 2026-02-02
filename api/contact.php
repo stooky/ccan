@@ -221,7 +221,15 @@ $formType = $data['formType'] ?? 'message';
 $errors = [];
 
 if ($formType === 'quote') {
-    // Quote form requires: name, email, phone
+    // Full quote form requires: name, email, phone
+    $required = ['name', 'email', 'phone'];
+    foreach ($required as $field) {
+        if (empty($data[$field])) {
+            $errors[] = ucfirst($field) . ' is required';
+        }
+    }
+} elseif ($formType === 'quick-quote') {
+    // Quick quote form requires: name, email, phone
     $required = ['name', 'email', 'phone'];
     foreach ($required as $field) {
         if (empty($data[$field])) {
@@ -264,7 +272,7 @@ $submission = [
 ];
 
 if ($formType === 'quote') {
-    // Quote form fields
+    // Full quote form fields
     $submission['name'] = htmlspecialchars(trim($data['name']), ENT_QUOTES, 'UTF-8');
     $submission['containerSize'] = htmlspecialchars(trim($data['containerSize'] ?? ''), ENT_QUOTES, 'UTF-8');
     $submission['condition'] = htmlspecialchars(trim($data['condition'] ?? ''), ENT_QUOTES, 'UTF-8');
@@ -279,35 +287,59 @@ if ($formType === 'quote') {
     $submission['landLocation'] = htmlspecialchars(trim($data['landLocation'] ?? ''), ENT_QUOTES, 'UTF-8');
     $submission['additionalDirections'] = htmlspecialchars(trim($data['additionalDirections'] ?? ''), ENT_QUOTES, 'UTF-8');
     $submission['message'] = htmlspecialchars(trim($data['message'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $submission['referralSource'] = htmlspecialchars(trim($data['referralSource'] ?? ''), ENT_QUOTES, 'UTF-8');
     $submission['subject'] = 'Quote Request';
+} elseif ($formType === 'quick-quote') {
+    // Quick quote form fields (simplified form)
+    $submission['name'] = htmlspecialchars(trim($data['name']), ENT_QUOTES, 'UTF-8');
+    $submission['interest'] = htmlspecialchars(trim($data['interest'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $submission['message'] = htmlspecialchars(trim($data['message'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $submission['referralSource'] = htmlspecialchars(trim($data['referralSource'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $submission['subject'] = 'Quick Quote Request';
 } else {
     // Message form fields
     $submission['firstName'] = htmlspecialchars(trim($data['firstName']), ENT_QUOTES, 'UTF-8');
     $submission['lastName'] = htmlspecialchars(trim($data['lastName']), ENT_QUOTES, 'UTF-8');
     $submission['subject'] = htmlspecialchars(trim($data['subject'] ?? 'General Inquiry'), ENT_QUOTES, 'UTF-8');
     $submission['message'] = htmlspecialchars(trim($data['message']), ENT_QUOTES, 'UTF-8');
+    $submission['referralSource'] = htmlspecialchars(trim($data['referralSource'] ?? ''), ENT_QUOTES, 'UTF-8');
 }
 
 // Log submission to file
 $logFile = dirname(__DIR__) . '/' . ($config['logging']['submissions_file'] ?? 'data/submissions.json');
 $logDir = dirname($logFile);
 
+// Ensure data directory exists
 if (!is_dir($logDir)) {
-    mkdir($logDir, 0755, true);
+    if (!mkdir($logDir, 0755, true)) {
+        error_log('Failed to create submissions directory: ' . $logDir);
+    }
 }
 
 $submissions = [];
 if (file_exists($logFile)) {
     $content = file_get_contents($logFile);
-    $submissions = json_decode($content, true) ?? [];
+    if ($content === false) {
+        error_log('Failed to read submissions file: ' . $logFile);
+    } else {
+        $submissions = json_decode($content, true) ?? [];
+    }
 }
 
 // Add new submission at the beginning
 array_unshift($submissions, $submission);
 
-// Save log
-if (file_put_contents($logFile, json_encode($submissions, JSON_PRETTY_PRINT)) === false) {
-    error_log('Failed to write submission log: ' . $logFile);
+// Save log with better error handling
+$jsonContent = json_encode($submissions, JSON_PRETTY_PRINT);
+if ($jsonContent === false) {
+    error_log('Failed to encode submissions as JSON: ' . json_last_error_msg());
+} else {
+    $bytesWritten = file_put_contents($logFile, $jsonContent);
+    if ($bytesWritten === false) {
+        error_log('Failed to write submission log: ' . $logFile . ' - Check directory permissions');
+    } else {
+        error_log('Submission saved successfully: ' . $submission['id'] . ' (' . $bytesWritten . ' bytes)');
+    }
 }
 
 // Send email notification
@@ -350,6 +382,33 @@ if ($formType === 'quote') {
         $emailBody .= $submission['message'];
     }
 
+    if (!empty($submission['referralSource'])) {
+        $emailBody .= "\n\nHow they found us: {$submission['referralSource']}\n";
+    }
+
+    $emailBody .= "\n--- End of Request ---\n";
+} elseif ($formType === 'quick-quote') {
+    $emailSubject = $subjectPrefix . ' Quick Quote from ' . $submission['name'];
+
+    $emailBody = "New Quick Quote Request:\n\n";
+    $emailBody .= "Name: {$submission['name']}\n";
+    $emailBody .= "Email: {$submission['email']}\n";
+    $emailBody .= "Phone: {$submission['phone']}\n";
+    $emailBody .= "Date: {$submission['date']} at {$submission['time']}\n";
+
+    if (!empty($submission['interest'])) {
+        $emailBody .= "\nInterested in: {$submission['interest']}\n";
+    }
+
+    if (!empty($submission['referralSource'])) {
+        $emailBody .= "How they found us: {$submission['referralSource']}\n";
+    }
+
+    if (!empty($submission['message'])) {
+        $emailBody .= "\n--- Message ---\n\n";
+        $emailBody .= $submission['message'];
+    }
+
     $emailBody .= "\n\n--- End of Request ---\n";
 } else {
     $emailSubject = $subjectPrefix . ' ' . $submission['subject'] . ' from ' . $submission['firstName'];
@@ -360,6 +419,11 @@ if ($formType === 'quote') {
     $emailBody .= "Phone: " . ($submission['phone'] ?: 'Not provided') . "\n";
     $emailBody .= "Subject: {$submission['subject']}\n";
     $emailBody .= "Date: {$submission['date']} at {$submission['time']}\n";
+
+    if (!empty($submission['referralSource'])) {
+        $emailBody .= "How they found us: {$submission['referralSource']}\n";
+    }
+
     $emailBody .= "\n--- Message ---\n\n";
     $emailBody .= $submission['message'];
     $emailBody .= "\n\n--- End of Message ---\n";

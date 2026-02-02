@@ -244,6 +244,25 @@ const apiEndpoint = isDev ? 'http://localhost:3001/contact' : '/api/contact.php'
         ></textarea>
       </div>
 
+      <div>
+        <label for="quote-referral-source" class="block text-sm font-medium text-gray-900">How did you hear about us? <span class="text-gray-500 font-normal">(optional)</span></label>
+        <select
+          name="referralSource"
+          id="quote-referral-source"
+          class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+        >
+          <option value="">Select an option</option>
+          <option value="Google Search">Google Search</option>
+          <option value="AI Assistant">AI Assistant (ChatGPT, Perplexity, etc.)</option>
+          <option value="Facebook">Facebook</option>
+          <option value="Instagram">Instagram</option>
+          <option value="Friend/Family">Friend or Family Referral</option>
+          <option value="Saw Container/Truck">Saw Your Container or Truck</option>
+          <option value="Returning Customer">Returning Customer</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
       <!-- Honeypot field for spam prevention -->
       <div class="hidden" aria-hidden="true">
         <label for="quote-website">Website</label>
@@ -342,6 +361,25 @@ const apiEndpoint = isDev ? 'http://localhost:3001/contact' : '/api/contact.php'
           required
           class="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2.5 shadow-sm focus:border-primary-500 focus:ring-primary-500"
         ></textarea>
+      </div>
+
+      <div>
+        <label for="msg-referral-source" class="block text-sm font-medium text-gray-700">How did you hear about us? <span class="text-gray-500">(optional)</span></label>
+        <select
+          name="referralSource"
+          id="msg-referral-source"
+          class="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2.5 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+        >
+          <option value="">Select an option</option>
+          <option value="Google Search">Google Search</option>
+          <option value="AI Assistant">AI Assistant (ChatGPT, Perplexity, etc.)</option>
+          <option value="Facebook">Facebook</option>
+          <option value="Instagram">Instagram</option>
+          <option value="Friend/Family">Friend or Family Referral</option>
+          <option value="Saw Container/Truck">Saw Your Container or Truck</option>
+          <option value="Returning Customer">Returning Customer</option>
+          <option value="Other">Other</option>
+        </select>
       </div>
 
       <!-- Honeypot field for spam prevention -->

@@ -4,6 +4,7 @@ import { Image } from 'astro:assets';
 import Section from '../components/Section.astro';
 import CTA from '../components/CTA.astro';
 import ReviewWidget from '../components/ReviewWidget.astro';
+import FAQSchema from '../components/schema/FAQSchema.astro';
 import { siteConfig } from '../config/site';
 import heroImage from '../assets/images/sales-hero.webp';
 
@@ -78,12 +79,50 @@ const renters = [
   { title: "Farmers & Ranchers", description: "Store equipment and supplies on your property during harvest or off-season." },
   { title: "Event Organizers", description: "Keep equipment and supplies on-site for multi-day events and festivals." },
 ];
+
+// FAQs for rental page
+const faqs = [
+  {
+    question: "How much does it cost to rent a shipping container?",
+    answer: "Container rental rates start at $150/month for a 20ft container and $200/month for a 40ft container. Prices may vary based on location and rental duration. A refundable security deposit is required. Delivery and pickup fees are separate."
+  },
+  {
+    question: "What is the minimum rental period?",
+    answer: "Our minimum rental period is one month. After that, rentals are month-to-month with no long-term contract required. You can keep the container as long as you need it and return it when you're done."
+  },
+  {
+    question: "Is delivery included in the rental price?",
+    answer: "Delivery and pickup are charged separately from the monthly rental rate. Delivery within 50km of Saskatoon is typically included or discounted. Contact us for delivery rates to your specific location."
+  },
+  {
+    question: "Do I need to prepare my site for container delivery?",
+    answer: "The container needs a relatively level surface—gravel, concrete, or compacted ground works well. We'll need truck access to your property. Our team will discuss site requirements when you book delivery to ensure smooth placement."
+  },
+  {
+    question: "Can I rent a container for just one month?",
+    answer: "Yes! We offer flexible month-to-month rentals with no long-term commitment. Whether you need a container for one month during a renovation or several months for a construction project, we can accommodate your timeline."
+  },
+  {
+    question: "What condition are rental containers in?",
+    answer: "All rental containers are inspected to be wind and watertight. They may show exterior wear from previous use but are structurally sound and will keep your belongings dry and secure. We maintain our rental fleet to high standards."
+  },
+  {
+    question: "Can I modify a rented container?",
+    answer: "Rental containers must be returned in their original condition. Modifications like cutting holes for doors or windows are not permitted on rentals. If you need a modified container, consider purchasing one instead—we offer modification services."
+  },
+  {
+    question: "What happens if I damage a rental container?",
+    answer: "Normal wear and tear is expected and covered. Significant damage beyond normal use may result in repair charges deducted from your security deposit. We'll document the container's condition at delivery and pickup."
+  },
+];
 ---
 
 <Layout
-  title="Container Rentals - Delivered to Your Location | Saskatchewan"
-  description="Rent shipping containers delivered to your property in Saskatchewan. 20ft, 40ft & High Cube containers from $150/month. We deliver, you use it, we pick up. No long-term contracts. Call 1-844-473-2226."
+  title="Container Rentals & Leasing - Delivered to Your Location | Saskatchewan"
+  description="Rent or lease shipping containers & sea cans in Saskatchewan. Portable storage containers from $150/month. 20ft & 40ft seacan rentals with delivery. Month-to-month terms. Call 1-844-473-2226."
 >
+  <FAQSchema faqs={faqs} />
+
   <!-- Hero Section -->
   <section class="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-blue-900 py-20 sm:py-28">
     <div class="absolute inset-0 bg-[url('/images/grid-pattern.svg')] opacity-10"></div>
@@ -339,6 +378,23 @@ const renters = [
           <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
         </svg>
       </a>
+    </div>
+  </Section>
+
+  <!-- FAQ Section -->
+  <Section title="Container Rental FAQs" background="gray">
+    <div class="mx-auto max-w-3xl divide-y divide-gray-200">
+      {faqs.map((faq) => (
+        <details class="group py-6">
+          <summary class="flex cursor-pointer items-center justify-between text-lg font-medium text-gray-900">
+            {faq.question}
+            <svg class="h-5 w-5 text-gray-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <p class="mt-4 text-gray-600">{faq.answer}</p>
+        </details>
+      ))}
     </div>
   </Section>
 

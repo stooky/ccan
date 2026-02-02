@@ -1,0 +1,326 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Section from '../components/Section.astro';
+import CTA from '../components/CTA.astro';
+import QuickQuoteForm from '../components/QuickQuoteForm.astro';
+import FAQSchema from '../components/schema/FAQSchema.astro';
+import { siteConfig } from '../config/site';
+
+const phoneLink = `tel:${siteConfig.contact.phone.replace(/\D/g, '')}`;
+const whatsappLink = `${siteConfig.social.whatsapp}?text=${encodeURIComponent("Hi! I'm interested in container modifications.")}`;
+
+// FAQs for this page
+const faqs = [
+  {
+    question: "What container modifications are most popular?",
+    answer: "The most popular modifications are: 1) Roll-up doors for easy access, 2) Man doors (walk-in doors), 3) Windows for natural light, 4) Ventilation systems for air circulation, and 5) Basic electrical (lights and outlets). Many customers combine several modifications to create custom workshops, offices, or specialized storage."
+  },
+  {
+    question: "How long do container modifications take?",
+    answer: "Simple modifications like adding vents or a lock box can be done in 1-2 days. More complex projects like full office conversions with electrical, insulation, and interior finishing typically take 2-4 weeks depending on scope. We'll provide a timeline estimate with your quote."
+  },
+  {
+    question: "Can you modify a container I already own?",
+    answer: "Yes! We can modify containers you already own. Just arrange delivery to our Martensville facility, and we'll handle the modifications. We can also work on-site for certain modifications, though shop work typically provides better results and weather protection during the build."
+  },
+  {
+    question: "How much do container modifications cost?",
+    answer: "Costs vary widely based on modification type. Basic vents start around $150-200 installed. Man doors range from $800-1,500. Roll-up doors from $1,500-3,000. Full office conversions with electrical and insulation can range from $5,000-15,000+. We provide detailed quotes after understanding your specific needs."
+  },
+  {
+    question: "Do you provide permits for modified containers?",
+    answer: "Permit requirements vary by municipality and intended use. We can advise on what's typically required in your area, but the property owner is responsible for obtaining necessary permits. For basic storage use, permits often aren't required. For occupied spaces (offices, workshops), permits are usually needed."
+  },
+  {
+    question: "Can a container be converted into a tiny home or cabin?",
+    answer: "Container homes and cabins are possible but involve significant work including insulation, vapor barriers, electrical, plumbing, and interior finishing. We can handle container prep and basic modifications, but recommend working with a licensed contractor for full residential conversions to ensure building code compliance."
+  },
+  {
+    question: "What's the best container condition for modifications?",
+    answer: "One-trip (new) containers are ideal for visible projects like offices or retail spaces. For workshops and storage, used containers in cargo-worthy condition work great and save money. The key is structural integrity—we can add doors, windows, and electrical to any sound container."
+  },
+  {
+    question: "Do modifications affect the container's structural integrity?",
+    answer: "When done properly, modifications don't compromise structural integrity. We reinforce around cut-outs for doors and windows with steel framing. The corrugated walls and corner posts provide most of the strength, so strategic modifications in the center panels are safe."
+  }
+];
+
+// Modification types
+const modifications = [
+  {
+    title: "Doors & Access",
+    description: "Transform how you access your container with custom door solutions.",
+    icon: `<svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25" /></svg>`,
+    items: [
+      { name: "Roll-Up Doors", desc: "Overhead garage-style doors for vehicle access" },
+      { name: "Man Doors", desc: "Standard walk-in doors with frames" },
+      { name: "Double Doors", desc: "Wide access for equipment" },
+      { name: "Sliding Doors", desc: "Space-saving side access" },
+    ],
+    priceRange: "From $800"
+  },
+  {
+    title: "Windows & Light",
+    description: "Let natural light in and improve visibility.",
+    icon: `<svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" /></svg>`,
+    items: [
+      { name: "Standard Windows", desc: "Fixed or sliding residential-style windows" },
+      { name: "Security Windows", desc: "Reinforced frames with bars or film" },
+      { name: "Skylights", desc: "Roof-mounted natural lighting" },
+      { name: "Window Shutters", desc: "Lockable security covers" },
+    ],
+    priceRange: "From $400"
+  },
+  {
+    title: "Ventilation & Climate",
+    description: "Control airflow and temperature inside your container.",
+    icon: `<svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" /></svg>`,
+    items: [
+      { name: "Louvered Vents", desc: "Passive airflow vents" },
+      { name: "Turbine Vents", desc: "Wind-powered ventilation" },
+      { name: "Exhaust Fans", desc: "Powered air exchange" },
+      { name: "HVAC Prep", desc: "Cutouts and framing for AC/heat units" },
+    ],
+    priceRange: "From $150"
+  },
+  {
+    title: "Electrical Systems",
+    description: "Power up your container for tools, lighting, and more.",
+    icon: `<svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" /></svg>`,
+    items: [
+      { name: "LED Lighting", desc: "Energy-efficient interior lights" },
+      { name: "Outlet Installation", desc: "Standard and 220V outlets" },
+      { name: "Panel/Sub-Panel", desc: "Electrical distribution" },
+      { name: "Exterior Hookup", desc: "Weather-protected connections" },
+    ],
+    priceRange: "From $500"
+  },
+  {
+    title: "Insulation & Finishing",
+    description: "Create comfortable, climate-controlled interior spaces.",
+    icon: `<svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>`,
+    items: [
+      { name: "Spray Foam Insulation", desc: "Best thermal performance" },
+      { name: "Rigid Board Insulation", desc: "Cost-effective option" },
+      { name: "Interior Wall Panels", desc: "Finished look (OSB, plywood, drywall)" },
+      { name: "Flooring", desc: "Vinyl, epoxy, or rubber over existing floor" },
+    ],
+    priceRange: "From $1,500"
+  },
+  {
+    title: "Security & Accessories",
+    description: "Protect your container and make it more functional.",
+    icon: `<svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>`,
+    items: [
+      { name: "Lock Boxes", desc: "Hardened steel lock protection" },
+      { name: "Security Bars", desc: "Window and vent protection" },
+      { name: "Shelving & Racking", desc: "Interior organization" },
+      { name: "Workbenches", desc: "Built-in work surfaces" },
+    ],
+    priceRange: "From $100"
+  },
+];
+
+// Use cases
+const useCases = [
+  {
+    title: "Mobile Office",
+    description: "Create a comfortable workspace on your job site or property. Includes insulation, electrical, HVAC, windows, and interior finishing.",
+    features: ["Climate controlled", "Electrical & lighting", "Windows & man door", "Interior walls"],
+  },
+  {
+    title: "Workshop / Garage",
+    description: "The perfect space for hobbies, repairs, and projects. Roll-up door for equipment, lighting, and ventilation.",
+    features: ["Roll-up door", "LED lighting", "Ventilation", "Workbench options"],
+  },
+  {
+    title: "Farm Storage",
+    description: "Secure, weatherproof storage for equipment, feed, and supplies. Easy access modifications for tractors and machinery.",
+    features: ["Roll-up or double doors", "Ventilation", "Rodent-proof", "Lock box"],
+  },
+  {
+    title: "Pop-Up Retail",
+    description: "Stand out with a unique retail space. Windows, lighting, and customer-friendly access.",
+    features: ["Storefront windows", "Interior finishing", "Electrical for displays", "Man door"],
+  },
+];
+---
+
+<Layout
+  title="Container Modifications Saskatchewan - Custom Sea Can Builds | C-Can Sam"
+  description="Custom shipping container modifications in Saskatchewan. Roll-up doors, windows, electrical, insulation & more. Transform your seacan into an office, workshop, or custom build. Call 1-844-473-2226."
+>
+  <FAQSchema faqs={faqs} />
+
+  <!-- Hero Section -->
+  <section class="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-primary-900 py-16 sm:py-24">
+    <div class="absolute inset-0 bg-[url('/images/grid-pattern.svg')] opacity-10"></div>
+    <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto text-center">
+        <span class="inline-flex items-center rounded-full bg-primary-500/10 px-4 py-1.5 text-sm font-medium text-primary-300 ring-1 ring-inset ring-primary-500/20">
+          Custom Builds Available
+        </span>
+        <h1 class="mt-6 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+          Container Modifications
+        </h1>
+        <p class="mt-6 text-lg leading-8 text-gray-300">
+          Transform your shipping container into exactly what you need. From simple vents and lock boxes to full office conversions — we handle it all.
+        </p>
+
+        <!-- Quick CTAs -->
+        <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+          <a
+            href={phoneLink}
+            class="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-600 px-6 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:bg-primary-500 hover:shadow-xl"
+          >
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+            </svg>
+            Call 1-844-473-2226
+          </a>
+          <a
+            href={whatsappLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 px-6 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:bg-green-500 hover:shadow-xl"
+          >
+            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+            WhatsApp Us
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modification Types -->
+  <Section
+    title="Modification Options"
+    subtitle="Everything you need to customize your container"
+  >
+    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      {modifications.map((mod) => (
+        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100 text-primary-600" set:html={mod.icon} />
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900">{mod.title}</h3>
+              <p class="text-sm text-primary-600 font-medium">{mod.priceRange}</p>
+            </div>
+          </div>
+          <p class="text-gray-600 text-sm mb-4">{mod.description}</p>
+          <ul class="space-y-2">
+            {mod.items.map((item) => (
+              <li class="flex items-start gap-2 text-sm">
+                <svg class="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>
+                  <strong class="text-gray-900">{item.name}</strong>
+                  <span class="text-gray-500"> — {item.desc}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </Section>
+
+  <!-- Popular Use Cases -->
+  <Section
+    title="Popular Custom Builds"
+    subtitle="See what's possible with container modifications"
+    background="gray"
+  >
+    <div class="grid gap-6 md:grid-cols-2">
+      {useCases.map((useCase) => (
+        <div class="rounded-xl bg-white p-6 shadow-sm">
+          <h3 class="text-xl font-bold text-gray-900 mb-2">{useCase.title}</h3>
+          <p class="text-gray-600 mb-4">{useCase.description}</p>
+          <div class="flex flex-wrap gap-2">
+            {useCase.features.map((feature) => (
+              <span class="inline-flex items-center rounded-full bg-primary-50 px-3 py-1 text-sm font-medium text-primary-700">
+                {feature}
+              </span>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </Section>
+
+  <!-- Process -->
+  <Section
+    title="How It Works"
+    subtitle="From concept to completion"
+  >
+    <div class="max-w-4xl mx-auto">
+      <div class="grid gap-8 md:grid-cols-4">
+        <div class="text-center">
+          <div class="flex h-16 w-16 mx-auto items-center justify-center rounded-full bg-primary-100 text-primary-600 text-2xl font-bold">1</div>
+          <h3 class="mt-4 font-semibold text-gray-900">Consultation</h3>
+          <p class="mt-2 text-sm text-gray-600">Tell us what you need. We'll discuss options, feasibility, and provide rough estimates.</p>
+        </div>
+        <div class="text-center">
+          <div class="flex h-16 w-16 mx-auto items-center justify-center rounded-full bg-primary-100 text-primary-600 text-2xl font-bold">2</div>
+          <h3 class="mt-4 font-semibold text-gray-900">Quote</h3>
+          <p class="mt-2 text-sm text-gray-600">We provide a detailed quote with materials, labor, and timeline for your approval.</p>
+        </div>
+        <div class="text-center">
+          <div class="flex h-16 w-16 mx-auto items-center justify-center rounded-full bg-primary-100 text-primary-600 text-2xl font-bold">3</div>
+          <h3 class="mt-4 font-semibold text-gray-900">Build</h3>
+          <p class="mt-2 text-sm text-gray-600">Our team completes modifications at our Martensville facility (or on-site when appropriate).</p>
+        </div>
+        <div class="text-center">
+          <div class="flex h-16 w-16 mx-auto items-center justify-center rounded-full bg-primary-100 text-primary-600 text-2xl font-bold">4</div>
+          <h3 class="mt-4 font-semibold text-gray-900">Delivery</h3>
+          <p class="mt-2 text-sm text-gray-600">We deliver your customized container and place it exactly where you need it.</p>
+        </div>
+      </div>
+    </div>
+  </Section>
+
+  <!-- FAQ Section -->
+  <Section
+    title="Frequently Asked Questions"
+    subtitle="Common questions about container modifications"
+    background="gray"
+  >
+    <div class="mx-auto max-w-3xl space-y-4">
+      {faqs.map((faq) => (
+        <details class="group rounded-lg bg-white p-6 shadow-sm">
+          <summary class="flex cursor-pointer items-center justify-between font-semibold text-gray-900">
+            {faq.question}
+            <svg class="h-5 w-5 text-gray-500 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            </svg>
+          </summary>
+          <p class="mt-4 text-gray-600">{faq.answer}</p>
+        </details>
+      ))}
+    </div>
+  </Section>
+
+  <!-- Quote Form -->
+  <Section
+    title="Request a Modification Quote"
+    subtitle="Tell us about your project and we'll provide a custom estimate"
+  >
+    <div class="max-w-xl mx-auto">
+      <QuickQuoteForm
+        title=""
+        subtitle=""
+      />
+    </div>
+  </Section>
+
+  <!-- CTA -->
+  <CTA
+    title="Ready to Customize Your Container?"
+    description="Whether you need a simple modification or a full custom build, we're here to help. Contact us to discuss your project."
+    primaryButton={{ text: "Call Now", href: phoneLink }}
+    secondaryButton={{ text: "View Containers", href: "/seacan-storage-containers-for-sale" }}
+  />
+</Layout>

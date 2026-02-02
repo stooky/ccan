@@ -647,7 +647,10 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
 // Prepare submissions data as JSON for client-side filtering
 $submissionsJson = json_encode($allSubmissions);
 $totalSubmissions = count($allSubmissions);
-$quoteCount = count(array_filter($allSubmissions, fn($s) => ($s['formType'] ?? 'message') === 'quote'));
+$quoteCount = count(array_filter($allSubmissions, fn($s) => in_array(($s['formType'] ?? 'message'), ['quote', 'quick-quote'])));
+$quickQuoteCount = count(array_filter($allSubmissions, fn($s) => ($s['formType'] ?? 'message') === 'quick-quote'));
+$fullQuoteCount = count(array_filter($allSubmissions, fn($s) => ($s['formType'] ?? 'message') === 'quote'));
+$messageCount = count(array_filter($allSubmissions, fn($s) => ($s['formType'] ?? 'message') === 'message'));
 $todayCount = count(array_filter($allSubmissions, fn($s) => ($s['date'] ?? '') === date('Y-m-d')));
 $last7DaysCount = count(array_filter($allSubmissions, fn($s) => strtotime($s['date'] ?? '1970-01-01') >= strtotime('-7 days')));
 
@@ -860,6 +863,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             flex-shrink: 0;
         }
         .badge-quote { background: #fef3c7; color: #92400e; }
+        .badge-quick-quote { background: #d1fae5; color: #065f46; }
         .badge-spam { background: #fee2e2; color: #dc2626; }
         .badge-manual { background: #f3f4f6; color: #4b5563; }
         .badge-message { background: #dbeafe; color: #1e40af; }
@@ -1110,7 +1114,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             </div>
             <div class="stat">
                 <div class="stat-value" id="stat-quotes"><?= $quoteCount ?></div>
-                <div class="stat-label">Quote Requests</div>
+                <div class="stat-label">All Quotes</div>
+                <div class="stat-detail" style="font-size: 0.7rem; color: #6b7280; margin-top: 0.25rem;"><?= $quickQuoteCount ?> quick / <?= $fullQuoteCount ?> full</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="stat-messages"><?= $messageCount ?></div>
+                <div class="stat-label">Messages</div>
             </div>
             <div class="stat">
                 <div class="stat-value" id="stat-today"><?= $todayCount ?></div>
@@ -1136,7 +1145,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 <label>Type:</label>
                 <select id="type-filter">
                     <option value="all">All</option>
-                    <option value="quote">Quotes</option>
+                    <option value="quote">Full Quotes</option>
+                    <option value="quick-quote">Quick Quotes</option>
                     <option value="message">Messages</option>
                 </select>
             </div>
@@ -1857,7 +1867,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         sub.message || '',
                         sub.containerSize || '',
                         sub.city || '',
-                        sub.subject || ''
+                        sub.subject || '',
+                        sub.interest || '',
+                        sub.referralSource || ''
                     ].join(' ').toLowerCase();
                     if (!searchFields.includes(search)) return false;
                 }
@@ -1882,10 +1894,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             container.innerHTML = submissions.map((sub, index) => {
                 const formType = sub.formType || 'message';
                 const isQuote = formType === 'quote';
+                const isQuickQuote = formType === 'quick-quote';
+                const isAnyQuote = isQuote || isQuickQuote;
                 const displayName = getDisplayName(sub);
                 const preview = isQuote
                     ? [sub.containerSize, sub.condition, sub.intention].filter(Boolean).join(' · ')
-                    : (sub.subject || 'General Inquiry');
+                    : isQuickQuote
+                        ? (sub.interest || 'Quick Quote')
+                        : (sub.subject || 'General Inquiry');
 
                 let detailsHtml = `
                     <div class="detail-item">
@@ -1964,6 +1980,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             }
                         }
                     }
+                } else if (isQuickQuote) {
+                    // Quick quote details
+                    if (sub.interest) {
+                        detailsHtml += `
+                            <div class="detail-item">
+                                <div class="detail-label">Interested In</div>
+                                <div class="detail-value">${escapeHtml(sub.interest)}</div>
+                            </div>
+                        `;
+                    }
+                    if (sub.referralSource) {
+                        detailsHtml += `
+                            <div class="detail-item">
+                                <div class="detail-label">How They Found Us</div>
+                                <div class="detail-value">${escapeHtml(sub.referralSource)}</div>
+                            </div>
+                        `;
+                    }
                 } else {
                     detailsHtml += `
                         <div class="detail-item">
@@ -1971,6 +2005,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             <div class="detail-value">${escapeHtml(sub.subject || 'General Inquiry')}</div>
                         </div>
                     `;
+                    if (sub.referralSource) {
+                        detailsHtml += `
+                            <div class="detail-item">
+                                <div class="detail-label">How They Found Us</div>
+                                <div class="detail-value">${escapeHtml(sub.referralSource)}</div>
+                            </div>
+                        `;
+                    }
                 }
 
                 let messageHtml = '';
@@ -1987,8 +2029,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     <div class="submission-row" id="row-${index}">
                         <div class="submission-summary" onclick="toggleRow(${index})">
                             <span class="expand-icon">▶</span>
-                            <span class="badge ${isQuote ? 'badge-quote' : 'badge-message'}">
-                                ${isQuote ? 'Quote' : 'Message'}
+                            <span class="badge ${isQuote ? 'badge-quote' : isQuickQuote ? 'badge-quick-quote' : 'badge-message'}">
+                                ${isQuote ? 'Quote' : isQuickQuote ? 'Quick Quote' : 'Message'}
                             </span>
                             <span class="summary-name">${escapeHtml(displayName)}</span>
                             <span class="summary-email">${escapeHtml(sub.email)}</span>

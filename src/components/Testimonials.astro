@@ -1,0 +1,207 @@
+---
+/**
+ * Testimonials Component
+ *
+ * Displays featured customer reviews from Google Business Profile.
+ * Uses JSON-LD schema for rich snippets.
+ */
+import { siteConfig } from '../config/site';
+
+// Import reviews data
+import reviewsData from '../../data/reviews.json';
+
+interface Props {
+  /** Number of testimonials to show */
+  count?: number;
+  /** Show only reviews with text content */
+  textOnly?: boolean;
+  /** Specific review IDs to display (overrides count) */
+  featured?: string[];
+  /** Show rating stars */
+  showStars?: boolean;
+  /** Layout variant */
+  variant?: 'grid' | 'carousel' | 'list';
+}
+
+const {
+  count = 6,
+  textOnly = true,
+  featured,
+  showStars = true,
+  variant = 'grid',
+} = Astro.props;
+
+// Filter and select reviews
+let reviews = reviewsData.reviews;
+
+// Filter to only reviews with text if specified
+if (textOnly) {
+  reviews = reviews.filter(r => r.text && r.text.length > 20);
+}
+
+// Use featured reviews if specified, otherwise take top reviews
+if (featured && featured.length > 0) {
+  reviews = featured
+    .map(id => reviews.find(r => r.id === id))
+    .filter((r): r is typeof reviews[0] => r !== undefined);
+} else {
+  // Sort by date (newest first) and take requested count
+  reviews = reviews
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, count);
+}
+
+// Truncate long reviews for display
+function truncateText(text: string, maxLength: number = 200): string {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength).trim() + '...';
+}
+
+// Format date for display
+function formatDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-CA', { month: 'short', year: 'numeric' });
+}
+
+// Generate star rating HTML
+function getStars(rating: number): string {
+  return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+}
+---
+
+<!-- Review Schema for SEO -->
+<script type="application/ld+json" set:html={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": siteConfig.name,
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": reviewsData.averageRating.toFixed(1),
+    "reviewCount": reviewsData.totalCount,
+    "bestRating": "5",
+    "worstRating": "1"
+  },
+  "review": reviews.slice(0, 5).map(review => ({
+    "@type": "Review",
+    "author": {
+      "@type": "Person",
+      "name": review.author
+    },
+    "datePublished": review.date,
+    "reviewRating": {
+      "@type": "Rating",
+      "ratingValue": review.rating,
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "reviewBody": review.text
+  }))
+})} />
+
+<div class="testimonials">
+  <!-- Summary Stats -->
+  <div class="mb-10 text-center">
+    <div class="inline-flex items-center gap-2 rounded-full bg-amber-50 px-4 py-2">
+      <span class="text-2xl text-amber-500" aria-hidden="true">★</span>
+      <span class="text-lg font-bold text-gray-900">{reviewsData.averageRating.toFixed(1)}</span>
+      <span class="text-gray-600">from {reviewsData.totalCount} Google reviews</span>
+    </div>
+  </div>
+
+  <!-- Reviews Grid -->
+  {variant === 'grid' && (
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {reviews.map((review) => (
+        <article class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-700 font-semibold">
+                {review.author.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-900">{review.author}</h3>
+                <time class="text-sm text-gray-500" datetime={review.date}>
+                  {formatDate(review.date)}
+                </time>
+              </div>
+            </div>
+            {review.isLocalGuide && (
+              <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
+                Local Guide
+              </span>
+            )}
+          </div>
+
+          {showStars && (
+            <div class="mt-3 text-amber-400" aria-label={`${review.rating} out of 5 stars`}>
+              {getStars(review.rating)}
+            </div>
+          )}
+
+          <blockquote class="mt-4 text-gray-600 text-sm leading-relaxed">
+            "{truncateText(review.text, 180)}"
+          </blockquote>
+
+          {review.hasPhoto && (
+            <div class="mt-3">
+              <span class="inline-flex items-center text-xs text-gray-400">
+                <svg class="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                </svg>
+                Posted with photo
+              </span>
+            </div>
+          )}
+        </article>
+      ))}
+    </div>
+  )}
+
+  {variant === 'list' && (
+    <div class="space-y-6 max-w-3xl mx-auto">
+      {reviews.map((review) => (
+        <article class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+          <div class="flex items-start gap-4">
+            <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary-100 text-primary-700 font-semibold text-lg">
+              {review.author.charAt(0).toUpperCase()}
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <h3 class="font-semibold text-gray-900">{review.author}</h3>
+                <time class="text-sm text-gray-500" datetime={review.date}>
+                  {formatDate(review.date)}
+                </time>
+              </div>
+              {showStars && (
+                <div class="mt-1 text-amber-400" aria-label={`${review.rating} out of 5 stars`}>
+                  {getStars(review.rating)}
+                </div>
+              )}
+              <blockquote class="mt-3 text-gray-600 leading-relaxed">
+                "{review.text}"
+              </blockquote>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  )}
+
+  <!-- Link to Google Reviews -->
+  <div class="mt-10 text-center">
+    <a
+      href={siteConfig.social.googleReviews}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-6 py-3 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors"
+    >
+      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      Read all {reviewsData.totalCount} reviews on Google
+    </a>
+  </div>
+</div>

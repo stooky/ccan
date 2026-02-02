@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import { Image } from 'astro:assets';
 import Section from '../components/Section.astro';
 import CTA from '../components/CTA.astro';
+import FAQSchema from '../components/schema/FAQSchema.astro';
 import { siteConfig } from '../config/site';
 import heroImage from '../assets/images/sales-hero.webp';
 
@@ -159,6 +160,8 @@ const faqs = [
   title="Shipping Container Types, Sizes & Uses | C-Can Sam"
   description="Learn about shipping container types, sizes, dimensions, and uses. Compare 20ft, 40ft, and 40ft high cube containers. Understand the difference between new and used sea cans."
 >
+  <FAQSchema faqs={faqs} />
+
   <!-- Hero Section -->
   <section class="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-primary-900 py-20 sm:py-28">
     <div class="absolute inset-0 bg-[url('/images/grid-pattern.svg')] opacity-10"></div>

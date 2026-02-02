@@ -134,6 +134,28 @@ const containerClasses = {
       ></textarea>
     </div>
 
+    <!-- Row 5: How did you find us (optional - for attribution tracking) -->
+    <div>
+      <label for="qq-referral-source" class="block text-sm font-medium text-gray-900">
+        How did you hear about us? <span class="text-gray-500 font-normal">(optional)</span>
+      </label>
+      <select
+        name="referralSource"
+        id="qq-referral-source"
+        class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-base"
+      >
+        <option value="">Select an option</option>
+        <option value="Google Search">Google Search</option>
+        <option value="AI Assistant">AI Assistant (ChatGPT, Perplexity, etc.)</option>
+        <option value="Facebook">Facebook</option>
+        <option value="Instagram">Instagram</option>
+        <option value="Friend/Family">Friend or Family Referral</option>
+        <option value="Saw Container/Truck">Saw Your Container or Truck</option>
+        <option value="Returning Customer">Returning Customer</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
     <!-- Honeypot field for spam prevention -->
     <div class="hidden" aria-hidden="true">
       <label for="qq-website">Website</label>
