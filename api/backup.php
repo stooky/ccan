@@ -452,6 +452,35 @@ switch ($action) {
         }
         break;
 
+    case 'download':
+        $filename = $_GET['filename'] ?? '';
+
+        if (empty($filename)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'No filename specified']);
+            break;
+        }
+
+        // Sanitize filename to prevent directory traversal
+        $filename = basename($filename);
+        $filepath = $backupsDir . '/' . $filename;
+
+        if (!file_exists($filepath)) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'message' => 'Backup not found']);
+            break;
+        }
+
+        // Serve the file for download
+        header('Content-Type: application/gzip');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Content-Length: ' . filesize($filepath));
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Pragma: no-cache');
+
+        readfile($filepath);
+        break;
+
     default:
         echo json_encode(['success' => false, 'message' => 'Invalid action']);
 }

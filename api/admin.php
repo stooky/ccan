@@ -3378,6 +3378,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 ${escapeHtml(backup.createdFormatted)}
                             </td>
                             <td style="padding: 0.5rem 0.75rem; text-align: center;">
+                                <a href="backup.php?key=${secretPath}&action=download&filename=${encodeURIComponent(backup.filename)}" class="btn btn-primary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem; text-decoration: none; margin-right: 0.25rem;">
+                                    Download
+                                </a>
                                 <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" onclick="deleteBackup('${escapeHtml(backup.filename)}')">
                                     Delete
                                 </button>
