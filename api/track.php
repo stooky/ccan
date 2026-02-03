@@ -347,8 +347,12 @@ function storePageView($pageView, $config) {
             $daily['llmBreakdown'][$detail] = ($daily['llmBreakdown'][$detail] ?? 0) + 1;
         }
 
-        // Track unique sessions
-        $daily['sessions'][$pageView['sessionHash']] = true;
+        // Track unique sessions (use a temporary set, convert to count when finalizing)
+        if (!isset($daily['_sessionSet'])) {
+            $daily['_sessionSet'] = [];
+        }
+        $daily['_sessionSet'][$pageView['sessionHash']] = true;
+        $daily['uniqueSessions'] = count($daily['_sessionSet']);
 
         // Update totals
         $data['totals']['allTime'] = ($data['totals']['allTime'] ?? 0) + 1;
@@ -365,6 +369,32 @@ function storePageView($pageView, $config) {
         if (count($data['raw']) > 10000) {
             $data['raw'] = array_slice($data['raw'], 0, 10000);
         }
+
+        // Cleanup old daily buckets (keep last 90 days)
+        $dailyRetentionDays = 90;
+        $dailyCutoff = date('Y-m-d', strtotime("-{$dailyRetentionDays} days"));
+        foreach (array_keys($data['daily']) as $dateKey) {
+            if ($dateKey < $dailyCutoff) {
+                unset($data['daily'][$dateKey]);
+            }
+        }
+
+        // Finalize daily buckets older than today - convert session sets to counts
+        foreach ($data['daily'] as $dateKey => &$dayData) {
+            if ($dateKey < $today && isset($dayData['_sessionSet'])) {
+                // Convert to count and remove the set
+                $dayData['uniqueSessions'] = count($dayData['_sessionSet']);
+                unset($dayData['_sessionSet']);
+            }
+            // Also remove legacy 'sessions' object if present
+            if (isset($dayData['sessions'])) {
+                if (!isset($dayData['uniqueSessions'])) {
+                    $dayData['uniqueSessions'] = count($dayData['sessions']);
+                }
+                unset($dayData['sessions']);
+            }
+        }
+        unset($dayData); // Break reference
 
         // Calculate rolling totals
         $data['totals']['last7Days'] = calculateRollingTotal($data['daily'], 7);

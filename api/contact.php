@@ -337,6 +337,50 @@ if (file_exists($logFile)) {
 // Add new submission at the beginning
 array_unshift($submissions, $submission);
 
+// Archive old submissions (older than 6 months) to keep main file manageable
+$archiveCutoff = date('Y-m-d', strtotime('-6 months'));
+$archiveFile = dirname($logFile) . '/submissions-archive.json';
+$toArchive = [];
+$toKeep = [];
+
+foreach ($submissions as $sub) {
+    $subDate = $sub['date'] ?? '1970-01-01';
+    if ($subDate < $archiveCutoff) {
+        $toArchive[] = $sub;
+    } else {
+        $toKeep[] = $sub;
+    }
+}
+
+// If there are submissions to archive
+if (count($toArchive) > 0) {
+    $archive = [];
+    if (file_exists($archiveFile)) {
+        $archiveContent = file_get_contents($archiveFile);
+        $archive = json_decode($archiveContent, true) ?? [];
+    }
+
+    // Add to archive (avoid duplicates by ID)
+    $existingIds = array_column($archive, 'id');
+    foreach ($toArchive as $archivedSub) {
+        if (!in_array($archivedSub['id'], $existingIds)) {
+            $archive[] = $archivedSub;
+        }
+    }
+
+    // Sort archive by date descending
+    usort($archive, fn($a, $b) => ($b['date'] ?? '') <=> ($a['date'] ?? ''));
+
+    // Keep only last 2 years in archive (hard limit)
+    $archiveHardCutoff = date('Y-m-d', strtotime('-2 years'));
+    $archive = array_filter($archive, fn($s) => ($s['date'] ?? '1970-01-01') >= $archiveHardCutoff);
+    $archive = array_values($archive);
+
+    file_put_contents($archiveFile, json_encode($archive, JSON_PRETTY_PRINT));
+    $submissions = $toKeep;
+    error_log('Archived ' . count($toArchive) . ' old submissions');
+}
+
 // Save log with better error handling
 $jsonContent = json_encode($submissions, JSON_PRETTY_PRINT);
 if ($jsonContent === false) {
@@ -527,10 +571,51 @@ function logSpamAttempt($reason, $data, $config) {
         $entries = json_decode($content, true) ?? [];
     }
 
-    // Keep only last 1000 entries
-    if (count($entries) > 1000) {
+    // Remove entries older than 90 days
+    $cutoffDate = date('c', strtotime('-90 days'));
+    $entries = array_filter($entries, function($entry) use ($cutoffDate) {
+        return ($entry['timestamp'] ?? '1970-01-01') >= $cutoffDate;
+    });
+    $entries = array_values($entries);
+
+    // Also enforce hard limit of 500 entries (prevent runaway spam attacks)
+    if (count($entries) > 500) {
         $entries = array_slice($entries, -500);
     }
+
+    // Build submission data for potential restoration
+    $formType = $data['formType'] ?? 'message';
+    $originalData = [
+        'id' => 'sub_' . uniqid(),
+        'timestamp' => date('c'),
+        'date' => date('Y-m-d'),
+        'time' => date('H:i:s'),
+        'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+        'formType' => $formType,
+        'email' => $data['email'] ?? '',
+        'phone' => $data['phone'] ?? '',
+        'userAgent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
+        'referer' => $_SERVER['HTTP_REFERER'] ?? '',
+    ];
+
+    // Add form-specific fields
+    if ($formType === 'quote' || $formType === 'quick-quote') {
+        $originalData['name'] = $data['name'] ?? '';
+        if ($formType === 'quote') {
+            $originalData['containerSize'] = $data['containerSize'] ?? '';
+            $originalData['condition'] = $data['condition'] ?? '';
+            $originalData['intention'] = $data['intention'] ?? '';
+            $originalData['delivery'] = $data['delivery'] ?? '';
+        }
+        if ($formType === 'quick-quote') {
+            $originalData['interest'] = $data['interest'] ?? '';
+        }
+    } else {
+        $originalData['firstName'] = $data['firstName'] ?? '';
+        $originalData['lastName'] = $data['lastName'] ?? '';
+        $originalData['subject'] = $data['subject'] ?? 'General Inquiry';
+    }
+    $originalData['message'] = $data['message'] ?? '';
 
     $entries[] = [
         'timestamp' => date('c'),
@@ -538,6 +623,7 @@ function logSpamAttempt($reason, $data, $config) {
         'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
         'email' => $data['email'] ?? '',
         'userAgent' => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 200),
+        'original_data' => $originalData,
     ];
 
     file_put_contents($logFile, json_encode($entries, JSON_PRETTY_PRINT));
@@ -562,14 +648,27 @@ function checkRateLimit($ip, $maxRequests, $windowSeconds, $config) {
         $rates = json_decode($content, true) ?? [];
     }
 
-    // Clean up expired entries
+    // Clean up expired entries within the rate limit window
     foreach ($rates as $rateIp => $timestamps) {
         $rates[$rateIp] = array_filter($timestamps, function($ts) use ($now, $windowSeconds) {
             return ($now - $ts) < $windowSeconds;
         });
+        $rates[$rateIp] = array_values($rates[$rateIp]); // Re-index
         if (empty($rates[$rateIp])) {
             unset($rates[$rateIp]);
         }
+    }
+
+    // Limit total IPs stored (prevent memory bloat from bot attacks)
+    // Keep only the 1000 most recently active IPs
+    if (count($rates) > 1000) {
+        // Sort by most recent timestamp
+        uasort($rates, function($a, $b) {
+            $maxA = !empty($a) ? max($a) : 0;
+            $maxB = !empty($b) ? max($b) : 0;
+            return $maxB - $maxA;
+        });
+        $rates = array_slice($rates, 0, 1000, true);
     }
 
     // Check current IP
