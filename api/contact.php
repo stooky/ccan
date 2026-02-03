@@ -216,6 +216,14 @@ if ($contentFilterResult !== true) {
     exit();
 }
 
+// Check learned spam patterns (from manual spam marking)
+$learnedPatternsResult = checkLearnedPatterns($data, $clientIp);
+if ($learnedPatternsResult !== true) {
+    logSpamAttempt('learned_pattern:' . $learnedPatternsResult, $data, $config);
+    echo json_encode(['success' => true, 'message' => 'Thank you for your message!']);
+    exit();
+}
+
 // Validate required fields based on form type
 $formType = $data['formType'] ?? 'message';
 $errors = [];
@@ -699,6 +707,52 @@ function checkContentFilters($data, $config) {
                 return 'gibberish_' . $field;
             }
         }
+    }
+
+    return true;
+}
+
+/**
+ * Check against learned spam patterns
+ * These are patterns manually identified by marking submissions as spam in admin
+ * Returns true if clean, or string describing the matched pattern
+ */
+function checkLearnedPatterns($data, $clientIp) {
+    $learnedFile = dirname(__DIR__) . '/data/learned-spam-patterns.json';
+
+    if (!file_exists($learnedFile)) {
+        return true; // No learned patterns yet
+    }
+
+    $patterns = json_decode(file_get_contents($learnedFile), true);
+    if (!$patterns) {
+        return true;
+    }
+
+    $email = strtolower($data['email'] ?? '');
+    $phone = preg_replace('/\D/', '', $data['phone'] ?? '');
+
+    // Check blocked emails
+    if (!empty($patterns['blocked_emails']) && in_array($email, $patterns['blocked_emails'])) {
+        return 'blocked_email:' . $email;
+    }
+
+    // Check blocked domains
+    if (!empty($patterns['blocked_domains']) && !empty($email)) {
+        $domain = substr($email, strpos($email, '@') + 1);
+        if (in_array($domain, $patterns['blocked_domains'])) {
+            return 'blocked_domain:' . $domain;
+        }
+    }
+
+    // Check blocked IPs
+    if (!empty($patterns['blocked_ips']) && in_array($clientIp, $patterns['blocked_ips'])) {
+        return 'blocked_ip:' . $clientIp;
+    }
+
+    // Check blocked phones
+    if (!empty($patterns['blocked_phones']) && !empty($phone) && in_array($phone, $patterns['blocked_phones'])) {
+        return 'blocked_phone:' . $phone;
     }
 
     return true;

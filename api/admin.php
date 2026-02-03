@@ -76,6 +76,255 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     exit();
 }
 
+// Handle mark as spam action
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'mark_spam') {
+    header('Content-Type: application/json');
+
+    $submissionId = $_POST['submission_id'] ?? '';
+    $learnFrom = $_POST['learn_from'] ?? []; // Array of fields to learn from: email_domain, phone_pattern, ip, name_pattern
+
+    // Find the submission
+    $submission = null;
+    $submissionIndex = -1;
+    foreach ($allSubmissions as $index => $s) {
+        if ($s['id'] === $submissionId) {
+            $submission = $s;
+            $submissionIndex = $index;
+            break;
+        }
+    }
+
+    if (!$submission) {
+        echo json_encode(['success' => false, 'message' => 'Submission not found']);
+        exit();
+    }
+
+    // Load spam log
+    $spamLogFile = dirname(__DIR__) . '/data/spam-log.json';
+    $spamLog = [];
+    if (file_exists($spamLogFile)) {
+        $spamLog = json_decode(file_get_contents($spamLogFile), true) ?? [];
+    }
+
+    // Load learned patterns
+    $learnedPatternsFile = dirname(__DIR__) . '/data/learned-spam-patterns.json';
+    $learnedPatterns = [
+        'blocked_emails' => [],
+        'blocked_domains' => [],
+        'blocked_ips' => [],
+        'blocked_phones' => [],
+        'blocked_name_patterns' => []
+    ];
+    if (file_exists($learnedPatternsFile)) {
+        $learnedPatterns = array_merge($learnedPatterns, json_decode(file_get_contents($learnedPatternsFile), true) ?? []);
+    }
+
+    // Learn from this spam
+    $learned = [];
+    if (in_array('email', $learnFrom) && !empty($submission['email'])) {
+        $email = strtolower($submission['email']);
+        if (!in_array($email, $learnedPatterns['blocked_emails'])) {
+            $learnedPatterns['blocked_emails'][] = $email;
+            $learned[] = "email: $email";
+        }
+    }
+    if (in_array('email_domain', $learnFrom) && !empty($submission['email'])) {
+        $domain = strtolower(substr($submission['email'], strpos($submission['email'], '@') + 1));
+        if (!in_array($domain, $learnedPatterns['blocked_domains'])) {
+            $learnedPatterns['blocked_domains'][] = $domain;
+            $learned[] = "domain: $domain";
+        }
+    }
+    if (in_array('ip', $learnFrom) && !empty($submission['ip'])) {
+        if (!in_array($submission['ip'], $learnedPatterns['blocked_ips'])) {
+            $learnedPatterns['blocked_ips'][] = $submission['ip'];
+            $learned[] = "ip: " . $submission['ip'];
+        }
+    }
+    if (in_array('phone', $learnFrom) && !empty($submission['phone'])) {
+        $phone = preg_replace('/\D/', '', $submission['phone']);
+        if (strlen($phone) >= 10 && !in_array($phone, $learnedPatterns['blocked_phones'])) {
+            $learnedPatterns['blocked_phones'][] = $phone;
+            $learned[] = "phone: $phone";
+        }
+    }
+
+    // Save learned patterns
+    file_put_contents($learnedPatternsFile, json_encode($learnedPatterns, JSON_PRETTY_PRINT));
+
+    // Move to spam log
+    $spamEntry = [
+        'timestamp' => date('c'),
+        'reason' => 'manual_review:marked_as_spam',
+        'ip' => $submission['ip'] ?? 'unknown',
+        'email' => $submission['email'] ?? '',
+        'userAgent' => $submission['userAgent'] ?? '',
+        'original_id' => $submission['id'],
+        'original_data' => $submission,
+        'learned_patterns' => $learned
+    ];
+    $spamLog[] = $spamEntry;
+    file_put_contents($spamLogFile, json_encode($spamLog, JSON_PRETTY_PRINT));
+
+    // Remove from submissions
+    array_splice($allSubmissions, $submissionIndex, 1);
+    file_put_contents($logFile, json_encode($allSubmissions, JSON_PRETTY_PRINT));
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'Marked as spam' . (count($learned) > 0 ? '. Learned: ' . implode(', ', $learned) : ''),
+        'learned' => $learned
+    ]);
+    exit();
+}
+
+// Handle restore from spam action
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'restore_spam') {
+    header('Content-Type: application/json');
+
+    $spamIndex = (int)($_POST['spam_index'] ?? -1);
+    $sendEmail = ($_POST['send_email'] ?? 'true') === 'true';
+
+    // Load spam log
+    $spamLogFile = dirname(__DIR__) . '/data/spam-log.json';
+    $spamLog = [];
+    if (file_exists($spamLogFile)) {
+        $spamLog = json_decode(file_get_contents($spamLogFile), true) ?? [];
+    }
+
+    if ($spamIndex < 0 || $spamIndex >= count($spamLog)) {
+        echo json_encode(['success' => false, 'message' => 'Spam entry not found']);
+        exit();
+    }
+
+    $spamEntry = $spamLog[$spamIndex];
+
+    // Check if we have original data
+    if (empty($spamEntry['original_data'])) {
+        echo json_encode(['success' => false, 'message' => 'No original submission data available to restore']);
+        exit();
+    }
+
+    $submission = $spamEntry['original_data'];
+
+    // Add restoration note
+    $submission['restored_from_spam'] = true;
+    $submission['restored_at'] = date('c');
+    $submission['original_spam_reason'] = $spamEntry['reason'] ?? 'unknown';
+
+    // Add to submissions (at the beginning)
+    array_unshift($allSubmissions, $submission);
+    file_put_contents($logFile, json_encode($allSubmissions, JSON_PRETTY_PRINT));
+
+    // Remove from spam log
+    array_splice($spamLog, $spamIndex, 1);
+    file_put_contents($spamLogFile, json_encode($spamLog, JSON_PRETTY_PRINT));
+
+    // Send email notification if requested
+    $emailSent = false;
+    if ($sendEmail) {
+        // Load email config
+        $recipientEmail = $config['contact_form']['recipient_email'] ?? 'ccansam22@gmail.com';
+        $subjectPrefix = $config['contact_form']['subject_prefix'] ?? '[C-Can Sam Contact]';
+        $resendApiKey = $config['email']['resend_api_key'] ?? '';
+        $fromEmail = $config['email']['from_email'] ?? 'noreply@ccansam.com';
+
+        $formType = $submission['formType'] ?? 'message';
+
+        // Build email based on form type
+        if ($formType === 'quote') {
+            $emailSubject = $subjectPrefix . ' [RESTORED] Quote Request from ' . ($submission['name'] ?? 'Unknown');
+            $emailBody = "*** RESTORED FROM SPAM ***\n";
+            $emailBody .= "Original spam reason: " . ($spamEntry['reason'] ?? 'unknown') . "\n\n";
+            $emailBody .= "Quote Request:\n\n";
+            $emailBody .= "Name: " . ($submission['name'] ?? '') . "\n";
+            $emailBody .= "Email: " . ($submission['email'] ?? '') . "\n";
+            $emailBody .= "Phone: " . ($submission['phone'] ?? '') . "\n";
+            $emailBody .= "Date: " . ($submission['date'] ?? '') . " at " . ($submission['time'] ?? '') . "\n";
+            $emailBody .= "\n--- Container Details ---\n\n";
+            $emailBody .= "Container Size: " . ($submission['containerSize'] ?? '') . "\n";
+            $emailBody .= "Condition: " . ($submission['condition'] ?? '') . "\n";
+            $emailBody .= "Intention: " . ($submission['intention'] ?? '') . "\n";
+            $emailBody .= "Delivery: " . ($submission['delivery'] ?? '') . "\n";
+            if (!empty($submission['message'])) {
+                $emailBody .= "\n--- Message ---\n\n" . $submission['message'];
+            }
+        } elseif ($formType === 'quick-quote') {
+            $emailSubject = $subjectPrefix . ' [RESTORED] Quick Quote from ' . ($submission['name'] ?? 'Unknown');
+            $emailBody = "*** RESTORED FROM SPAM ***\n";
+            $emailBody .= "Original spam reason: " . ($spamEntry['reason'] ?? 'unknown') . "\n\n";
+            $emailBody .= "Quick Quote Request:\n\n";
+            $emailBody .= "Name: " . ($submission['name'] ?? '') . "\n";
+            $emailBody .= "Email: " . ($submission['email'] ?? '') . "\n";
+            $emailBody .= "Phone: " . ($submission['phone'] ?? '') . "\n";
+            if (!empty($submission['interest'])) {
+                $emailBody .= "Interested in: " . $submission['interest'] . "\n";
+            }
+            if (!empty($submission['message'])) {
+                $emailBody .= "\n--- Message ---\n\n" . $submission['message'];
+            }
+        } else {
+            $displayName = trim(($submission['firstName'] ?? '') . ' ' . ($submission['lastName'] ?? ''));
+            $emailSubject = $subjectPrefix . ' [RESTORED] ' . ($submission['subject'] ?? 'Message') . ' from ' . ($displayName ?: 'Unknown');
+            $emailBody = "*** RESTORED FROM SPAM ***\n";
+            $emailBody .= "Original spam reason: " . ($spamEntry['reason'] ?? 'unknown') . "\n\n";
+            $emailBody .= "Contact Form Submission:\n\n";
+            $emailBody .= "Name: $displayName\n";
+            $emailBody .= "Email: " . ($submission['email'] ?? '') . "\n";
+            $emailBody .= "Phone: " . ($submission['phone'] ?? 'Not provided') . "\n";
+            $emailBody .= "Subject: " . ($submission['subject'] ?? 'General Inquiry') . "\n";
+            $emailBody .= "\n--- Message ---\n\n" . ($submission['message'] ?? '');
+        }
+
+        $emailBody .= "\n\n--- End of Message ---\n";
+        $emailBody .= "\nSubmission ID: " . ($submission['id'] ?? 'unknown') . "\n";
+
+        // Try to send via Resend API
+        if (!empty($resendApiKey)) {
+            $data = [
+                'from' => $fromEmail,
+                'to' => [$recipientEmail],
+                'reply_to' => $submission['email'] ?? $fromEmail,
+                'subject' => $emailSubject,
+                'text' => $emailBody
+            ];
+
+            $ch = curl_init('https://api.resend.com/emails');
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => json_encode($data),
+                CURLOPT_HTTPHEADER => [
+                    'Authorization: Bearer ' . $resendApiKey,
+                    'Content-Type: application/json'
+                ],
+                CURLOPT_TIMEOUT => 10
+            ]);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            $emailSent = ($httpCode === 200);
+        } else {
+            // Fallback to PHP mail
+            $headers = [
+                'From: ' . $fromEmail,
+                'Reply-To: ' . ($submission['email'] ?? $fromEmail),
+                'Content-Type: text/plain; charset=UTF-8'
+            ];
+            $emailSent = @mail($recipientEmail, $emailSubject, $emailBody, implode("\r\n", $headers));
+        }
+    }
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'Restored to submissions' . ($sendEmail ? ($emailSent ? ' and email sent' : ' but email failed') : ''),
+        'email_sent' => $emailSent
+    ]);
+    exit();
+}
+
 // Handle add review action
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_review') {
     header('Content-Type: application/json');
@@ -834,6 +1083,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         .btn-secondary:hover { background: #d1d5db; }
         .btn-danger { background: #dc2626; color: white; font-size: 0.75rem; padding: 0.25rem 0.5rem; }
         .btn-danger:hover { background: #b91c1c; }
+        .btn-warning { background: #f59e0b; color: white; font-size: 0.75rem; padding: 0.25rem 0.5rem; }
+        .btn-warning:hover { background: #d97706; }
+        .btn-success { background: #10b981; color: white; font-size: 0.75rem; padding: 0.25rem 0.5rem; }
+        .btn-success:hover { background: #059669; }
+        .footer-actions { display: flex; gap: 0.5rem; align-items: center; }
+
+        /* Modal styles */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: white; border-radius: 0.75rem; padding: 1.5rem; max-width: 500px; width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+        }
+        .modal h3 { margin: 0 0 1rem 0; font-size: 1.25rem; color: #111827; }
+        .modal-body { margin-bottom: 1.5rem; }
+        .modal-footer { display: flex; gap: 0.5rem; justify-content: flex-end; }
+        .checkbox-group { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
+        .checkbox-item { display: flex; align-items: center; gap: 0.5rem; }
+        .checkbox-item input[type="checkbox"] { width: 1rem; height: 1rem; }
+        .checkbox-item label { font-size: 0.875rem; color: #374151; }
+        .checkbox-item .hint { font-size: 0.75rem; color: #6b7280; margin-left: 1.5rem; }
         .alert {
             padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;
             background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7;
@@ -1240,6 +1513,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             <option value="invalid_phone">Phone Area Code</option>
                             <option value="gibberish_message">Gibberish Message</option>
                             <option value="gibberish_">Gibberish Detection</option>
+                        </optgroup>
+                        <optgroup label="Learned Patterns">
+                            <option value="learned_pattern">Learned Pattern</option>
                         </optgroup>
                         <optgroup label="Manual">
                             <option value="manual_review">Manual Review</option>
@@ -2045,10 +2321,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             ${messageHtml}
                             <div class="details-footer">
                                 <span>ID: ${escapeHtml(sub.id)} · IP: ${escapeHtml(sub.ip)}</span>
-                                <form method="POST" style="display: inline;" onsubmit="return confirm('Delete this submission?');">
-                                    <input type="hidden" name="delete_id" value="${escapeHtml(sub.id)}">
-                                    <button type="submit" class="btn btn-danger">Delete</button>
-                                </form>
+                                <div class="footer-actions">
+                                    <button type="button" class="btn btn-warning" onclick="showSpamModal('${escapeHtml(sub.id)}', '${escapeHtml(sub.email)}', '${escapeHtml(sub.ip)}', '${escapeHtml(sub.phone || '')}')">Mark as Spam</button>
+                                    <form method="POST" style="display: inline;" onsubmit="return confirm('Delete this submission?');">
+                                        <input type="hidden" name="delete_id" value="${escapeHtml(sub.id)}">
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2385,7 +2664,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         // ============================================
         // Spam Tab Functionality
         // ============================================
-        const allSpam = <?= $spamJson ?>;
+        const allSpam = <?= $spamJson ?>.map((spam, index) => ({ ...spam, _originalIndex: index }));
         const spamContainer = document.getElementById('spam-container');
         const spamEmptyState = document.getElementById('spam-empty-state');
         const spamReasonFilter = document.getElementById('spam-reason-filter');
@@ -2570,6 +2849,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 <div class="message-label">User Agent</div>
                                 <div class="message-content" style="font-size: 0.75rem;">${escapeHtml(spam.userAgent || '')}</div>
                             </div>
+
+                            <!-- Actions -->
+                            ${spam.original_data ? `
+                            <div class="details-footer" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                                <span style="font-size: 0.75rem; color: #6b7280;">Not spam? Restore to submissions:</span>
+                                <div class="footer-actions">
+                                    <button type="button" class="btn btn-success" onclick="restoreFromSpam(${spam._originalIndex}, true)">Restore & Send Email</button>
+                                    <button type="button" class="btn btn-secondary" onclick="restoreFromSpam(${spam._originalIndex}, false)">Restore Only</button>
+                                </div>
+                            </div>
+                            ` : `
+                            <div class="details-footer" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                                <span style="font-size: 0.75rem; color: #9ca3af;">⚠️ Original data not available - cannot restore</span>
+                            </div>
+                            `}
                         </div>
                     </div>
                 `;
@@ -3672,6 +3966,151 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 closeRebuildModal();
             }
         });
+
+        // ============================================
+        // Spam Management Functions
+        // ============================================
+        const spamModal = document.getElementById('spam-modal');
+        const spamModalOverlay = document.getElementById('spam-modal-overlay');
+
+        function showSpamModal(submissionId, email, ip, phone) {
+            document.getElementById('spam-submission-id').value = submissionId;
+            document.getElementById('spam-email-label').textContent = email;
+            document.getElementById('spam-ip-label').textContent = ip;
+            document.getElementById('spam-phone-label').textContent = phone || 'N/A';
+
+            // Extract domain from email
+            const domain = email.includes('@') ? email.split('@')[1] : '';
+            document.getElementById('spam-domain-label').textContent = domain;
+
+            // Show/hide phone option based on availability
+            document.getElementById('spam-phone-option').style.display = phone ? 'block' : 'none';
+
+            spamModalOverlay.classList.add('active');
+        }
+
+        function closeSpamModal() {
+            spamModalOverlay.classList.remove('active');
+        }
+
+        async function submitSpamForm() {
+            const submissionId = document.getElementById('spam-submission-id').value;
+            const learnFrom = [];
+
+            if (document.getElementById('learn-email').checked) learnFrom.push('email');
+            if (document.getElementById('learn-domain').checked) learnFrom.push('email_domain');
+            if (document.getElementById('learn-ip').checked) learnFrom.push('ip');
+            if (document.getElementById('learn-phone')?.checked) learnFrom.push('phone');
+
+            try {
+                const response = await fetch('?key=<?= urlencode($secretPath) ?>', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        action: 'mark_spam',
+                        submission_id: submissionId,
+                        'learn_from[]': learnFrom
+                    })
+                });
+
+                // Handle array properly
+                const formData = new FormData();
+                formData.append('action', 'mark_spam');
+                formData.append('submission_id', submissionId);
+                learnFrom.forEach(item => formData.append('learn_from[]', item));
+
+                const response2 = await fetch('?key=<?= urlencode($secretPath) ?>', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response2.json();
+
+                if (result.success) {
+                    alert(result.message);
+                    closeSpamModal();
+                    location.reload();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error marking as spam: ' + error.message);
+            }
+        }
+
+        async function restoreFromSpam(spamIndex, sendEmail = true) {
+            if (!confirm('Restore this submission?' + (sendEmail ? ' An email notification will be sent.' : ''))) {
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('action', 'restore_spam');
+                formData.append('spam_index', spamIndex);
+                formData.append('send_email', sendEmail ? 'true' : 'false');
+
+                const response = await fetch('?key=<?= urlencode($secretPath) ?>', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(result.message);
+                    location.reload();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error restoring: ' + error.message);
+            }
+        }
+
+        // Close modal on overlay click
+        spamModalOverlay?.addEventListener('click', (e) => {
+            if (e.target === spamModalOverlay) {
+                closeSpamModal();
+            }
+        });
     </script>
+
+    <!-- Spam Modal -->
+    <div id="spam-modal-overlay" class="modal-overlay">
+        <div class="modal" id="spam-modal">
+            <h3>🚫 Mark as Spam</h3>
+            <div class="modal-body">
+                <p>This will move the submission to the spam log.</p>
+                <p style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">
+                    Optionally, learn from this spam to block similar submissions in the future:
+                </p>
+
+                <input type="hidden" id="spam-submission-id" value="">
+
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="learn-email">
+                        <label for="learn-email">Block this exact email: <strong id="spam-email-label"></strong></label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="learn-domain">
+                        <label for="learn-domain">Block entire domain: <strong id="spam-domain-label"></strong></label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="learn-ip">
+                        <label for="learn-ip">Block IP address: <strong id="spam-ip-label"></strong></label>
+                    </div>
+                    <div class="checkbox-item" id="spam-phone-option">
+                        <input type="checkbox" id="learn-phone">
+                        <label for="learn-phone">Block phone number: <strong id="spam-phone-label"></strong></label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeSpamModal()">Cancel</button>
+                <button type="button" class="btn btn-warning" onclick="submitSpamForm()">Mark as Spam</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
