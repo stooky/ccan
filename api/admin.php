@@ -2109,7 +2109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     <script>
         // All submissions data from PHP
-        const allSubmissions = <?= $submissionsJson ?>;
+        let allSubmissions = <?= $submissionsJson ?>;
         const secretPath = '<?= urlencode($secretPath) ?>';
 
         // DOM elements
