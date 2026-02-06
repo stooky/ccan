@@ -66,13 +66,34 @@ if (file_exists($logFile)) {
     $allSubmissions = json_decode($content, true) ?? [];
 }
 
-// Handle delete action
+// Handle delete action (single)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     $deleteId = $_POST['delete_id'];
     $allSubmissions = array_filter($allSubmissions, fn($s) => $s['id'] !== $deleteId);
     $allSubmissions = array_values($allSubmissions);
     file_put_contents($logFile, json_encode($allSubmissions, JSON_PRETTY_PRINT));
     header('Location: ?key=' . urlencode($secretPath) . '&deleted=1');
+    exit();
+}
+
+// Handle bulk delete action
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'bulk_delete') {
+    header('Content-Type: application/json');
+    $deleteIds = $_POST['ids'] ?? [];
+
+    if (!is_array($deleteIds) || empty($deleteIds)) {
+        echo json_encode(['success' => false, 'message' => 'No submissions selected']);
+        exit();
+    }
+
+    $originalCount = count($allSubmissions);
+    $allSubmissions = array_filter($allSubmissions, fn($s) => !in_array($s['id'], $deleteIds));
+    $allSubmissions = array_values($allSubmissions);
+    $deletedCount = $originalCount - count($allSubmissions);
+
+    file_put_contents($logFile, json_encode($allSubmissions, JSON_PRETTY_PRINT));
+
+    echo json_encode(['success' => true, 'deleted' => $deletedCount]);
     exit();
 }
 
@@ -1441,6 +1462,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             <a href="?key=<?= urlencode($secretPath) ?>" class="btn btn-secondary">Refresh</a>
         </div>
 
+        <!-- Bulk Actions Bar -->
+        <div class="bulk-actions" id="bulk-actions" style="display: none; background: #fef3c7; border: 1px solid #fcd34d; border-radius: 0.5rem; padding: 0.75rem 1rem; margin-bottom: 1rem; display: none; align-items: center; gap: 1rem;">
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" id="select-all-checkbox" onchange="toggleSelectAll(this.checked)">
+                <span>Select All</span>
+            </label>
+            <span id="selected-count" style="color: #92400e; font-weight: 500;">0 selected</span>
+            <button type="button" class="btn btn-danger" id="bulk-delete-btn" onclick="bulkDeleteSelected()" disabled>
+                Delete Selected
+            </button>
+        </div>
+
         <div class="submissions" id="submissions-container">
             <!-- Submissions will be rendered by JavaScript -->
         </div>
@@ -2302,17 +2335,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 }
 
                 return `
-                    <div class="submission-row" id="row-${index}">
-                        <div class="submission-summary" onclick="toggleRow(${index})">
-                            <span class="expand-icon">▶</span>
-                            <span class="badge ${isQuote ? 'badge-quote' : isQuickQuote ? 'badge-quick-quote' : 'badge-message'}">
+                    <div class="submission-row" id="row-${index}" data-id="${escapeHtml(sub.id)}">
+                        <div class="submission-summary">
+                            <input type="checkbox" class="submission-checkbox" data-id="${escapeHtml(sub.id)}" onclick="event.stopPropagation(); updateSelectionCount();" style="margin-right: 0.5rem; width: 18px; height: 18px; cursor: pointer;">
+                            <span class="expand-icon" onclick="toggleRow(${index})">▶</span>
+                            <span class="badge ${isQuote ? 'badge-quote' : isQuickQuote ? 'badge-quick-quote' : 'badge-message'}" onclick="toggleRow(${index})">
                                 ${isQuote ? 'Quote' : isQuickQuote ? 'Quick Quote' : 'Message'}
                             </span>
-                            <span class="summary-name">${escapeHtml(displayName)}</span>
-                            <span class="summary-email">${escapeHtml(sub.email)}</span>
-                            <span class="summary-phone">${escapeHtml(sub.phone || '')}</span>
-                            <span class="summary-preview">${escapeHtml(preview)}</span>
-                            <span class="summary-date">${escapeHtml(sub.date)}</span>
+                            <span class="summary-name" onclick="toggleRow(${index})">${escapeHtml(displayName)}</span>
+                            <span class="summary-email" onclick="toggleRow(${index})">${escapeHtml(sub.email)}</span>
+                            <span class="summary-phone" onclick="toggleRow(${index})">${escapeHtml(sub.phone || '')}</span>
+                            <span class="summary-preview" onclick="toggleRow(${index})">${escapeHtml(preview)}</span>
+                            <span class="summary-date" onclick="toggleRow(${index})">${escapeHtml(sub.date)}</span>
                         </div>
                         <div class="submission-details">
                             <div class="details-grid">
@@ -2375,6 +2409,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
         // Initial render
         filterSubmissions();
+
+        // Show bulk actions bar after render
+        document.getElementById('bulk-actions').style.display = 'flex';
+
+        // ============================================
+        // Bulk Selection Functions
+        // ============================================
+
+        function updateSelectionCount() {
+            const checkboxes = document.querySelectorAll('.submission-checkbox:checked');
+            const count = checkboxes.length;
+            document.getElementById('selected-count').textContent = count + ' selected';
+            document.getElementById('bulk-delete-btn').disabled = count === 0;
+
+            // Update select-all checkbox state
+            const allCheckboxes = document.querySelectorAll('.submission-checkbox');
+            const selectAllCheckbox = document.getElementById('select-all-checkbox');
+            if (allCheckboxes.length > 0 && count === allCheckboxes.length) {
+                selectAllCheckbox.checked = true;
+                selectAllCheckbox.indeterminate = false;
+            } else if (count > 0) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = true;
+            } else {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            }
+        }
+
+        function toggleSelectAll(checked) {
+            const checkboxes = document.querySelectorAll('.submission-checkbox');
+            checkboxes.forEach(cb => cb.checked = checked);
+            updateSelectionCount();
+        }
+
+        function getSelectedIds() {
+            const checkboxes = document.querySelectorAll('.submission-checkbox:checked');
+            return Array.from(checkboxes).map(cb => cb.dataset.id);
+        }
+
+        async function bulkDeleteSelected() {
+            const ids = getSelectedIds();
+            if (ids.length === 0) return;
+
+            if (!confirm(`Are you sure you want to delete ${ids.length} submission(s)? This cannot be undone.`)) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('action', 'bulk_delete');
+            ids.forEach(id => formData.append('ids[]', id));
+
+            try {
+                const response = await fetch('?key=<?= urlencode($secretPath) ?>', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    // Remove deleted submissions from allSubmissions array
+                    allSubmissions = allSubmissions.filter(s => !ids.includes(s.id));
+
+                    // Re-render
+                    filterSubmissions();
+
+                    // Update stats
+                    document.getElementById('stat-total').textContent = allSubmissions.length;
+
+                    alert(`Successfully deleted ${result.deleted} submission(s).`);
+                } else {
+                    alert('Error: ' + (result.message || 'Failed to delete'));
+                }
+            } catch (error) {
+                alert('Error deleting submissions: ' + error.message);
+            }
+        }
 
         // ============================================
         // Reviews Tab Functionality
