@@ -62,6 +62,21 @@ const businessHours = Object.entries(siteConfig.hours).map(([day, hours]) => ({
     <div class="grid gap-12 lg:grid-cols-2">
       <!-- Tabbed Contact Form -->
       <div>
+        <!-- Rental Promo Banner Above Form -->
+        <div class="mb-6 rounded-xl bg-gradient-to-r from-green-600 via-emerald-500 to-green-600 p-4 shadow-lg">
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
+            <div class="flex items-center gap-2 text-white">
+              <svg class="h-6 w-6 animate-bounce" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5 2a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2V4a2 2 0 00-2-2H5zm2.5 3a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm6.207.293a1 1 0 00-1.414 0l-6 6a1 1 0 101.414 1.414l6-6a1 1 0 000-1.414zM12.5 10a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" clip-rule="evenodd"/>
+              </svg>
+              <span class="text-base sm:text-lg font-bold">Rental Special:</span>
+            </div>
+            <div class="bg-white text-green-700 px-3 py-1.5 rounded-lg font-bold text-base shadow-inner">
+              Rent 6 months, last month FREE!
+            </div>
+          </div>
+        </div>
+
         <TabbedContactForm />
       </div>
 

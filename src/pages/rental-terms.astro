@@ -114,8 +114,8 @@ const faqs = [
       </table>
     </div>
 
-    <!-- 6 Month Promo Banner -->
-    <div class="mt-6 rounded-xl bg-gradient-to-r from-green-600 via-emerald-500 to-green-600 p-5 shadow-lg">
+    <!-- 6 Month Promo Banner - Clickable CTA -->
+    <a href="/contact" class="mt-6 block rounded-xl bg-gradient-to-r from-green-600 via-emerald-500 to-green-600 p-5 shadow-lg hover:from-green-700 hover:via-emerald-600 hover:to-green-700 transition-all hover:shadow-xl hover:scale-[1.01] cursor-pointer group">
       <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
         <div class="flex items-center gap-2 text-white">
           <svg class="h-7 w-7 animate-bounce" fill="currentColor" viewBox="0 0 20 20">
@@ -124,11 +124,12 @@ const faqs = [
           <span class="text-lg font-bold">Rent for 6 months</span>
         </div>
         <span class="hidden sm:inline text-white text-xl font-light">&rarr;</span>
-        <div class="bg-white text-green-700 px-4 py-2 rounded-lg font-bold text-lg shadow-inner">
+        <div class="bg-white text-green-700 px-4 py-2 rounded-lg font-bold text-lg shadow-inner group-hover:bg-green-50">
           Last Month FREE!
         </div>
       </div>
-    </div>
+      <p class="mt-2 text-green-100 text-sm font-medium text-center group-hover:text-white">Click to request your rental quote &rarr;</p>
+    </a>
 
     <div class="mt-4 rounded-lg bg-blue-50 border border-blue-200 p-4">
       <div class="flex items-start gap-3">
