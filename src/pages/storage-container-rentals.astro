@@ -21,7 +21,7 @@ const containers = [
     ideal: "Residential storage, renovations, small moves",
     image: "/images/containers/20-standard.png",
     popular: false,
-    rental: { min: 150, max: 175 },
+    rental: 175,
     deposit: 300,
   },
   {
@@ -31,7 +31,7 @@ const containers = [
     ideal: "Construction sites, business overflow, large projects",
     image: "/images/containers/40-standard.png",
     popular: true,
-    rental: { min: 200, max: 250 },
+    rental: 300,
     deposit: 400,
   },
   {
@@ -40,8 +40,8 @@ const containers = [
     capacity: "2,694 cubic feet",
     ideal: "Tall equipment, workshops, maximum flexibility",
     image: "/images/containers/40-high-cube.png",
-    popular: false,
-    rental: { min: 225, max: 275 },
+    popular: true,
+    rental: 300,
     deposit: 400,
   },
 ];
@@ -84,7 +84,7 @@ const renters = [
 const faqs = [
   {
     question: "How much does it cost to rent a shipping container?",
-    answer: "Container rental rates start at $150/month for a 20ft container and $200/month for a 40ft container. Prices may vary based on location and rental duration. A refundable security deposit is required. Delivery and pickup fees are separate."
+    answer: "Container rental rates are $175/month for a 20ft container and $300/month for a 40ft (standard or high cube). Rent for 6 months and get your last month FREE! A refundable security deposit is required. Delivery and pickup are included within 50km."
   },
   {
     question: "What is the minimum rental period?",
@@ -236,8 +236,8 @@ const faqs = [
             {/* Monthly Rental - Blue */}
             <div class="rounded-lg bg-blue-50 p-3 border border-blue-100">
               <p class="text-xs font-medium text-blue-700 uppercase tracking-wide">Monthly</p>
-              <p class="mt-1 text-lg font-bold text-blue-800">
-                ${container.rental.min}<span class="text-sm font-normal">-${container.rental.max}</span>
+              <p class="mt-1 text-xl font-bold text-blue-800">
+                ${container.rental}
               </p>
             </div>
             {/* Deposit - Gray */}
@@ -247,6 +247,16 @@ const faqs = [
                 ${container.deposit}
               </p>
             </div>
+          </div>
+
+          <!-- 6 Month Promo Badge -->
+          <div class="mt-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 p-3 text-center shadow-md">
+            <p class="text-sm font-bold text-white flex items-center justify-center gap-2">
+              <svg class="h-5 w-5 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5 2a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2V4a2 2 0 00-2-2H5zm2.5 3a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm6.207.293a1 1 0 00-1.414 0l-6 6a1 1 0 101.414 1.414l6-6a1 1 0 000-1.414zM12.5 10a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" clip-rule="evenodd"/>
+              </svg>
+              Rent 6 months, last month <span class="uppercase tracking-wide bg-white text-green-600 px-2 py-0.5 rounded ml-1">FREE!</span>
+            </p>
           </div>
 
           <dl class="mt-4 space-y-2 text-sm">
@@ -288,9 +298,24 @@ const faqs = [
       ))}
     </div>
 
-    <p class="mt-8 text-center text-gray-600">
-      Prices shown are monthly rates. Final price depends on location and rental duration.
-      <br /><strong>Delivery & pickup included within 50km.</strong> <a href={phoneLink} class="font-medium text-blue-600 hover:text-blue-700">Call us</a> for rates beyond 50km.
+    <!-- Promo Banner -->
+    <div class="mt-8 rounded-2xl bg-gradient-to-r from-green-600 via-emerald-500 to-green-600 p-6 text-center shadow-lg">
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <div class="flex items-center gap-2 text-white">
+          <svg class="h-8 w-8 animate-bounce" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5 2a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2V4a2 2 0 00-2-2H5zm2.5 3a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm6.207.293a1 1 0 00-1.414 0l-6 6a1 1 0 101.414 1.414l6-6a1 1 0 000-1.414zM12.5 10a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-xl font-bold">Rent for 6 months</span>
+        </div>
+        <span class="hidden sm:inline text-white text-2xl font-light">&rarr;</span>
+        <div class="bg-white text-green-700 px-4 py-2 rounded-lg font-bold text-xl shadow-inner">
+          Last Month FREE!
+        </div>
+      </div>
+    </div>
+
+    <p class="mt-6 text-center text-gray-600">
+      <strong>Delivery & pickup included within 50km.</strong> <a href={phoneLink} class="font-medium text-blue-600 hover:text-blue-700">Call us</a> for rates beyond 50km.
     </p>
     <p class="mt-2 text-center">
       <a href="/rental-terms" class="text-sm font-medium text-blue-600 hover:text-blue-700">

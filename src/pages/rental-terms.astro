@@ -10,9 +10,9 @@ const phoneLink = `tel:${siteConfig.contact.phone.replace(/\D/g, '')}`;
 
 // Rental Pricing
 const rentalPricing = [
-  { size: "20ft Standard", monthlyRate: "$150 - $175", deposit: "$300", deliveryFee: "Free within 50km" },
-  { size: "40ft Standard", monthlyRate: "$200 - $250", deposit: "$400", deliveryFee: "Free within 50km" },
-  { size: "40ft High Cube", monthlyRate: "$225 - $275", deposit: "$400", deliveryFee: "Free within 50km" },
+  { size: "20ft Standard", monthlyRate: "$175", deposit: "$300", deliveryFee: "Free within 50km" },
+  { size: "40ft Standard", monthlyRate: "$300", deposit: "$400", deliveryFee: "Free within 50km" },
+  { size: "40ft High Cube", monthlyRate: "$300", deposit: "$400", deliveryFee: "Free within 50km" },
 ];
 
 // What's Included
@@ -74,7 +74,7 @@ const faqs = [
 
 <Layout
   title="Container Rental Terms & Pricing"
-  description="Transparent rental terms and pricing for shipping container rentals in Saskatchewan. Month-to-month rates from $150/month. No hidden fees. Free delivery within 50km."
+  description="Transparent rental terms and pricing for shipping container rentals in Saskatchewan. 20ft from $175/month, 40ft from $300/month. Rent 6 months, last month FREE! Free delivery within 50km."
 >
   <FAQSchema faqs={faqs} />
 
@@ -114,7 +114,23 @@ const faqs = [
       </table>
     </div>
 
-    <div class="mt-6 rounded-lg bg-blue-50 border border-blue-200 p-4">
+    <!-- 6 Month Promo Banner -->
+    <div class="mt-6 rounded-xl bg-gradient-to-r from-green-600 via-emerald-500 to-green-600 p-5 shadow-lg">
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <div class="flex items-center gap-2 text-white">
+          <svg class="h-7 w-7 animate-bounce" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5 2a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2V4a2 2 0 00-2-2H5zm2.5 3a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm6.207.293a1 1 0 00-1.414 0l-6 6a1 1 0 101.414 1.414l6-6a1 1 0 000-1.414zM12.5 10a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-lg font-bold">Rent for 6 months</span>
+        </div>
+        <span class="hidden sm:inline text-white text-xl font-light">&rarr;</span>
+        <div class="bg-white text-green-700 px-4 py-2 rounded-lg font-bold text-lg shadow-inner">
+          Last Month FREE!
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 rounded-lg bg-blue-50 border border-blue-200 p-4">
       <div class="flex items-start gap-3">
         <svg class="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
