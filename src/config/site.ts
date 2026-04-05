@@ -136,9 +136,10 @@ export interface SiteConfig {
   copyright: string;
 }
 
-// Load and parse config.yaml
+// Load and parse config.yaml (supports SITE_DIR env var for multi-site builds)
 function loadConfig(): SiteConfig {
-  const configPath = path.join(process.cwd(), 'config.yaml');
+  const siteDir = process.env.SITE_DIR || process.cwd();
+  const configPath = path.join(siteDir, 'config.yaml');
   const configFile = fs.readFileSync(configPath, 'utf-8');
   const config = YAML.parse(configFile);
 
@@ -262,7 +263,8 @@ function loadReviewsData(): ReviewsData {
   }
 
   try {
-    const reviewsPath = path.join(process.cwd(), 'data', 'reviews.json');
+    const siteDir = process.env.SITE_DIR || process.cwd();
+    const reviewsPath = path.join(siteDir, 'data', 'reviews.json');
     const reviewsFile = fs.readFileSync(reviewsPath, 'utf-8');
     const data = JSON.parse(reviewsFile);
     reviewsDataCache = {

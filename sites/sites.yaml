@@ -1,0 +1,15 @@
+# Site Registry — Agent-readable manifest of all deployed sites
+#
+# Used by deploy.js (--site flag) and agents to discover/manage sites.
+# Each site maps to a config directory under sites/<domain>/
+
+sites:
+  ccansam.com:
+    name: "C-Can Sam"
+    config: sites/ccansam.com/config.yaml
+    server: ccansam.com
+    staging_server: ccan.crkid.com
+    branch: main
+    status: active
+    nginx_conf: deploy/nginx-prod.conf
+    staging_nginx_conf: deploy/nginx-staging.conf

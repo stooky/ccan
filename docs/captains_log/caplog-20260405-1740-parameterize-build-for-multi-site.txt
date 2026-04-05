@@ -1,0 +1,161 @@
+================================================================================
+CAPTAIN'S LOG: parameterize-build-for-multi-site
+Date: 2026-04-05 17:40:00
+Previous Log: caplog-20260405-123700-new-report-tab-and-report.txt
+================================================================================
+
+## Summary
+
+Parameterized the entire build/deploy pipeline for N-site deployment. The
+codebase can now build and deploy different sites from the same repo using
+SITE_DIR, SITE_URL, and SITE_ROOT environment variables.
+
+## Current State
+
+The site now supports multi-site via a `sites/<domain>/` directory pattern.
+config.yaml at the root is a symlink to `sites/ccansam.com/config.yaml`.
+All PHP files use a shared `_config.php` that reads SITE_ROOT from nginx.
+deploy.js reads from a `sites.yaml` manifest and includes a post-deploy
+health check.
+
+================================================================================
+WORK COMPLETED
+================================================================================
+
+## 1. Bolt 1 — Deploy Pipeline Fix (completed earlier in session)
+
+- Fixed nginx try_files ($uri $uri.html $uri/ =404)
+- Added CSP, Permissions-Policy, X-Frame-Options DENY headers
+- Consolidated deploy.js (backup, migrate, build, nginx SCP+reload, permissions)
+- Refactored ship.js as wrapper around deploy.js
+- Deleted dead configs (vercel.json, _headers, _redirects)
+- Removed admin secret from CLAUDE.md
+- Fixed package.json identity (nocms -> ccansam)
+
+## 2. Bolt 2 — Multi-Site Parameterization
+
+### 2a. Astro Build Parameterization
+- astro.config.mjs reads site URL from config.yaml (or SITE_URL env var)
+- src/config/site.ts reads config from SITE_DIR env var (or cwd)
+- Reviews data path also uses SITE_DIR
+
+### 2b. Site Directory Structure
+- Created sites/ccansam.com/config.yaml (moved from root)
+- Root config.yaml is now a symlink → sites/ccansam.com/config.yaml
+- Created sites/sites.yaml manifest (agent-readable registry)
+
+### 2c. PHP Multi-Site Support
+- Created api/_config.php (shared config loader)
+- All 6 PHP files (admin, contact, quote, backup, tag-reviews, track) now
+  use _config.php for config path resolution
+- SITE_ROOT env var (set by nginx fastcgi_param) overrides default path
+- SITE_ROOT constant defined for deeply nested code
+
+### 2d. Deploy Infrastructure
+- deploy.js reads sites.yaml manifest, accepts --site flag
+- Post-deploy health check (curl homepage, verify HTTP 200)
+- Created deploy/nginx.conf.template with {{DOMAIN}}, {{SITE_ROOT}}, {{REDIRECTS}}
+- Created scripts/generate-nginx.js (template + config → nginx conf)
+
+## 3. Staff Engineer Panels
+
+Two panel analyses completed:
+1. Deploy/Build Process — identified nginx misconfiguration root cause
+2. Mass Deploy Architecture — designed N-site scaling strategy
+
+## 4. PM Bootstrap
+
+- Created docs/pm/ (CURRENT-SPRINT.md, BACKLOG.md, SPRINT-LOG.md)
+- Imported 13 SEO backlog items from docs/backlog/
+- Bolt 1 archived, Bolt 2 in progress
+
+## 5. Health Audits
+
+- Motherhen: 0 PASS / 2 WARN / 3 FAIL / 2 SKIP
+- DLC Audit: 3.3/10 (Developing maturity)
+- Key gaps: zero tests, 1/14 foundation docs, no security reviews
+
+--------------------------------------------------------------------------------
+
+## DECISIONS MADE
+
+1. **Symlink over copy** — Root config.yaml is a symlink to sites/ccansam.com/
+   config.yaml, not a copy. This means one source of truth, no sync needed.
+
+2. **Shared PHP with env var** — PHP files use SITE_ROOT env var (set by nginx)
+   rather than per-site PHP-FPM pools. Simpler for solo dev, per-site pools
+   deferred to when >5 sites on one server.
+
+3. **Build on server (for now)** — Still runs npm run build on the VPS. Rsync
+   of dist/ deferred to Phase 3 when server count increases.
+
+4. **Backward compatible** — All changes fall back to current behavior when no
+   env vars are set. Zero breaking changes for existing deployment.
+
+================================================================================
+ISSUES ENCOUNTERED
+================================================================================
+
+## 1. SSH Key with Space in Filename
+
+**Symptom:** All SSH connections failed — "No such file or directory"
+**Cause:** Key was named "id_rsa 1" (with space), permissions were 644
+**Resolution:** chmod 600, quoted path in scripts
+
+## 2. CSP Blocked Chart.js CDN
+
+**Symptom:** SEO report page rendered blank below the stat cards
+**Cause:** New CSP headers blocked cdnjs.cloudflare.com
+**Resolution:** Added cdnjs.cloudflare.com to script-src allowlist
+
+## 3. GitHub Push with Wrong Identity
+
+**Symptom:** Permission denied pushing to stooky/ccan
+**Cause:** Remote was HTTPS, authenticating as msifoss
+**Resolution:** Switched remote to SSH with github-stooky host alias
+
+================================================================================
+LESSONS LEARNED
+================================================================================
+
+1. **Always test CSP with real page content** — curl -I only checks headers,
+   doesn't reveal blocked resources. Load the actual page.
+
+2. **Check SSH key names carefully** — spaces in filenames are legal but
+   break unquoted paths in scripts.
+
+3. **Git remote identity matters** — HTTPS remotes use default credential,
+   SSH remotes use host-specific keys from ~/.ssh/config.
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+### Immediate
+1. [ ] Commit, tag v1.2.0, push, deploy to both servers
+2. [ ] Verify symlink works after git pull on server
+
+### Phase 3 (next bolt)
+1. [ ] Create provision-site.sh (one command to stand up a new site)
+2. [ ] Per-site PHP-FPM pools (when >5 sites per server)
+3. [ ] Build locally, rsync dist/ (remove node/npm requirement from VPS)
+4. [ ] Agent API: create-site, deploy-site, check-site, update-config
+
+### Outstanding from Previous Logs
+1. [ ] Re-implement automated testing system
+2. [ ] Add real founder photo to About page
+3. [ ] Create customer case study pages
+4. [ ] External monitoring (UptimeRobot)
+
+================================================================================
+DEPLOYMENT STATUS
+================================================================================
+
+- Bolt 1: Deployed at e34a8d3 (v1.1.0)
+- Bolt 2: Ready to commit and deploy
+- Production: ccansam.com — nginx fixed, headers live, report accessible
+- Staging: ccan.crkid.com — same fixes applied
+
+================================================================================
+END OF LOG
+================================================================================

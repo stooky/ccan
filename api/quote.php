@@ -22,8 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Load config
-$configPath = __DIR__ . '/../config.yaml';
+// Load config (supports multi-site via SITE_ROOT env var)
+require_once __DIR__ . '/_config.php';
+// $siteRoot, $configPath, $localConfigPath set by _config.php
 if (!file_exists($configPath)) {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Config not found']);

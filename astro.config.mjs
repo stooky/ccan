@@ -2,10 +2,23 @@
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
+import fs from 'node:fs';
+import YAML from 'yaml';
+
+// Load site URL from config.yaml (supports SITE_DIR env var for multi-site)
+const siteDir = process.env.SITE_DIR || process.cwd();
+const configPath = `${siteDir}/config.yaml`;
+let siteUrl = 'https://ccansam.com'; // fallback
+try {
+  const config = YAML.parse(fs.readFileSync(configPath, 'utf-8'));
+  siteUrl = config.site?.url || siteUrl;
+} catch (e) {
+  // fallback to default if config not found
+}
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://ccansam.com',
+  site: process.env.SITE_URL || siteUrl,
   integrations: [
     sitemap({
       // Custom priority for important pages

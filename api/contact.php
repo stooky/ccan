@@ -28,9 +28,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-// Load configuration
-$configPath = dirname(__DIR__) . '/config.yaml';
-$localConfigPath = dirname(__DIR__) . '/config.local.yaml';
+// Load configuration (supports multi-site via SITE_ROOT env var)
+require_once __DIR__ . '/_config.php';
+// $siteRoot, $configPath, $localConfigPath set by _config.php
 
 if (!file_exists($configPath)) {
     http_response_code(500);

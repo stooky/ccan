@@ -99,8 +99,8 @@ returnPixel();
  * Load configuration from YAML files
  */
 function loadConfig() {
-    $configPath = dirname(__DIR__) . '/config.yaml';
-    $localConfigPath = dirname(__DIR__) . '/config.local.yaml';
+    require __DIR__ . '/_config.php';
+    // $siteRoot, $configPath, $localConfigPath set by _config.php
 
     $config = [];
 

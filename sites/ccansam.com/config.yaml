@@ -1,0 +1,629 @@
+# =============================================================================
+# C-Can Sam - Site Configuration
+# =============================================================================
+# This is the single source of truth for all site settings.
+# Used by both the Astro frontend and PHP backend.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Site Identity
+# -----------------------------------------------------------------------------
+site:
+  name: "C-Can Sam"
+  tagline: "Saskatchewan's Premier Seacan Solutions Provider"
+  description: "Saskatoon new & used seacan shipping container rental, sales, and on and off-site storage. Perfect for construction sites, moving, farms, homes, and more!"
+  url: "https://ccansam.com"
+  default_og_image: "/images/logo.png"
+
+# -----------------------------------------------------------------------------
+# Data Version & Migration
+# -----------------------------------------------------------------------------
+# Bump this version when data file structures change.
+# The deploy script will backup data and run migrations automatically.
+# See migrations/ folder for migration scripts.
+#
+data:
+  version: 1
+  files:
+    - submissions.json
+    - reviews.json
+    - inventory.json
+    - spam-log.json
+    - quote-requests.json
+
+# -----------------------------------------------------------------------------
+# Product Pricing (Sale prices in CAD)
+# -----------------------------------------------------------------------------
+# Prices are controlled here and used for:
+# - Display on container pages
+# - Product schema for Google rich results
+# Set to null if not available
+#
+products:
+  currency: "CAD"
+  containers:
+    - size: "9ft"
+      slug: "9ft-mini"
+      name: "9ft Mini Container"
+      description: "Compact 9ft shipping container, perfect for tight spaces and small storage needs."
+      new: { min: 4000, max: 4500 }
+      used: null
+    - size: "20ft"
+      slug: "20ft-standard"
+      name: "20ft Standard Container"
+      description: "20ft standard shipping container for sale. Versatile storage solution for residential, commercial, and construction needs."
+      new: { min: 4450, max: 4700 }
+      used: { min: 3000, max: 3600 }
+    - size: "40ft"
+      slug: "40ft-standard"
+      name: "40ft Standard Container"
+      description: "40ft standard shipping container for sale. Maximum storage capacity for commercial and industrial applications."
+      new: null
+      used: { min: 4750, max: 5000 }
+    - size: "40ft HC"
+      slug: "40ft-high-cube"
+      name: "40ft High Cube Container"
+      description: "40ft high cube shipping container with extra height. Ideal for oversized items and commercial storage."
+      new: { min: 6500, max: 6900 }
+      used: { min: 4750, max: 5000 }
+
+# -----------------------------------------------------------------------------
+# Contact Information
+# -----------------------------------------------------------------------------
+contact:
+  email: "ccansam22@gmail.com"
+  phone: "1-844-473-2226"
+  phone_local: "1-306-281-4100"
+  address:
+    street: "12 Peters Avenue"
+    city: "Martensville"
+    state: "SK"
+    zip: "S0K 0A2"
+    country: "Canada"
+  # Geo coordinates for LocalBusiness schema
+  geo:
+    latitude: 52.2614082
+    longitude: -106.6082841
+  # Service area center (Saskatoon) and radius in meters
+  service_area:
+    latitude: 52.1579
+    longitude: -106.6702
+    radius: 200000
+
+# -----------------------------------------------------------------------------
+# Business Hours
+# -----------------------------------------------------------------------------
+hours:
+  monday: "9:00 AM - 5:00 PM"
+  tuesday: "9:00 AM - 5:00 PM"
+  wednesday: "9:00 AM - 5:00 PM"
+  thursday: "9:00 AM - 5:00 PM"
+  friday: "9:00 AM - 5:00 PM"
+  saturday: "By Appointment"
+  sunday: "Closed"
+
+# -----------------------------------------------------------------------------
+# Social Media Links (leave empty to hide)
+# -----------------------------------------------------------------------------
+social:
+  facebook: "https://www.facebook.com/ccansam"
+  instagram: "https://www.instagram.com/ccansam_"
+  twitter: ""
+  linkedin: ""
+  youtube: ""
+  whatsapp: "https://wa.me/13062814100"
+  google_business: "https://www.google.com/maps/place/Ccansam+Container+Sales+and+Rental/@52.2614082,-106.610859,17z"
+
+# -----------------------------------------------------------------------------
+# Navigation
+# -----------------------------------------------------------------------------
+navigation:
+  # Main navigation (header)
+  main:
+    - name: "Home"
+      href: "/"
+    - name: "Our Containers"
+      href: "/storage-container-sales-and-rentals"
+      children:
+        - name: "Buy"
+          href: "/seacan-storage-containers-for-sale"
+        - name: "Rent"
+          href: "/storage-container-rentals"
+        - name: "Lease"
+          href: "/storage-container-leasing"
+    - name: "On-Site Rentals"
+      href: "/on-site-storage-rentals"
+    - name: "Service Areas"
+      href: "/containers-saskatoon"
+      children:
+        - name: "Saskatoon"
+          href: "/containers-saskatoon"
+        - name: "Regina"
+          href: "/containers-regina"
+        - name: "Moose Jaw"
+          href: "/containers-moose-jaw"
+        - name: "Swift Current"
+          href: "/containers-swift-current"
+        - name: "Prince Albert"
+          href: "/containers-prince-albert"
+    - name: "Resources"
+      href: "/shipping-container-guide"
+      children:
+        - name: "Container Guide"
+          href: "/shipping-container-guide"
+        - name: "Blog"
+          href: "/blog"
+    - name: "About"
+      href: "/about"
+    - name: "Request a Quote"
+      href: "/contact"
+
+  # Footer links
+  footer:
+    # Services - core offerings (primary SEO value)
+    services:
+      - name: "Buy Containers"
+        href: "/seacan-storage-containers-for-sale"
+      - name: "Rent Containers"
+        href: "/storage-container-rentals"
+      - name: "Lease Containers"
+        href: "/storage-container-leasing"
+      - name: "On-Site Storage"
+        href: "/on-site-storage-rentals"
+      - name: "View Inventory"
+        href: "/inventory-checker"
+    # Products - specific container types and resources
+    products:
+      - name: "9ft Mini Container"
+        href: "/containers/9ft-mini"
+      - name: "20ft Standard"
+        href: "/containers/20ft-standard"
+      - name: "40ft Standard"
+        href: "/containers/40ft-standard"
+      - name: "40ft High Cube"
+        href: "/containers/40ft-high-cube"
+      - name: "Container Guide"
+        href: "/shipping-container-guide"
+      - name: "Maintenance Guide"
+        href: "/container-maintenance-guide"
+    # Company - service areas
+    company:
+      - name: "Saskatoon"
+        href: "/containers-saskatoon"
+      - name: "Regina"
+        href: "/containers-regina"
+      - name: "Moose Jaw"
+        href: "/containers-moose-jaw"
+      - name: "Swift Current"
+        href: "/containers-swift-current"
+      - name: "Prince Albert"
+        href: "/containers-prince-albert"
+    # Useful links - company info and resources
+    useful:
+      - name: "About Us"
+        href: "/about"
+      - name: "Blog"
+        href: "/blog"
+      - name: "Referral Program"
+        href: "/referrals"
+      - name: "Contact"
+        href: "/contact"
+    # Legal - compliance (required)
+    legal:
+      - name: "Privacy Policy"
+        href: "/privacy"
+      - name: "Terms & Conditions"
+        href: "/terms"
+      - name: "Rental Terms"
+        href: "/rental-terms"
+
+# -----------------------------------------------------------------------------
+# Analytics & Tracking
+# -----------------------------------------------------------------------------
+analytics:
+  # Google Analytics 4
+  # Note: GA4 is configured through GTM to avoid loading ~150KB of redundant JS
+  # If you need standalone GA4, set enabled: true
+  google_analytics:
+    enabled: false
+    measurement_id: "G-LZZQSG5ZL7"
+
+  # Google Tag Manager (handles GA4 + other tags)
+  # Get your ID from: tagmanager.google.com > Container ID
+  # Format: GTM-XXXXXXX
+  google_tag_manager:
+    enabled: true
+    container_id: "GTM-MTTG4KTT"
+
+# -----------------------------------------------------------------------------
+# Visitor Tracking (Custom Analytics)
+# -----------------------------------------------------------------------------
+# Lightweight page view tracking to identify traffic sources
+# Especially useful for tracking LLM-referred visitors
+#
+visitor_tracking:
+  enabled: true
+
+  # Raw data retention (days) - older data is aggregated into daily summaries
+  retention_days: 30
+
+  # LLM referrer domains to detect as AI traffic
+  llm_domains:
+    - "chat.openai.com"
+    - "chatgpt.com"
+    - "perplexity.ai"
+    - "claude.ai"
+    - "you.com"
+    - "copilot.microsoft.com"
+    - "bing.com/chat"
+    - "bard.google.com"
+    - "gemini.google.com"
+    - "phind.com"
+
+  # UTM sources/mediums that indicate LLM traffic
+  llm_utm_sources:
+    - "chatgpt"
+    - "openai"
+    - "perplexity"
+    - "claude"
+    - "gemini"
+    - "copilot"
+    - "phind"
+
+  # Search engine domains (organic traffic)
+  search_engines:
+    - "google.com"
+    - "google.ca"
+    - "google.co.uk"
+    - "bing.com"
+    - "duckduckgo.com"
+    - "yahoo.com"
+    - "ecosia.org"
+    - "yandex.com"
+    - "baidu.com"
+
+  # Social media domains
+  social_domains:
+    - "facebook.com"
+    - "fb.com"
+    - "twitter.com"
+    - "x.com"
+    - "linkedin.com"
+    - "instagram.com"
+    - "reddit.com"
+    - "youtube.com"
+    - "tiktok.com"
+    - "pinterest.com"
+
+# -----------------------------------------------------------------------------
+# Contact Form Settings (PHP Backend)
+# -----------------------------------------------------------------------------
+contact_form:
+  # Email address to receive form submissions
+  recipient_email: "ccansam22@gmail.com"
+
+  # Email subject prefix
+  subject_prefix: "[C-Can Sam Contact]"
+
+# -----------------------------------------------------------------------------
+# Email Sending (Resend API)
+# -----------------------------------------------------------------------------
+# Sign up at https://resend.com (free: 3,000 emails/month)
+# 1. Create account -> Get API key
+# 2. Add & verify your domain (or use onboarding@resend.dev for testing)
+# 3. Paste API key below
+email:
+  # Resend API key (starts with "re_")
+  # Leave empty to fall back to PHP mail() - often lands in spam
+  resend_api_key: "re_U5h93je3_2zV9MPz3i7QXjbcYLeYR6uET"
+
+  # From email address
+  # Must be from a verified domain in Resend, or use: onboarding@resend.dev
+  from_email: "C-Can Sam <hello@ccansam.com>"
+
+# -----------------------------------------------------------------------------
+# Admin Panel Settings
+# -----------------------------------------------------------------------------
+admin:
+  # Secret URL path for admin access (e.g., /api/admin.php?key=your-secret-here)
+  # Change this to something unique and hard to guess!
+  secret_path: "ccan-admin-2024"
+
+  # Number of submissions to show per page
+  per_page: 50
+
+# -----------------------------------------------------------------------------
+# Logging Settings
+# -----------------------------------------------------------------------------
+logging:
+  # Where to store submission logs (relative to site root)
+  submissions_file: "data/submissions.json"
+
+  # Maximum log file size in MB before rotation
+  max_size_mb: 10
+
+# -----------------------------------------------------------------------------
+# Security Settings (Spam Prevention)
+# -----------------------------------------------------------------------------
+security:
+  # Honeypot field name (hidden field that bots fill out)
+  honeypot_field: "website_url"
+
+  # Time-based validation: minimum seconds to fill out form (bots submit instantly)
+  min_submit_time: 3
+
+  # Rate limiting: max submissions per IP within the window
+  rate_limit: 10
+  rate_limit_window: 3600  # seconds (1 hour)
+
+  # Content filtering: max URLs allowed in message
+  max_urls: 2
+
+  # Spam phrases to block (checked in message + name fields)
+  # Add more as needed - these are case-insensitive
+  spam_phrases:
+    - "crypto"
+    - "bitcoin"
+    - "ethereum"
+    - "nft"
+    - "seo services"
+    - "seo expert"
+    - "rank your website"
+    - "web traffic"
+    - "buy followers"
+    - "instagram followers"
+    - "casino"
+    - "poker online"
+    - "slot machine"
+    - "viagra"
+    - "cialis"
+    - "pharmacy"
+    - "make money fast"
+    - "earn money online"
+    - "work from home opportunity"
+    - "nigerian prince"
+    - "lottery winner"
+    - "you have won"
+    - "click here now"
+    - "act now"
+    - "limited time offer"
+    - "webcam"
+    - "adult content"
+
+  # Disposable email domains to block
+  disposable_domains:
+    - "mailinator.com"
+    - "guerrillamail.com"
+    - "tempmail.com"
+    - "throwaway.email"
+    - "10minutemail.com"
+    - "trashmail.com"
+    - "fakeinbox.com"
+    - "temp-mail.org"
+    - "getnada.com"
+    - "maildrop.cc"
+    - "yopmail.com"
+    - "sharklasers.com"
+    - "guerrillamail.info"
+    - "grr.la"
+    - "spam4.me"
+    - "dispostable.com"
+    - "tempail.com"
+    - "burnermail.io"
+
+  # --- Advanced Bot Detection (catches gibberish spam) ---
+
+  # Gibberish detection: enable checking for random character strings
+  # DISABLED: Was too aggressive, flagging legitimate names
+  gibberish_detection: false
+
+  # Name validation: require names to have vowels and reasonable structure
+  # DISABLED: Was rejecting legitimate ethnic names
+  name_validation: false
+
+  # Phone validation: require valid North American area codes
+  # Set to false if you expect international customers
+  # DISABLED: Was rejecting legitimate customers with unlisted area codes
+  phone_area_code_validation: false
+  valid_area_codes:
+    # Saskatchewan
+    - "306"
+    - "639"
+    # Alberta
+    - "403"
+    - "587"
+    - "780"
+    - "825"
+    # Manitoba
+    - "204"
+    - "431"
+    # BC
+    - "236"
+    - "250"
+    - "604"
+    - "672"
+    - "778"
+    # Ontario (common)
+    - "416"
+    - "647"
+    - "905"
+    - "437"
+    # Quebec (common)
+    - "514"
+    - "438"
+
+  # Message validation: require at least one real English word
+  message_word_validation: true
+  min_real_words: 1
+
+  # Gmail dot pattern: flag emails with 3+ dots in username (bot pattern)
+  gmail_dot_limit: 3
+
+# -----------------------------------------------------------------------------
+# URL Redirects (301 Permanent)
+# -----------------------------------------------------------------------------
+# These redirects are applied by nginx during deployment.
+# Format: old_path: new_path
+# All redirects are 301 (permanent) redirects.
+#
+redirects:
+  # Old WordPress pages
+  /homepage/: /
+  # /shipping-containers/ now has its own SEO-optimized page
+  /rentals/: /storage-container-rentals/
+  /sales/: /seacan-storage-containers-for-sale/
+  /off-site-storage/: /on-site-storage-rentals/
+  /our-containers/: /storage-container-sales-and-rentals/
+  /our-containers/20ft-standard-container/: /containers/20ft-standard/
+  /our-containers/40ft-standard-container/: /containers/40ft-standard/
+  /our-containers/40ft-high-cube/: /containers/40ft-high-cube/
+  /blogpage/: /blog/
+  /frequently-asked-questions/: /
+  /sitemap/: /sitemap-index.xml
+  /sitemap_index.xml: /sitemap-index.xml
+  /terms-and-conditions/: /terms/
+  /privacy-policy/: /privacy/
+
+  # Old blog posts
+  /eco-friendly-uses-of-sea-can-for-summer-projects/: /blog/eco-friendly-seacan-uses/
+  /buy-used-shipping-containers-in-canada/: /blog/buy-used-shipping-containers-canada/
+  /shipping-container-for-sale-5-smart-tips/: /blog/5-smart-tips-buying-containers/
+  /7-things-you-need-to-know-before-buying-a-used-shipping-container/: /blog/7-things-buying-used-container/
+  /renovating-shipping-containers-turning-steel-into-homes/: /blog/container-homes-steel-into-living/
+  /what-is-a-seacan-one-tripper-sustainable-solutions/: /blog/what-is-one-trip-container/
+  /portable-storage-solutions-rent-containers-today/: /storage-container-rentals/
+  /invest-in-a-seacan-for-sale/: /seacan-storage-containers-for-sale/
+  /storage-containers-for-sale/: /seacan-storage-containers-for-sale/
+  /shipping-containers-offices-and-retail-spaces/: /blog/
+  /should-you-rent-or-buy-a-container/: /blog/
+  /optimize-your-dorm-space-practical-storage-solutions/: /blog/
+  /maximizing-efficiency-in-construction-and-renovation-projects/: /blog/
+
+# -----------------------------------------------------------------------------
+# Review Widgets
+# -----------------------------------------------------------------------------
+# Display Google reviews on pages. Run "Tag Reviews" in admin to auto-assign
+# reviews to pages using AI, or manually edit the tagged section.
+#
+# Layouts:
+#   - featured: Large cards with prominent stars (Home, About)
+#   - standard: Medium cards with nav arrows (Service pages)
+#   - compact: Minimal inline style (Product pages)
+#   - 3-row: Three cards side by side, scroll one at a time
+#
+# Positions:
+#   - before-cta: Above the call-to-action section
+#   - after-hero: Right after the hero section
+#
+# AI Tagging:
+#   - ai_prompt: (optional) Custom prompt for AI to determine which reviews
+#     belong on this page. Overrides default logic. Be specific about what
+#     keywords or topics make a review relevant.
+#
+reviews:
+  # Pages that display review widgets
+  pages:
+    - path: "/"
+      layout: "featured"
+      position: "before-cta"
+      max_reviews: 3
+      ai_prompt: "All 5 star reviews"
+    - path: "/about"
+      layout: "standard"
+      position: "before-cta"
+      max_reviews: 3
+      ai_prompt: "Reviews mentioning trust, family business, local service, or personal experience with the team"
+    - path: "/seacan-storage-containers-for-sale"
+      layout: "3-row"
+      position: "after-hero"
+      max_reviews: 6
+      ai_prompt: "Reviews about buying or purchasing containers, sales experience, or container quality"
+    - path: "/storage-container-rentals"
+      layout: "3-row"
+      position: "after-hero"
+      max_reviews: 6
+      ai_prompt: "Reviews about renting containers, rental experience, or short-term storage are first priority, after that general reviews about a quality experience."
+    - path: "/storage-container-leasing"
+      layout: "3-row"
+      position: "after-hero"
+      max_reviews: 6
+      ai_prompt: "Reviews about leasing, long-term rentals, or extended storage arrangements"
+    - path: "/storage-container-sales-and-rentals"
+      layout: "3-row"
+      position: "after-hero"
+      max_reviews: 6
+      ai_prompt: "Any reviews mentioning containers, storage, buying, renting, or general positive experiences - this is the main landing page so include broadly relevant reviews"
+    - path: "/on-site-storage-rentals"
+      layout: "standard"
+      position: "before-cta"
+      max_reviews: 2
+      ai_prompt: "Reviews specifically about on-site storage at their facility or storing items at their location"
+    - path: "/containers/20ft-standard"
+      layout: "compact"
+      position: "before-cta"
+      max_reviews: 2
+      ai_prompt: "Reviews mentioning 20ft containers, 20 foot, or smaller containers"
+    - path: "/containers/40ft-standard"
+      layout: "compact"
+      position: "before-cta"
+      max_reviews: 2
+      ai_prompt: "Reviews mentioning 40ft containers, 40 foot, or larger standard containers"
+    - path: "/containers/40ft-high-cube"
+      layout: "compact"
+      position: "before-cta"
+      max_reviews: 2
+      ai_prompt: "Reviews mentioning high cube, extra height, tall containers, or 40ft HC"
+
+  # Review-to-page mappings (auto-populated by "Tag Reviews" in admin)
+  # Format: review_id: ["/path1", "/path2"]
+  tagged:
+    review_001: ["/","/about","/seacan-storage-containers-for-sale","/storage-container-sales-and-rentals"]
+    review_002: ["/","/storage-container-sales-and-rentals"]
+    review_003: ["/seacan-storage-containers-for-sale","/containers/20ft-standard","/storage-container-sales-and-rentals"]
+    review_004: ["/","/storage-container-sales-and-rentals"]
+    review_005: ["/seacan-storage-containers-for-sale","/storage-container-sales-and-rentals"]
+    review_006: ["/"]
+    review_007: ["/"]
+    review_008: ["/seacan-storage-containers-for-sale","/storage-container-sales-and-rentals"]
+    review_009: ["/seacan-storage-containers-for-sale"]
+    review_010: ["/seacan-storage-containers-for-sale"]
+    review_011: ["/seacan-storage-containers-for-sale","/storage-container-rentals","/storage-container-sales-and-rentals"]
+    review_012: ["/"]
+    review_013: ["/"]
+    review_014: ["/"]
+    review_015: ["/seacan-storage-containers-for-sale","/containers/20ft-standard"]
+    review_016: ["/seacan-storage-containers-for-sale"]
+    review_017: ["/"]
+    review_018: ["/seacan-storage-containers-for-sale","/containers/40ft-standard"]
+    review_019: ["/"]
+    review_020: ["/"]
+    review_021: ["/"]
+    review_022: ["/"]
+    review_023: ["/about","/seacan-storage-containers-for-sale"]
+    review_024: ["/"]
+    review_026: ["/seacan-storage-containers-for-sale","/on-site-storage-rentals"]
+    review_027: ["/seacan-storage-containers-for-sale"]
+    review_028: ["/seacan-storage-containers-for-sale","/containers/40ft-standard"]
+    review_029: ["/seacan-storage-containers-for-sale"]
+    review_030: ["/"]
+    review_031: ["/seacan-storage-containers-for-sale"]
+    review_032: ["/seacan-storage-containers-for-sale"]
+    review_033: ["/"]
+    review_034: ["/seacan-storage-containers-for-sale"]
+    review_035: ["/seacan-storage-containers-for-sale"]
+    review_036: ["/about"]
+    review_037: ["/seacan-storage-containers-for-sale"]
+    review_038: ["/"]
+    review_039: ["/"]
+    review_040: ["/"]
+    review_041: ["/"]
+    review_042: ["/seacan-storage-containers-for-sale"]
+    review_043: ["/"]
+    review_047: ["/seacan-storage-containers-for-sale"]
+    review_048: ["/"]
+    review_049: ["/seacan-storage-containers-for-sale"]
+    review_050: ["/seacan-storage-containers-for-sale"]
+    review_051: ["/about"]
+    review_052: ["/storage-container-rentals","/containers/20ft-standard"]
+    review_053: ["/"]
+    review_054: ["/on-site-storage-rentals"]

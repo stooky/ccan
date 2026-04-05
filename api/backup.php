@@ -12,10 +12,10 @@
 
 header('Content-Type: application/json');
 
-// Load configuration
-$configPath = dirname(__DIR__) . '/config.yaml';
-$localConfigPath = dirname(__DIR__) . '/config.local.yaml';
-$dataDir = dirname(__DIR__) . '/data';
+// Load configuration (supports multi-site via SITE_ROOT env var)
+require_once __DIR__ . '/_config.php';
+// $siteRoot, $configPath, $localConfigPath set by _config.php
+$dataDir = $siteRoot . '/data';
 $backupsDir = $dataDir . '/backups';
 
 // Simple YAML parser (same as admin.php)

@@ -8,9 +8,9 @@
 
 header('Content-Type: application/json');
 
-// Load config for auth
-$configPath = dirname(__DIR__) . '/config.yaml';
-$localConfigPath = dirname(__DIR__) . '/config.local.yaml';
+// Load config for auth (supports multi-site via SITE_ROOT env var)
+require_once __DIR__ . '/_config.php';
+// $siteRoot, $configPath, $localConfigPath set by _config.php
 
 function parseSimpleYaml($path) {
     $content = file_get_contents($path);

@@ -6,10 +6,10 @@
  * Access via: /api/admin.php?key=YOUR_SECRET_PATH
  */
 
-// Load configuration
-$configPath = dirname(__DIR__) . '/config.yaml';
-$localConfigPath = dirname(__DIR__) . '/config.local.yaml';
-$reviewsPath = dirname(__DIR__) . '/data/reviews.json';
+// Load configuration (supports multi-site via SITE_ROOT env var)
+require_once __DIR__ . '/_config.php';
+// $siteRoot, $configPath, $localConfigPath set by _config.php
+$reviewsPath = $siteRoot . '/data/reviews.json';
 $config = null;
 
 if (file_exists($configPath)) {
