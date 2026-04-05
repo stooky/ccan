@@ -3,41 +3,22 @@
  * Ship Script - Commit, push, and deploy in one command
  *
  * Usage:
- *   npm run ship "commit message"     - Commit, push to both branches, deploy to both envs
- *   npm run ship:staging "message"    - Commit, push to develop, deploy to staging only
+ *   npm run ship "commit message"     - Commit, push, deploy to both envs
+ *   npm run ship:staging "message"    - Commit, push to main, deploy to staging only
  *   npm run ship:prod "message"       - Commit, push to main, deploy to prod only
  *
- * If no message provided, will prompt or use a default
+ * This is a convenience wrapper around deploy.js.
+ * All deploy logic lives in deploy.js — ship.js handles git + calls deploy.
  */
 
-import { execSync, spawnSync } from 'child_process';
+import { execSync } from 'child_process';
 import readline from 'readline';
-
-const ENVIRONMENTS = {
-  staging: {
-    name: 'Staging',
-    host: 'ccan.crkid.com',
-    user: 'root',
-    path: '/var/www/ccan',
-    branch: 'develop',
-    url: 'https://ccan.crkid.com',
-  },
-  production: {
-    name: 'Production',
-    host: 'ccansam.com',
-    user: 'root',
-    path: '/var/www/ccan',
-    branch: 'main',
-    url: 'https://ccansam.com',
-  },
-};
 
 // Parse arguments
 const args = process.argv.slice(2);
 let target = 'all'; // all, staging, or production
 let message = null;
 
-// Check for target flag
 if (args[0] === '--staging' || args[0] === '-s') {
   target = 'staging';
   message = args.slice(1).join(' ');
@@ -86,23 +67,6 @@ async function prompt(question) {
   });
 }
 
-function deploy(envName) {
-  const env = ENVIRONMENTS[envName];
-  console.log(`\n${bold(green(`🚀 Deploying to ${env.name}...`))}`);
-
-  const sshKey = '~/.ssh/id_rsa';
-  const sshCmd = `ssh -i ${sshKey} ${env.user}@${env.host}`;
-  const remoteCmd = `cd ${env.path} && git fetch origin && git checkout ${env.branch} && git pull origin ${env.branch} && npm run build`;
-
-  if (run(`${sshCmd} "${remoteCmd}"`)) {
-    console.log(green(`  ✓ ${env.name} deployed: ${env.url}`));
-    return true;
-  } else {
-    console.log(red(`  ✗ ${env.name} deployment failed`));
-    return false;
-  }
-}
-
 async function main() {
   console.log(bold('\n🚢 Ship - Commit, Push & Deploy\n'));
 
@@ -142,37 +106,34 @@ Co-Authored-By: Claude <noreply@anthropic.com>`;
     fs.unlinkSync('.commit-msg-tmp');
   }
 
-  // Push to appropriate branches
+  // Push
   console.log(bold('\n📤 Pushing to remote...\n'));
+  run('git push origin main');
 
-  if (target === 'all' || target === 'production') {
-    run('git push origin main');
-  }
-
-  if (target === 'all' || target === 'staging') {
-    run('git push origin main:develop');
-  }
-
-  // Deploy
+  // Deploy using deploy.js
   const results = [];
 
   if (target === 'all' || target === 'staging') {
-    results.push({ env: 'staging', success: deploy('staging') });
+    console.log(bold(`\n🚀 Deploying to Staging...\n`));
+    const success = run('node scripts/deploy.js staging');
+    results.push({ env: 'staging', success });
   }
 
   if (target === 'all' || target === 'production') {
-    results.push({ env: 'production', success: deploy('production') });
+    console.log(bold(`\n🚀 Deploying to Production...\n`));
+    const success = run('node scripts/deploy.js production');
+    results.push({ env: 'production', success });
   }
 
   // Summary
   console.log(bold('\n📋 Summary\n'));
 
+  const envUrls = { staging: 'https://ccan.crkid.com', production: 'https://ccansam.com' };
   for (const r of results) {
-    const env = ENVIRONMENTS[r.env];
     if (r.success) {
-      console.log(green(`  ✓ ${env.name}: ${env.url}`));
+      console.log(green(`  ✓ ${r.env}: ${envUrls[r.env]}`));
     } else {
-      console.log(red(`  ✗ ${env.name}: Failed`));
+      console.log(red(`  ✗ ${r.env}: Failed`));
     }
   }
 

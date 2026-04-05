@@ -1,8 +1,8 @@
 {
-  "name": "nocms",
+  "name": "ccansam",
   "type": "module",
   "version": "1.0.0",
-  "description": "No-CMS website builder for SMBs - HVAC, Plumbing, and more",
+  "description": "C-Can Sam — Shipping container sales, rentals, and storage in Saskatchewan",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
