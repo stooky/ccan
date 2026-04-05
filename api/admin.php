@@ -1396,6 +1396,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             <a href="?key=<?= urlencode($secretPath) ?>&tab=backup" class="tab <?= $currentTab === 'backup' ? 'active' : '' ?>">
                 Backup
             </a>
+            <a href="?key=<?= urlencode($secretPath) ?>&tab=reports" class="tab <?= $currentTab === 'reports' ? 'active' : '' ?>">
+                Reports
+            </a>
         </div>
 
         <!-- Submissions Tab -->
@@ -2058,6 +2061,93 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 </ul>
             </div>
         </div><!-- End Traffic Tab -->
+
+        <!-- Reports Tab -->
+        <div class="tab-content <?= $currentTab === 'reports' ? 'active' : '' ?>" id="reports-tab">
+            <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem; color: #111827;">Reports</h2>
+
+            <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 0.5rem; overflow: hidden;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+                            <th style="padding: 0.75rem 1rem; text-align: left; font-weight: 600; color: #374151;">Report</th>
+                            <th style="padding: 0.75rem 1rem; text-align: left; font-weight: 600; color: #374151;">Type</th>
+                            <th style="padding: 0.75rem 1rem; text-align: left; font-weight: 600; color: #374151;">Date</th>
+                            <th style="padding: 0.75rem 1rem; text-align: center; font-weight: 600; color: #374151;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $reportsDir = dirname(__DIR__) . '/public/d4t4/r3p0rts';
+                        $reports = [];
+                        if (is_dir($reportsDir)) {
+                            $files = glob($reportsDir . '/*.html');
+                            foreach ($files as $file) {
+                                $filename = basename($file);
+                                $mtime = filemtime($file);
+                                $size = filesize($file);
+
+                                // Extract type from filename
+                                $type = 'General';
+                                if (stripos($filename, 'seo') !== false) $type = 'SEO';
+                                elseif (stripos($filename, 'traffic') !== false) $type = 'Traffic';
+                                elseif (stripos($filename, 'performance') !== false) $type = 'Performance';
+                                elseif (stripos($filename, 'audit') !== false) $type = 'Audit';
+
+                                $reports[] = [
+                                    'filename' => $filename,
+                                    'type' => $type,
+                                    'date' => $mtime,
+                                    'size' => $size
+                                ];
+                            }
+                            // Sort by date descending
+                            usort($reports, fn($a, $b) => $b['date'] - $a['date']);
+                        }
+
+                        if (empty($reports)): ?>
+                            <tr>
+                                <td colspan="4" style="padding: 2rem; text-align: center; color: #6b7280;">
+                                    No reports available
+                                </td>
+                            </tr>
+                        <?php else:
+                            foreach ($reports as $report): ?>
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 0.75rem 1rem;">
+                                    <div style="font-weight: 500; color: #111827;"><?= htmlspecialchars($report['filename']) ?></div>
+                                    <div style="font-size: 0.75rem; color: #6b7280;"><?= number_format($report['size'] / 1024, 1) ?> KB</div>
+                                </td>
+                                <td style="padding: 0.75rem 1rem;">
+                                    <span style="display: inline-block; padding: 0.25rem 0.5rem; background: <?= $report['type'] === 'SEO' ? '#dbeafe' : ($report['type'] === 'Traffic' ? '#dcfce7' : '#f3e8ff') ?>; color: <?= $report['type'] === 'SEO' ? '#1e40af' : ($report['type'] === 'Traffic' ? '#166534' : '#7c3aed') ?>; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500;">
+                                        <?= htmlspecialchars($report['type']) ?>
+                                    </span>
+                                </td>
+                                <td style="padding: 0.75rem 1rem; color: #6b7280;">
+                                    <?= date('M j, Y', $report['date']) ?>
+                                    <div style="font-size: 0.75rem;"><?= date('g:i A', $report['date']) ?></div>
+                                </td>
+                                <td style="padding: 0.75rem 1rem; text-align: center;">
+                                    <a href="/d4t4/r3p0rts/<?= htmlspecialchars($report['filename']) ?>"
+                                       target="_blank"
+                                       style="display: inline-block; padding: 0.5rem 1rem; background: #f59e0b; color: #fff; border-radius: 0.375rem; text-decoration: none; font-size: 0.875rem; font-weight: 500;">
+                                        View Report
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach;
+                        endif; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="background: #fefce8; border: 1px solid #fde047; border-radius: 0.5rem; padding: 1rem; margin-top: 1.5rem;">
+                <p style="font-size: 0.875rem; color: #854d0e;">
+                    <strong>Note:</strong> Reports are stored in an obscure location and blocked from search engine indexing.
+                    Add new reports to <code style="background: #fef9c3; padding: 0.125rem 0.25rem; border-radius: 0.25rem;">public/d4t4/r3p0rts/</code>
+                </p>
+            </div>
+        </div><!-- End Reports Tab -->
 
         <!-- Backup Confirmation Modal -->
         <div id="backup-confirm-modal" class="modal" style="display: none;">

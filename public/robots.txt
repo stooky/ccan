@@ -4,5 +4,6 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /data/
+Disallow: /d4t4/
 
 Sitemap: https://ccansam.com/sitemap-index.xml

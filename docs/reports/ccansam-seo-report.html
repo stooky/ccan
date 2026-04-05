@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ccansam.com — SEO & Digital Visibility Performance Report</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0a0e17;
+    --bg-card: #111827;
+    --bg-card-hover: #1a2332;
+    --border: #1e2a3a;
+    --border-accent: #2563eb33;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
+    --accent: #3b82f6;
+    --accent-light: #60a5fa;
+    --green: #22c55e;
+    --green-bg: #22c55e18;
+    --red: #ef4444;
+    --red-bg: #ef444418;
+    --orange: #f59e0b;
+    --orange-bg: #f59e0b18;
+    --purple: #a855f7;
+    --purple-bg: #a855f718;
+    --cyan: #06b6d4;
+    --cyan-bg: #06b6d418;
+    --gradient-1: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    --gradient-2: linear-gradient(135deg, #22c55e, #06b6d4);
+    --gradient-3: linear-gradient(135deg, #f59e0b, #ef4444);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* Hero */
+  .hero {
+    position: relative;
+    padding: 80px 40px 60px;
+    background: linear-gradient(180deg, #0f1729 0%, #0a0e17 100%);
+    overflow: hidden;
+    text-align: center;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -20%;
+    width: 140%;
+    height: 200%;
+    background: radial-gradient(ellipse at 50% 0%, #3b82f620 0%, transparent 60%),
+                radial-gradient(ellipse at 20% 50%, #8b5cf610 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 50%, #06b6d410 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .hero-content { position: relative; max-width: 900px; margin: 0 auto; }
+  .hero-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border-radius: 20px;
+    margin-bottom: 24px;
+  }
+  .hero h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    line-height: 1.15;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-sub {
+    font-size: 1.15rem;
+    color: var(--text-muted);
+    max-width: 650px;
+    margin: 0 auto 32px;
+  }
+  .hero-meta {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .hero-meta svg { width: 16px; height: 16px; stroke: var(--accent-light); fill: none; stroke-width: 2; }
+
+  /* Container */
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+  /* KPI Strip */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin: -30px auto 48px;
+    position: relative;
+    z-index: 2;
+  }
+  .kpi-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    transition: all 0.3s;
+  }
+  .kpi-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 32px #3b82f615; }
+  .kpi-label { font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 500; }
+  .kpi-value { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; }
+  .kpi-change { font-size: 0.82rem; font-weight: 600; margin-top: 4px; }
+  .kpi-change.up { color: var(--green); }
+  .kpi-change.down { color: var(--red); }
+  .kpi-change.neutral { color: var(--text-dim); }
+
+  /* Section */
+  .section { margin-bottom: 64px; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--gradient-1);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .section-header h2 {
+    font-size: 1.55rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  /* Subsection */
+  .subsection { margin-bottom: 36px; }
+  .subsection h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent-light);
+    margin-bottom: 16px;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+    transition: border-color 0.3s;
+  }
+  .card:hover { border-color: #2563eb44; }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  /* Tables */
+  .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+  thead { background: #151d2e; }
+  th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 11px 16px;
+    border-bottom: 1px solid #1e2a3a55;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  tbody tr { transition: background 0.2s; }
+  tbody tr:hover { background: #1a223055; }
+  tbody tr:last-child td { border-bottom: none; }
+  .highlight-row { background: #3b82f608; }
+  .val-up { color: var(--green); font-weight: 600; }
+  .val-down { color: var(--red); font-weight: 600; }
+  .val-new { color: var(--purple); font-weight: 600; }
+  .val-bold { font-weight: 700; color: #fff; }
+  .val-accent { color: var(--accent-light); font-weight: 600; }
+
+  /* Insight callout */
+  .insight {
+    background: linear-gradient(135deg, #1e293b, #172033);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 12px 12px 0;
+    padding: 18px 22px;
+    margin: 20px 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.75;
+  }
+  .insight strong { color: var(--text); }
+  .insight.green { border-left-color: var(--green); }
+  .insight.orange { border-left-color: var(--orange); }
+  .insight.purple { border-left-color: var(--purple); }
+
+  /* Chart container */
+  .chart-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .chart-container h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+  .chart-container canvas { max-height: 340px; }
+
+  /* Scorecard */
+  .scorecard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .score-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+  }
+  .score-label { flex: 1; font-size: 0.88rem; font-weight: 500; }
+  .score-bars { display: flex; gap: 3px; align-items: center; }
+  .score-bar {
+    width: 10px;
+    height: 24px;
+    border-radius: 3px;
+    background: #1e2a3a;
+  }
+  .score-bar.filled { background: var(--accent); }
+  .score-bar.filled.green { background: var(--green); }
+  .score-val { font-size: 0.78rem; color: var(--text-dim); width: 38px; text-align: right; font-weight: 600; }
+  .score-arrow { font-size: 1.1rem; }
+
+  /* Opportunity cards */
+  .opp-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 14px;
+  }
+  .opp-card h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+  .opp-card .opp-state { font-size: 0.82rem; color: var(--text-dim); margin-bottom: 6px; }
+  .opp-card .opp-impact { font-size: 0.85rem; color: var(--green); font-weight: 500; }
+
+  /* Executive summary box */
+  .exec-box {
+    background: linear-gradient(135deg, #111c2e, #0f1729);
+    border: 1px solid #2563eb33;
+    border-radius: 20px;
+    padding: 36px;
+    margin-bottom: 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .exec-box::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, #3b82f608, transparent);
+    pointer-events: none;
+  }
+  .exec-box h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 16px; }
+  .exec-box p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 14px; line-height: 1.8; }
+  .exec-box .bottom-line {
+    background: #22c55e12;
+    border: 1px solid #22c55e30;
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 0.92rem;
+    color: var(--green);
+    font-weight: 500;
+    margin-top: 8px;
+  }
+
+  /* Footer */
+  .report-footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 24px;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+  }
+  .report-footer a { color: var(--accent-light); text-decoration: none; }
+
+  /* Tabs for appendix */
+  .tab-nav { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab-btn {
+    padding: 8px 18px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .tab-btn.active, .tab-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero { padding: 48px 20px 40px; }
+    .hero h1 { font-size: 2rem; }
+    .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+    .card-grid { grid-template-columns: 1fr; }
+    .hero-meta { flex-direction: column; gap: 8px; align-items: center; }
+    .container { padding: 0 16px; }
+    .exec-box { padding: 24px; }
+    td, th { padding: 8px 10px; font-size: 0.8rem; }
+  }
+  @media (max-width: 480px) {
+    .kpi-strip { grid-template-columns: 1fr; }
+    .scorecard-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Animation */
+  .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s, transform 0.6s; }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  /* Badge pills */
+  .pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .pill-green { background: var(--green-bg); color: var(--green); }
+  .pill-red { background: var(--red-bg); color: var(--red); }
+  .pill-purple { background: var(--purple-bg); color: var(--purple); }
+  .pill-orange { background: var(--orange-bg); color: var(--orange); }
+  .pill-cyan { background: var(--cyan-bg); color: var(--cyan); }
+
+  /* Comparison strips */
+  .compare-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .compare-item {
+    background: #0d1320;
+    border-radius: 10px;
+    padding: 14px 18px;
+    text-align: center;
+  }
+  .compare-item .label { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+  .compare-item .old { font-size: 1.3rem; font-weight: 700; color: var(--text-dim); }
+  .compare-item .arrow { color: var(--green); margin: 2px 0; font-size: 0.85rem; }
+  .compare-item .new { font-size: 1.3rem; font-weight: 700; color: var(--green); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-content">
+    <span class="hero-badge">Performance Report</span>
+    <h1>ccansam.com<br>SEO & Digital Visibility</h1>
+    <p class="hero-sub">15-month performance analysis tracking the transformation from page 3 to page 1 of Google across Saskatchewan's shipping container market.</p>
+    <div class="hero-meta">
+      <span>
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Prepared: April 5, 2026
+      </span>
+      <span>
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Period: Jan 2025 – Mar 2026
+      </span>
+      <span>
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Spotlight: Sep 2025 vs Mar 2026
+      </span>
+      <span>
+        <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+        GA4 + Search Console
+      </span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- KPI Strip -->
+<div class="kpi-strip">
+  <div class="kpi-card">
+    <div class="kpi-label">Search Clicks</div>
+    <div class="kpi-value" style="color: var(--accent-light)">365</div>
+    <div class="kpi-change up">+123% from Sep</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Avg Position</div>
+    <div class="kpi-value" style="color: var(--green)">9.6</div>
+    <div class="kpi-change up">Page 3 → Page 1</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Total Sessions</div>
+    <div class="kpi-value" style="color: var(--purple)">996</div>
+    <div class="kpi-change up">+113% from Sep</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Conversions</div>
+    <div class="kpi-value" style="color: var(--orange)">62</div>
+    <div class="kpi-change up">+32% from Sep</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Click-Through Rate</div>
+    <div class="kpi-value" style="color: var(--cyan)">0.9%</div>
+    <div class="kpi-change up">+125% from Sep</div>
+  </div>
+</div>
+
+<!-- Executive Summary -->
+<div class="exec-box fade-in">
+  <h2>Executive Summary</h2>
+  <p>Over 15 months, ccansam.com transformed from a low-visibility site buried on page 3–4 of Google into a <strong>page-1 competitor</strong> across Saskatchewan's shipping container market. A full site rebuild completed around October 2025 caused a short-term dip in Google impressions, but the new structure — city-specific pages, optimized URLs, guide content — compounded into the <strong>best organic performance in the site's history</strong> by March 2026.</p>
+  <div class="bottom-line">
+    <strong>The bottom line:</strong> Google search clicks grew <strong>+123%</strong>, average position improved from <strong>page 3 to page 1</strong>, and the site is now visible in AI search engines for the first time.
+  </div>
+</div>
+
+<!-- SECTION 1: Headline Numbers -->
+<div class="section fade-in">
+  <div class="section-header">
+    <div class="section-num">1</div>
+    <h2>The Headline Numbers — Sep 2025 vs Mar 2026</h2>
+  </div>
+
+  <div class="subsection">
+    <h3>Traffic & Engagement</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Metric</th><th>Sep 2025</th><th>Mar 2026</th><th>Change</th></tr></thead>
+        <tbody>
+          <tr><td>Total sessions</td><td>467</td><td class="val-bold">996</td><td class="val-up">+113%</td></tr>
+          <tr><td>Unique users</td><td>373</td><td class="val-bold">861</td><td class="val-up">+131%</td></tr>
+          <tr><td>Page views</td><td>989</td><td class="val-bold">1,548</td><td class="val-up">+57%</td></tr>
+          <tr><td>Pages per session</td><td>2.12</td><td>1.55</td><td class="val-down">-27%</td></tr>
+          <tr><td>Engaged sessions</td><td>262 (56%)</td><td class="val-bold">405 (41%)</td><td class="val-up">+55% volume</td></tr>
+          <tr><td>Bounce rate</td><td>44%</td><td>59%</td><td class="val-down">+15 pts</td></tr>
+          <tr><td>Avg session duration</td><td>2:06</td><td>1:40</td><td class="val-down">-21%</td></tr>
+          <tr><td>Conversions (GA4)</td><td>47</td><td class="val-bold">62</td><td class="val-up">+32%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="insight">
+      <strong>Read this right:</strong> The per-session engagement dipped because the audience expanded. But total engaged sessions grew 55% and conversions grew 32%. More people are reaching the contact page and converting, even if each individual session is slightly shorter. <strong>Volume wins.</strong>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>Search Console — Organic Search Performance</h3>
+    <div class="compare-strip">
+      <div class="compare-item">
+        <div class="label">Google Clicks</div>
+        <div class="old">164</div>
+        <div class="arrow">↓</div>
+        <div class="new">365</div>
+      </div>
+      <div class="compare-item">
+        <div class="label">Impressions</div>
+        <div class="old">39,509</div>
+        <div class="arrow">≈</div>
+        <div class="new" style="color: var(--text-muted)">38,823</div>
+      </div>
+      <div class="compare-item">
+        <div class="label">CTR</div>
+        <div class="old">0.4%</div>
+        <div class="arrow">↓</div>
+        <div class="new">0.9%</div>
+      </div>
+      <div class="compare-item">
+        <div class="label">Avg Position</div>
+        <div class="old">~27</div>
+        <div class="arrow">↓</div>
+        <div class="new">~9.6</div>
+      </div>
+    </div>
+    <div class="insight green">
+      The site maintained roughly the same number of impressions while <strong>doubling the click rate</strong>. The new pages rank higher and the titles/descriptions are more compelling — people who see the listing now actually click it.
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>Conversions & Lead Indicators</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Metric</th><th>Sep 2025</th><th>Mar 2026</th><th>Change</th></tr></thead>
+        <tbody>
+          <tr><td>GA4 conversions</td><td>47</td><td class="val-bold">62</td><td class="val-up">+32%</td></tr>
+          <tr><td>Contact page sessions</td><td>38</td><td class="val-bold">56</td><td class="val-up">+47%</td></tr>
+          <tr><td>Contact page bounce rate</td><td>10.5%</td><td class="val-bold">7.1%</td><td class="val-up">Improved</td></tr>
+          <tr><td>Contact page avg duration</td><td>0:53</td><td class="val-bold">1:35</td><td class="val-up">+78%</td></tr>
+          <tr><td>New user conversions</td><td>42</td><td>47</td><td class="val-up">+12%</td></tr>
+          <tr class="highlight-row"><td>Returning user conversions</td><td>3</td><td class="val-bold">15</td><td class="val-up">+400%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="insight green">
+      Returning visitors went from almost never converting (3) to a reliable conversion channel (15). <strong>The rebuilt site gives people a reason to come back.</strong>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2: Traffic Sources -->
+<div class="section fade-in">
+  <div class="section-header">
+    <div class="section-num">2</div>
+    <h2>Traffic Sources — Where Visitors Come From</h2>
+  </div>
+
+  <div class="card-grid">
+    <div class="chart-container">
+      <h4>Channel Mix — Mar 2026</h4>
+      <canvas id="channelPie"></canvas>
+    </div>
+    <div class="chart-container">
+      <h4>Channel Growth — Sep 2025 vs Mar 2026</h4>
+      <canvas id="channelBar"></canvas>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>Channel Mix Comparison</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Source</th><th>Sep 2025</th><th>%</th><th>Mar 2026</th><th>%</th><th>Change</th></tr></thead>
+        <tbody>
+          <tr><td>Google organic</td><td>189</td><td>40%</td><td class="val-bold">448</td><td>45%</td><td class="val-up">+137%</td></tr>
+          <tr><td>Direct</td><td>182</td><td>39%</td><td class="val-bold">418</td><td>42%</td><td class="val-up">+130%</td></tr>
+          <tr><td>Facebook (all)</td><td>64</td><td>14%</td><td>70</td><td>7%</td><td class="val-up">+9%</td></tr>
+          <tr><td>Bing</td><td>7</td><td>2%</td><td class="val-bold">41</td><td>4%</td><td class="val-up">+486%</td></tr>
+          <tr><td>Yahoo</td><td>0</td><td>0%</td><td>5</td><td>&lt;1%</td><td class="val-new">New</td></tr>
+          <tr><td>ChatGPT</td><td>0</td><td>0%</td><td>4</td><td>&lt;1%</td><td class="val-new">New channel</td></tr>
+          <tr><td>DuckDuckGo</td><td>4</td><td>1%</td><td>1</td><td>&lt;1%</td><td class="val-down">-75%</td></tr>
+          <tr><td>LinkedIn</td><td>7</td><td>2%</td><td>2</td><td>&lt;1%</td><td class="val-down">-71%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>Source Quality — Conversions by Channel</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Source</th><th>Sep Conv</th><th>Mar Conv</th><th>Bounce (Mar)</th></tr></thead>
+        <tbody>
+          <tr><td>Google</td><td>29</td><td class="val-bold">34</td><td><span class="pill pill-green">35%</span></td></tr>
+          <tr><td>Direct</td><td>11</td><td class="val-bold">21</td><td><span class="pill pill-red">86%</span></td></tr>
+          <tr><td>Bing</td><td>1</td><td class="val-bold">5</td><td><span class="pill pill-green">32%</span></td></tr>
+          <tr><td>Facebook (mobile)</td><td>0</td><td>1</td><td><span class="pill pill-orange">78%</span></td></tr>
+          <tr><td>ChatGPT</td><td>—</td><td class="val-new">1</td><td><span class="pill pill-cyan">50%</span></td></tr>
+          <tr><td>DuckDuckGo</td><td>2</td><td>1</td><td><span class="pill pill-green">0%</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="insight">
+      <strong>Google organic is the highest-quality channel:</strong> lowest bounce rate (35%), most conversions (34), and the most engaged sessions. Bing is quietly strong at 32% bounce with 5 conversions. ChatGPT already produced a conversion in its first month — that's signal.
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 3: SEO Deep Dive -->
+<div class="section fade-in">
+  <div class="section-header">
+    <div class="section-num">3</div>
+    <h2>Search Engine Optimization — Deep Dive</h2>
+  </div>
+
+  <div class="chart-container">
+    <h4>Monthly Search Console Trend — Clicks & CTR (Full Period)</h4>
+    <canvas id="seoTrend"></canvas>
+  </div>
+
+  <div class="subsection">
+    <h3>Monthly Search Console Data</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Month</th><th>Clicks</th><th>Impressions</th><th>CTR</th><th>Trend</th></tr></thead>
+        <tbody>
+          <tr><td>Jan 2025</td><td>66</td><td>38,117</td><td>0.2%</td><td>Baseline</td></tr>
+          <tr><td>Feb 2025</td><td>86</td><td>45,152</td><td>0.2%</td><td></td></tr>
+          <tr><td>Mar 2025</td><td>116</td><td>48,744</td><td>0.2%</td><td>Peak impressions</td></tr>
+          <tr><td>Apr 2025</td><td>138</td><td>35,328</td><td>0.4%</td><td>CTR doubles</td></tr>
+          <tr><td>May 2025</td><td>154</td><td>39,229</td><td>0.4%</td><td></td></tr>
+          <tr><td>Jun 2025</td><td>131</td><td>38,238</td><td>0.3%</td><td></td></tr>
+          <tr><td>Jul 2025</td><td>178</td><td>41,267</td><td>0.4%</td><td></td></tr>
+          <tr><td>Aug 2025</td><td>178</td><td>43,568</td><td>0.4%</td><td></td></tr>
+          <tr class="highlight-row"><td class="val-bold">Sep 2025</td><td class="val-bold">164</td><td class="val-bold">39,509</td><td class="val-bold">0.4%</td><td class="val-accent">Pre-rebuild benchmark</td></tr>
+          <tr><td>Oct 2025</td><td>152</td><td>21,060</td><td>0.7%</td><td><span class="pill pill-orange">Migration dip</span></td></tr>
+          <tr><td>Nov 2025</td><td>134</td><td>23,151</td><td>0.6%</td><td>Recovery phase</td></tr>
+          <tr><td>Dec 2025</td><td>88</td><td>24,947</td><td>0.4%</td><td>Seasonal low</td></tr>
+          <tr><td>Jan 2026</td><td>207</td><td>29,266</td><td>0.7%</td><td><span class="pill pill-green">Recovery confirmed</span></td></tr>
+          <tr><td>Feb 2026</td><td>263</td><td>29,476</td><td>0.9%</td><td>Acceleration</td></tr>
+          <tr class="highlight-row"><td class="val-bold">Mar 2026</td><td class="val-bold">365</td><td class="val-bold">38,823</td><td class="val-bold">0.9%</td><td class="val-up">All-time high clicks</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>Half-Year Aggregates</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Period</th><th>Clicks</th><th>Impressions</th><th>CTR</th><th>Avg Position</th></tr></thead>
+        <tbody>
+          <tr><td>H1 2025 (Jan–Jun)</td><td>691</td><td>244,808</td><td>0.28%</td><td>39.3</td></tr>
+          <tr><td>H2 2025 (Jul–Dec)</td><td>894</td><td>193,502</td><td>0.46%</td><td>26.4</td></tr>
+          <tr class="highlight-row"><td class="val-bold">Q1 2026 (Jan–Mar)</td><td class="val-bold">835</td><td>97,565</td><td class="val-up">0.86%</td><td class="val-up">11.3</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="insight green">
+      In just Q1 2026 (3 months), the site generated nearly as many clicks as H1 2025 (6 months) while using <strong>less than half the impressions</strong>. The efficiency gain is dramatic.
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>Keyword Rankings — Sep 2025 vs Mar 2026</h3>
+    <h3 style="font-size: 0.95rem; color: var(--text); margin-top: 20px; margin-bottom: 12px;">Branded Terms</h3>
+    <div class="table-wrap" style="margin-bottom: 20px;">
+      <table>
+        <thead><tr><th>Query</th><th>Sep Clicks</th><th>Sep Position</th><th>Mar Clicks</th><th>Mar Position</th></tr></thead>
+        <tbody>
+          <tr><td>ccansam</td><td>9</td><td>1.1</td><td>10</td><td class="val-up">1.0</td></tr>
+          <tr><td>c can sam</td><td>0</td><td>—</td><td>9</td><td class="val-new">1.0</td></tr>
+          <tr><td>ccansam container sales and rental</td><td>13</td><td>1.2</td><td>—</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="font-size: 0.95rem; color: var(--text); margin-top: 20px; margin-bottom: 12px;">Commercial Intent — Saskatchewan</h3>
+    <div class="table-wrap" style="margin-bottom: 20px;">
+      <table>
+        <thead><tr><th>Query</th><th>Sep Clicks</th><th>Sep Position</th><th>Mar Clicks</th><th>Mar Position</th></tr></thead>
+        <tbody>
+          <tr><td>shipping containers for sale saskatoon</td><td>4</td><td>5.3</td><td>—</td><td>—</td></tr>
+          <tr><td>saskatoon shipping containers</td><td>—</td><td>—</td><td>1</td><td class="val-up">1.0</td></tr>
+          <tr><td>shipping containers saskatchewan</td><td>1</td><td>3.1</td><td>2</td><td class="val-up">1.2</td></tr>
+          <tr><td>sea can for sale saskatchewan</td><td>—</td><td>—</td><td>3</td><td class="val-up">3.8</td></tr>
+          <tr><td>sea cans for sale saskatoon</td><td>—</td><td>—</td><td>3</td><td class="val-up">4.5</td></tr>
+          <tr><td>seacan saskatoon</td><td>—</td><td>—</td><td>4</td><td class="val-up">3.1</td></tr>
+          <tr><td>container homes saskatchewan</td><td>—</td><td>—</td><td>2</td><td class="val-up">1.5</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="font-size: 0.95rem; color: var(--text); margin-top: 20px; margin-bottom: 12px;">High-Volume Generic Terms</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Query</th><th>Sep Impressions</th><th>Sep Position</th><th>Mar Impressions</th><th>Mar Position</th></tr></thead>
+        <tbody>
+          <tr><td>seacan</td><td>(in 5,884 H1 total)</td><td>17.7</td><td>1,970</td><td class="val-up">5.2</td></tr>
+          <tr><td>sea can</td><td>1,946</td><td>10.8</td><td>1,266</td><td class="val-up">5.2</td></tr>
+          <tr><td>c can</td><td>1,946</td><td>10.8</td><td>—</td><td>—</td></tr>
+          <tr><td>sea can saskatoon</td><td>(in 3,818 H1 total)</td><td>3.7</td><td>622</td><td>5.3</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="insight purple">
+      The site is now <strong>page 1 for the two highest-volume generic terms</strong> in the category: "seacan" (position 5.2) and "sea can" (position 5.2). In September it was on page 2–3 for these same terms.
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>Keyword Universe Expansion</h3>
+    <div class="compare-strip">
+      <div class="compare-item">
+        <div class="label">Queries with clicks</div>
+        <div class="old">28</div>
+        <div class="arrow">↓</div>
+        <div class="new">40+</div>
+      </div>
+      <div class="compare-item">
+        <div class="label">Position &lt; 5</div>
+        <div class="old">~5</div>
+        <div class="arrow">↓</div>
+        <div class="new">~12</div>
+      </div>
+      <div class="compare-item">
+        <div class="label">Commercial queries</div>
+        <div class="old">~8</div>
+        <div class="arrow">↓</div>
+        <div class="new">~20</div>
+      </div>
+      <div class="compare-item">
+        <div class="label">City queries</div>
+        <div class="old">0</div>
+        <div class="arrow">↓</div>
+        <div class="new">6+ cities</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>Page-Level Search Performance</h3>
+    <h3 style="font-size: 0.95rem; color: var(--text); margin-top: 16px; margin-bottom: 12px;">Homepage</h3>
+    <div class="table-wrap" style="margin-bottom: 20px;">
+      <table>
+        <thead><tr><th>Metric</th><th>Sep 2025</th><th>Mar 2026</th><th>Change</th></tr></thead>
+        <tbody>
+          <tr><td>Clicks</td><td>140</td><td class="val-bold">261</td><td class="val-up">+86%</td></tr>
+          <tr><td>Impressions</td><td>29,538</td><td>27,558</td><td>-7%</td></tr>
+          <tr><td>CTR</td><td>0.47%</td><td class="val-bold">0.95%</td><td class="val-up">+102%</td></tr>
+          <tr><td>Avg position</td><td>26.5</td><td class="val-bold">8.8</td><td class="val-up">Page 3 → Page 1</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="font-size: 0.95rem; color: var(--text); margin-top: 20px; margin-bottom: 12px;">Top Inner Pages — Mar 2026 <span class="pill pill-purple">New pages</span></h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Page</th><th>Clicks</th><th>Impressions</th><th>CTR</th><th>Position</th></tr></thead>
+        <tbody>
+          <tr><td>/containers-prince-albert/</td><td class="val-bold">15</td><td>127</td><td class="val-up">11.81%</td><td>15.9</td></tr>
+          <tr><td>/storage-container-sales-and-rentals/</td><td>14</td><td>3,003</td><td>0.47%</td><td>21.4</td></tr>
+          <tr><td>/storage-container-rentals/</td><td>9</td><td>1,230</td><td>0.73%</td><td>34.3</td></tr>
+          <tr><td>/on-site-storage-rentals/</td><td>8</td><td>570</td><td>1.40%</td><td>11.4</td></tr>
+          <tr><td>/shipping-containers/</td><td>8</td><td>3,433</td><td>0.23%</td><td>12.4</td></tr>
+          <tr><td>/containers-swift-current/</td><td>7</td><td>963</td><td>0.73%</td><td>20.7</td></tr>
+          <tr><td>/shipping-container-guide/</td><td>6</td><td>3,224</td><td>0.19%</td><td>8.6</td></tr>
+          <tr><td>/containers-regina/</td><td>4</td><td>605</td><td>0.66%</td><td>14.9</td></tr>
+          <tr><td>/containers-north-battleford/</td><td>4</td><td>79</td><td>5.06%</td><td>18.2</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="insight green">
+      Every rebuilt page is outperforming its predecessor. The old <code>/sales/</code> page got 6 clicks; its replacement gets 14. The old <code>/rentals/</code> got 3; the new rental pages collectively get 17+.
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 4: Geographic Reach -->
+<div class="section fade-in">
+  <div class="section-header">
+    <div class="section-num">4</div>
+    <h2>Geographic Reach</h2>
+  </div>
+
+  <div class="subsection">
+    <h3>Canada (Target Market)</h3>
+    <div class="compare-strip">
+      <div class="compare-item">
+        <div class="label">Clicks from Canada</div>
+        <div class="old">141</div>
+        <div class="arrow">↓</div>
+        <div class="new">342</div>
+      </div>
+      <div class="compare-item">
+        <div class="label">CTR (Canada)</div>
+        <div class="old">0.41%</div>
+        <div class="arrow">↓</div>
+        <div class="new">0.99%</div>
+      </div>
+      <div class="compare-item">
+        <div class="label">Avg Position</div>
+        <div class="old">29.8</div>
+        <div class="arrow">↓</div>
+        <div class="new">10.2</div>
+      </div>
+    </div>
+    <div class="insight green">
+      Same number of Canadian impressions, nearly <strong>2.5x the clicks</strong>. The site is dramatically more visible and more compelling to its target market.
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>Other Countries — Mar 2026</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Country</th><th>Clicks</th><th>CTR</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Philippines</td><td>10</td><td class="val-up">12.35%</td><td>Likely container industry workers/brokers</td></tr>
+          <tr><td>USA</td><td>4</td><td>0.21%</td><td>Cross-border interest</td></tr>
+          <tr><td>Vietnam</td><td>3</td><td class="val-up">15.79%</td><td></td></tr>
+          <tr><td>Australia</td><td>1</td><td>2.70%</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5: Device Performance -->
+<div class="section fade-in">
+  <div class="section-header">
+    <div class="section-num">5</div>
+    <h2>Device Performance</h2>
+  </div>
+
+  <div class="card-grid">
+    <div class="chart-container">
+      <h4>Sessions by Device — Mar 2026</h4>
+      <canvas id="devicePie"></canvas>
+    </div>
+    <div class="chart-container">
+      <h4>Search Clicks by Device</h4>
+      <canvas id="deviceBar"></canvas>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>GA4 — Sessions & Conversions by Device</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Device</th><th>Sep Sessions</th><th>Sep Conv</th><th>Mar Sessions</th><th>Mar Conv</th></tr></thead>
+        <tbody>
+          <tr><td>Desktop</td><td>246 (53%)</td><td>42 (89%)</td><td class="val-bold">582 (58%)</td><td class="val-bold">51 (82%)</td></tr>
+          <tr><td>Mobile</td><td>216 (46%)</td><td>4 (9%)</td><td class="val-bold">407 (41%)</td><td class="val-bold">10 (16%)</td></tr>
+          <tr><td>Tablet</td><td>6 (1%)</td><td>1 (2%)</td><td>7 (1%)</td><td>1 (2%)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>Search Console — Clicks by Device</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Device</th><th>Sep Clicks</th><th>Sep CTR</th><th>Sep Position</th><th>Mar Clicks</th><th>Mar CTR</th><th>Mar Position</th></tr></thead>
+        <tbody>
+          <tr class="highlight-row"><td>Mobile</td><td>96</td><td>0.53%</td><td>27.7</td><td class="val-bold">244</td><td class="val-up">1.42%</td><td class="val-up">7.5</td></tr>
+          <tr><td>Desktop</td><td>64</td><td>0.30%</td><td>31.0</td><td class="val-bold">115</td><td>0.54%</td><td>13.2</td></tr>
+          <tr><td>Tablet</td><td>4</td><td>5.56%</td><td>9.2</td><td>6</td><td>3.23%</td><td class="val-up">3.9</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="insight purple">
+      <strong>Mobile search is the breakout story.</strong> Clicks went from 96 to 244 (+154%), CTR nearly tripled, and average position moved from page 3 to page 1 (7.5). Mobile searchers are the core audience — people looking for containers from a job site or yard.
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: Page Performance -->
+<div class="section fade-in">
+  <div class="section-header">
+    <div class="section-num">6</div>
+    <h2>Page Performance — What's Working</h2>
+  </div>
+
+  <div class="chart-container">
+    <h4>Top Pages by Sessions — Mar 2026</h4>
+    <canvas id="pagesBar"></canvas>
+  </div>
+
+  <div class="subsection">
+    <h3>Top Pages by GA4 Sessions (Mar 2026)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Page</th><th>Sessions</th><th>Pageviews</th><th>Bounce</th><th>Duration</th><th>Conv</th></tr></thead>
+        <tbody>
+          <tr><td>/ (homepage)</td><td class="val-bold">662</td><td>716</td><td>54%</td><td>1:03</td><td>0</td></tr>
+          <tr><td>/storage-container-sales-and-rentals/</td><td class="val-bold">199</td><td>220</td><td><span class="pill pill-green">23%</span></td><td>1:37</td><td>0</td></tr>
+          <tr><td>/seacan-storage-containers-for-sale/</td><td>64</td><td>70</td><td><span class="pill pill-green">13%</span></td><td>1:37</td><td>0</td></tr>
+          <tr><td>/contact/</td><td>56</td><td>59</td><td><span class="pill pill-green">7%</span></td><td>1:35</td><td class="val-up">59</td></tr>
+          <tr><td>/on-site-storage-rentals/</td><td>54</td><td>58</td><td><span class="pill pill-green">26%</span></td><td>1:39</td><td>0</td></tr>
+          <tr><td>/storage-container-rentals/</td><td>41</td><td>41</td><td>32%</td><td>0:54</td><td>0</td></tr>
+          <tr><td>/containers/20ft-standard/</td><td>33</td><td>38</td><td><span class="pill pill-green">15%</span></td><td>1:55</td><td>0</td></tr>
+          <tr><td>/about/</td><td>30</td><td>35</td><td>27%</td><td>0:58</td><td>0</td></tr>
+          <tr><td>/containers/40ft-high-cube/</td><td>28</td><td>30</td><td>46%</td><td>0:42</td><td>0</td></tr>
+          <tr><td>/shipping-container-guide/</td><td>26</td><td>26</td><td>35%</td><td>0:40</td><td>0</td></tr>
+          <tr><td>/containers-prince-albert/</td><td>24</td><td>25</td><td>25%</td><td class="val-up">2:40</td><td>0</td></tr>
+          <tr><td>/containers/9ft-mini/</td><td>17</td><td>19</td><td>24%</td><td>1:18</td><td>0</td></tr>
+          <tr><td>/containers-saskatoon/</td><td>16</td><td>17</td><td><span class="pill pill-green">19%</span></td><td>0:22</td><td>0</td></tr>
+          <tr><td>/containers-regina/</td><td>13</td><td>15</td><td>38%</td><td>0:21</td><td>0</td></tr>
+          <tr><td>/containers-swift-current/</td><td>10</td><td>10</td><td>30%</td><td>0:44</td><td>0</td></tr>
+          <tr><td>/containers-moose-jaw/</td><td>10</td><td>9</td><td>30%</td><td>0:16</td><td>0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="insight">
+      <strong>/storage-container-sales-and-rentals/</strong> is the standout inner page: 199 sessions, 23% bounce, 1:37 duration. This is the core sales page and it's doing its job — keeping people engaged and moving them toward contact.
+    </div>
+    <div class="insight green" style="margin-top: 10px;">
+      <strong>City pages are pulling their weight.</strong> Prince Albert visitors stay 2:40 on average. Saskatoon has the lowest bounce rate (19%). These are real local prospects researching their options.
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7: New vs Returning -->
+<div class="section fade-in">
+  <div class="section-header">
+    <div class="section-num">7</div>
+    <h2>New vs Returning Visitors</h2>
+  </div>
+
+  <div class="card-grid">
+    <div class="chart-container">
+      <h4>Session Split</h4>
+      <canvas id="visitorBar"></canvas>
+    </div>
+    <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div style="font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Returning Visitor Conversion Rate</div>
+        <div style="font-size: 3.5rem; font-weight: 800; color: var(--green);">14.4%</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted);">up from 5.2% in Sep 2025 <span class="pill pill-green">+177%</span></div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Returning User Conversions</div>
+        <div style="font-size: 3.5rem; font-weight: 800; color: var(--accent-light);">15</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted);">up from 3 in Sep 2025 <span class="pill pill-green">+400%</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="insight green">
+    The most impressive stat in this report: <strong>returning visitors convert at 14.4% in March vs 5.2% in September.</strong> The rebuilt site gives people a reason to come back, and when they do, they convert. This is the sign of a site that builds trust.
+  </div>
+</div>
+
+<!-- SECTION 8: AI Search -->
+<div class="section fade-in">
+  <div class="section-header">
+    <div class="section-num">8</div>
+    <h2>AI Search & Generative Engine Visibility</h2>
+  </div>
+
+  <div class="card" style="margin-bottom: 24px;">
+    <h3 style="font-size: 1rem; margin-bottom: 12px; color: var(--accent-light);">What Is GEO / AIO / LLMO?</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+      <div style="padding: 14px; background: #0d1320; border-radius: 10px;">
+        <div style="font-weight: 700; color: var(--purple); margin-bottom: 6px;">GEO</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted);">Generative Engine Optimization — optimizing for AI-powered search results (Google AI Overviews, Bing Copilot)</div>
+      </div>
+      <div style="padding: 14px; background: #0d1320; border-radius: 10px;">
+        <div style="font-weight: 700; color: var(--cyan); margin-bottom: 6px;">AIO</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted);">AI Overview Optimization — specifically targeting Google's AI-generated answer boxes</div>
+      </div>
+      <div style="padding: 14px; background: #0d1320; border-radius: 10px;">
+        <div style="font-weight: 700; color: var(--green); margin-bottom: 6px;">LLMO</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted);">Large Language Model Optimization — ensuring content is cited by ChatGPT, Claude, Perplexity, and other AI assistants</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>Current AI Search Traffic</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>AI Source</th><th>Sep 2025</th><th>Mar 2026</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>ChatGPT (chatgpt.com)</td><td>0</td><td class="val-new">4 sessions</td><td><span class="pill pill-purple">New — first ever</span></td></tr>
+          <tr><td>Perplexity</td><td>0</td><td>0</td><td>Not yet</td></tr>
+          <tr><td>Google AI Overviews</td><td>Not trackable</td><td>Not trackable</td><td>Likely appearing*</td></tr>
+          <tr><td>Bing Copilot</td><td>Included in Bing</td><td>Included in Bing</td><td><span class="pill pill-green">Bing +486%</span></td></tr>
+          <tr><td>Claude / Anthropic</td><td>0</td><td>0</td><td>Not yet</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>ChatGPT Performance</h3>
+    <div class="compare-strip">
+      <div class="compare-item">
+        <div class="label">Sessions</div>
+        <div class="new" style="color: var(--purple);">4</div>
+      </div>
+      <div class="compare-item">
+        <div class="label">Page Views</div>
+        <div class="new" style="color: var(--purple);">6</div>
+      </div>
+      <div class="compare-item">
+        <div class="label">Bounce Rate</div>
+        <div class="new" style="color: var(--cyan);">50%</div>
+      </div>
+      <div class="compare-item">
+        <div class="label">Conversions</div>
+        <div class="new" style="color: var(--green);">1</div>
+      </div>
+    </div>
+    <div class="insight purple">
+      ChatGPT sent 4 visitors and one of them converted. A <strong>25% conversion rate from an AI referral</strong>. This is a tiny sample but a strong signal.
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>Why the New Site Is AI-Friendly</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Factor</th><th>Old Site (Sep 2025)</th><th>New Site (Mar 2026)</th></tr></thead>
+        <tbody>
+          <tr><td>Descriptive URLs</td><td style="color: var(--text-dim);">/sales/, /our-containers/</td><td class="val-up">/storage-container-sales-and-rentals/</td></tr>
+          <tr><td>Structured product pages</td><td style="color: var(--text-dim);">Generic gallery</td><td class="val-up">Individual pages per size</td></tr>
+          <tr><td>Location specificity</td><td style="color: var(--text-dim);">1 page (Martensville)</td><td class="val-up">6 city pages</td></tr>
+          <tr><td>Guide/educational content</td><td style="color: var(--text-dim);">Blog posts only</td><td class="val-up">/shipping-container-guide/ (pos 8.6)</td></tr>
+          <tr><td>FAQ-ready content</td><td style="color: var(--text-dim);">Scattered</td><td class="val-up">Structured by topic</td></tr>
+          <tr><td>Inventory/pricing signals</td><td style="color: var(--text-dim);">None visible</td><td class="val-up">/inventory-checker/ page</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>Bing Copilot / Bing Search Surge</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Metric</th><th>Sep 2025</th><th>Mar 2026</th><th>Change</th></tr></thead>
+        <tbody>
+          <tr><td>Bing sessions</td><td>7</td><td class="val-bold">41</td><td class="val-up">+486%</td></tr>
+          <tr><td>Bing bounce rate</td><td>14%</td><td>32%</td><td>Still excellent</td></tr>
+          <tr><td>Bing conversions</td><td>1</td><td class="val-bold">5</td><td class="val-up">+400%</td></tr>
+          <tr><td>Bing pages/session</td><td>1.71</td><td class="val-bold">2.51</td><td class="val-up">+47%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="insight">
+      <strong>Bing visitors are the most engaged segment in March 2026.</strong> They browse the most pages (2.51/session), have low bounce rates, and convert well. This is likely a mix of traditional Bing search + Bing Copilot referrals.
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 9: Full Year vs Q1 -->
+<div class="section fade-in">
+  <div class="section-header">
+    <div class="section-num">9</div>
+    <h2>Full-Year 2025 vs Q1 2026 — Annualized</h2>
+  </div>
+
+  <div class="chart-container">
+    <h4>Monthly Sessions & Conversions — Full Timeline</h4>
+    <canvas id="timelineChart"></canvas>
+  </div>
+
+  <div class="subsection">
+    <h3>GA4 Totals</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Metric</th><th>2025 (9 months*)</th><th>Q1 2026 (3 months)</th><th>Q1 Annualized</th></tr></thead>
+        <tbody>
+          <tr><td>Sessions</td><td>4,667</td><td>2,836</td><td class="val-bold">11,344</td></tr>
+          <tr><td>Users</td><td>4,018</td><td>2,412</td><td class="val-bold">9,648</td></tr>
+          <tr><td>Page views</td><td>6,884</td><td>4,470</td><td class="val-bold">17,880</td></tr>
+          <tr><td>Conversions</td><td>380</td><td>158</td><td class="val-bold">632</td></tr>
+          <tr><td>Avg monthly sessions</td><td>519</td><td class="val-up">945</td><td>—</td></tr>
+          <tr><td>Avg monthly conversions</td><td>42</td><td class="val-up">53</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 8px;">*Jun–Aug 2025 missing from GA4 due to tracking gap during site rebuild</p>
+  </div>
+
+  <div class="subsection">
+    <h3>Search Console Totals</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Metric</th><th>Full Year 2025</th><th>Q1 2026</th><th>Q1 Annualized</th></tr></thead>
+        <tbody>
+          <tr><td>Clicks</td><td>1,585</td><td>835</td><td class="val-bold">3,340</td></tr>
+          <tr><td>Impressions</td><td>438,310</td><td>97,565</td><td>390,260</td></tr>
+          <tr><td>Avg CTR</td><td>0.36%</td><td class="val-up">0.86%</td><td>—</td></tr>
+          <tr><td>Avg monthly clicks</td><td>132</td><td class="val-up">278</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="insight green">
+      At Q1 2026's run rate, the site will generate <strong>2x the clicks</strong> of all 2025 in this calendar year, from roughly the same number of impressions.
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>Monthly Google Organic Sessions — Full Timeline</h3>
+    <div class="chart-container">
+      <h4>Google Organic Sessions vs Search Console Clicks</h4>
+      <canvas id="organicTimeline"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 10: Site Architecture -->
+<div class="section fade-in">
+  <div class="section-header">
+    <div class="section-num">10</div>
+    <h2>Site Architecture — What Changed</h2>
+  </div>
+
+  <div class="subsection">
+    <h3>URL Structure Migration</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Category</th><th>Old URLs (Sep 2025)</th><th>New URLs (Mar 2026)</th></tr></thead>
+        <tbody>
+          <tr><td>Sales</td><td style="color: var(--text-dim);">/sales/</td><td class="val-up">/storage-container-sales-and-rentals/</td></tr>
+          <tr><td>Rentals</td><td style="color: var(--text-dim);">/rentals/</td><td class="val-up">/storage-container-rentals/, /on-site-storage-rentals/, /storage-container-leasing/</td></tr>
+          <tr><td>Products</td><td style="color: var(--text-dim);">/our-containers/</td><td class="val-up">/containers/20ft-standard/, /40ft-standard/, /40ft-high-cube/, /9ft-mini/</td></tr>
+          <tr><td>Cities</td><td style="color: var(--text-dim);">/storage-solutions-martensville/ (only)</td><td class="val-up">6 city pages: Saskatoon, Prince Albert, Regina, Swift Current, Moose Jaw, North Battleford</td></tr>
+          <tr><td>Guides</td><td style="color: var(--text-dim);">Blog posts only</td><td class="val-up">/shipping-container-guide/</td></tr>
+          <tr><td>Tools</td><td style="color: var(--text-dim);">None</td><td class="val-new">/inventory-checker/</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>Content Expansion</h3>
+    <div class="compare-strip">
+      <div class="compare-item">
+        <div class="label">Pages w/ clicks</div>
+        <div class="old">14</div>
+        <div class="arrow">↓</div>
+        <div class="new">25+</div>
+      </div>
+      <div class="compare-item">
+        <div class="label">City pages</div>
+        <div class="old">1</div>
+        <div class="arrow">↓</div>
+        <div class="new">6</div>
+      </div>
+      <div class="compare-item">
+        <div class="label">Product pages</div>
+        <div class="old">2-3</div>
+        <div class="arrow">↓</div>
+        <div class="new">4 specific</div>
+      </div>
+      <div class="compare-item">
+        <div class="label">Guide pages</div>
+        <div class="old">0</div>
+        <div class="arrow">↓</div>
+        <div class="new">1 comprehensive</div>
+      </div>
+      <div class="compare-item">
+        <div class="label">Interactive tools</div>
+        <div class="old">0</div>
+        <div class="arrow">↓</div>
+        <div class="new">1</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 11: Competitive Position -->
+<div class="section fade-in">
+  <div class="section-header">
+    <div class="section-num">11</div>
+    <h2>Competitive Position Indicators</h2>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3 style="font-size: 1rem; color: var(--accent-light); margin-bottom: 16px;">Top-3 Keywords (Position 1–3)</h3>
+      <div style="margin-bottom: 14px;">
+        <div style="font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">September 2025</div>
+        <div style="font-size: 0.9rem; color: var(--text-muted);">Only branded terms (2 keywords)</div>
+      </div>
+      <div>
+        <div style="font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">March 2026</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+          <span class="pill pill-green">shipping containers saskatchewan — 1.2</span>
+          <span class="pill pill-green">container homes saskatchewan — 1.5</span>
+          <span class="pill pill-green">ccansam — 1.0</span>
+          <span class="pill pill-green">c can sam — 1.0</span>
+          <span class="pill pill-green">c cans for sale saskatoon — 1.1</span>
+          <span class="pill pill-cyan">ccan — 2.4</span>
+          <span class="pill pill-green">sea can for sale saskatoon — 1.8</span>
+          <span class="pill pill-cyan">seacan saskatoon — 3.1</span>
+          <span class="pill pill-cyan">sea cans for sale saskatchewan — 2.8</span>
+          <span class="pill pill-green">saskatoon shipping containers — 1.0</span>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+      <div style="font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Page 1 Keywords</div>
+      <div style="display: flex; align-items: baseline; gap: 16px; margin-bottom: 16px;">
+        <div>
+          <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-dim);">~5</div>
+          <div style="font-size: 0.75rem; color: var(--text-dim);">Sep 2025</div>
+        </div>
+        <div style="font-size: 1.5rem; color: var(--green);">→</div>
+        <div>
+          <div style="font-size: 3rem; font-weight: 800; color: var(--green);">15-20</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">Mar 2026</div>
+        </div>
+      </div>
+      <div style="font-size: 0.85rem; color: var(--text-muted);">Branded + Commercial + Local</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 12: Opportunities -->
+<div class="section fade-in">
+  <div class="section-header">
+    <div class="section-num">12</div>
+    <h2>Opportunities & Recommendations</h2>
+  </div>
+
+  <div class="subsection">
+    <h3>Immediate Wins (This Quarter)</h3>
+    <div class="opp-card" style="border-left: 3px solid var(--green);">
+      <h4>Title tag optimization for high-impression pages</h4>
+      <div class="opp-state">/shipping-container-guide/ has 3,224 impressions but only 6 clicks (0.19% CTR) at position 8.6</div>
+      <div class="opp-impact">Rewriting the title/description could 3–5x clicks — it's already on page 1</div>
+    </div>
+    <div class="opp-card" style="border-left: 3px solid var(--orange);">
+      <h4>Mobile conversion optimization</h4>
+      <div class="opp-state">Mobile: 407 sessions, 10 conversions (2.5%) vs Desktop: 582 sessions, 51 conversions (8.8%)</div>
+      <div class="opp-impact">Closing even half the gap = ~10 additional monthly conversions</div>
+    </div>
+    <div class="opp-card" style="border-left: 3px solid var(--accent);">
+      <h4>/storage-container-rentals/ position improvement</h4>
+      <div class="opp-state">Position 34.3 with 1,230 impressions</div>
+      <div class="opp-impact">Moving to page 1 could generate 20–30 additional monthly clicks</div>
+    </div>
+    <div class="opp-card" style="border-left: 3px solid var(--purple);">
+      <h4>Duplicate URL fix</h4>
+      <div class="opp-state">/seacan-storage-containers-for-sale/ with and without trailing slash ranking separately</div>
+      <div class="opp-impact">Consolidating could double the ranking power</div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>Medium-Term Growth (Next 2 Quarters)</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
+      <div class="opp-card"><h4>FAQ schema markup</h4><div class="opp-state">Structured data helps both traditional search snippets and AI Overview citations</div></div>
+      <div class="opp-card"><h4>Price/sizing comparison content</h4><div class="opp-state">"How much does a 20ft container cost in Saskatchewan?" — the kind of question ChatGPT answers</div></div>
+      <div class="opp-card"><h4>Expand city pages</h4><div class="opp-state">Yorkton, Weyburn, Humboldt, Lloydminster — each is a new keyword cluster</div></div>
+      <div class="opp-card"><h4>Google Business Profile optimization</h4><div class="opp-state">Local pack visibility compounds with organic rankings</div></div>
+      <div class="opp-card"><h4>Backlink building</h4><div class="opp-state">Guide and blog content can attract links from SK business directories</div></div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>AI Search / GEO Priorities</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Action</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>Add FAQ sections to key pages</td><td>LLMs prefer pages with clear Q&A structures</td></tr>
+          <tr><td>Publish "Saskatchewan Container Buyer's Guide"</td><td>Long-form authoritative content that AI engines cite</td></tr>
+          <tr><td>Add structured data (Product, LocalBusiness, FAQ)</td><td>Helps Google AI Overviews pull your data</td></tr>
+          <tr><td>Create comparison content (rent vs buy, sizes)</td><td>The exact queries people ask ChatGPT/Perplexity</td></tr>
+          <tr><td>Ensure contact info on every page</td><td>LLMs extract contact details for "near me" queries</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 13: Summary Scorecard -->
+<div class="section fade-in">
+  <div class="section-header">
+    <div class="section-num">13</div>
+    <h2>Summary Scorecard</h2>
+  </div>
+
+  <div class="scorecard-grid" id="scorecard">
+    <!-- Filled by JS -->
+  </div>
+</div>
+
+<!-- Appendix -->
+<div class="section fade-in">
+  <div class="section-header">
+    <div class="section-num" style="background: linear-gradient(135deg, #64748b, #475569);">A</div>
+    <h2>Appendices</h2>
+  </div>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="showTab('sources')">Data Sources</button>
+    <button class="tab-btn" onclick="showTab('glossary')">Glossary</button>
+  </div>
+
+  <div id="tab-sources" class="tab-panel active">
+    <div class="card">
+      <div style="display: grid; gap: 12px; font-size: 0.88rem;">
+        <div><strong>Google Analytics 4</strong> (property 349535016): All session, user, pageview, conversion, and engagement data</div>
+        <div><strong>Google Search Console</strong> (https://ccansam.com/): All click, impression, CTR, and position data</div>
+        <div><strong>Date range:</strong> January 1, 2025 – April 5, 2026</div>
+        <div><strong>GA4 tracking gap:</strong> June–August 2025 (no data — likely tracking code removed during site rebuild)</div>
+        <div><strong>Conversions:</strong> GA4 conversion events as configured (appears to be contact form submissions)</div>
+        <div><strong>AI traffic attribution:</strong> Based on sessionSource in GA4 (chatgpt.com, perplexity.ai, etc.)</div>
+        <div><strong>All data pulled via:</strong> Anny analytics tool (GA4 Data API v1beta + Search Console API v1)</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-glossary" class="tab-panel">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Session</strong></td><td>A visit to the website (resets after 30 min of inactivity)</td></tr>
+          <tr><td><strong>Engaged Session</strong></td><td>A session that lasted 10+ seconds, had 2+ pageviews, or had a conversion</td></tr>
+          <tr><td><strong>Bounce Rate</strong></td><td>% of sessions that were not engaged</td></tr>
+          <tr><td><strong>Impressions</strong></td><td>Number of times the site appeared in Google search results</td></tr>
+          <tr><td><strong>Clicks</strong></td><td>Number of times someone clicked through from Google search</td></tr>
+          <tr><td><strong>CTR</strong></td><td>Click-through rate (clicks / impressions)</td></tr>
+          <tr><td><strong>Position</strong></td><td>Average ranking in Google search results (1 = top, 10 = bottom of page 1)</td></tr>
+          <tr><td><strong>GEO</strong></td><td>Generative Engine Optimization — optimizing for AI-powered search</td></tr>
+          <tr><td><strong>AIO</strong></td><td>AI Overview Optimization — targeting Google's AI answer boxes</td></tr>
+          <tr><td><strong>LLMO</strong></td><td>Large Language Model Optimization — ensuring citation by AI assistants</td></tr>
+          <tr><td><strong>Conversion</strong></td><td>A completed goal action (contact form, phone call, etc.)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<footer class="report-footer">
+  <p>Report generated from ccansam.com analytics data via Anny. Data sourced directly from Google APIs.</p>
+  <p style="margin-top: 8px;">ccansam.com — SEO & Digital Visibility Performance Report — April 5, 2026</p>
+</footer>
+
+<script>
+// Chart defaults
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.borderColor = '#1e2a3a';
+Chart.defaults.font.family = 'Inter, sans-serif';
+
+// Channel Pie Chart
+new Chart(document.getElementById('channelPie'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Google Organic', 'Direct', 'Facebook', 'Bing', 'Yahoo', 'ChatGPT', 'Other'],
+    datasets: [{
+      data: [448, 418, 70, 41, 5, 4, 10],
+      backgroundColor: ['#3b82f6', '#8b5cf6', '#f59e0b', '#06b6d4', '#ef4444', '#22c55e', '#64748b'],
+      borderWidth: 0,
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyleWidth: 10, font: { size: 11 } } }
+    },
+    cutout: '62%'
+  }
+});
+
+// Channel Bar Chart
+new Chart(document.getElementById('channelBar'), {
+  type: 'bar',
+  data: {
+    labels: ['Google', 'Direct', 'Facebook', 'Bing'],
+    datasets: [
+      { label: 'Sep 2025', data: [189, 182, 64, 7], backgroundColor: '#3b82f650', borderColor: '#3b82f6', borderWidth: 1, borderRadius: 6 },
+      { label: 'Mar 2026', data: [448, 418, 70, 41], backgroundColor: '#3b82f6', borderColor: '#3b82f6', borderWidth: 0, borderRadius: 6 }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, font: { size: 11 } } } },
+    scales: { y: { beginAtZero: true, grid: { color: '#1e2a3a55' } }, x: { grid: { display: false } } }
+  }
+});
+
+// SEO Trend Chart
+new Chart(document.getElementById('seoTrend'), {
+  type: 'line',
+  data: {
+    labels: ['Jan 25', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan 26', 'Feb', 'Mar'],
+    datasets: [
+      {
+        label: 'Clicks',
+        data: [66, 86, 116, 138, 154, 131, 178, 178, 164, 152, 134, 88, 207, 263, 365],
+        borderColor: '#3b82f6',
+        backgroundColor: '#3b82f620',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 4,
+        pointBackgroundColor: '#3b82f6',
+        borderWidth: 2.5,
+        yAxisID: 'y'
+      },
+      {
+        label: 'CTR %',
+        data: [0.2, 0.2, 0.2, 0.4, 0.4, 0.3, 0.4, 0.4, 0.4, 0.7, 0.6, 0.4, 0.7, 0.9, 0.9],
+        borderColor: '#22c55e',
+        backgroundColor: 'transparent',
+        borderDash: [6, 3],
+        tension: 0.3,
+        pointRadius: 4,
+        pointBackgroundColor: '#22c55e',
+        borderWidth: 2,
+        yAxisID: 'y1'
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, font: { size: 11 } } },
+      annotation: {}
+    },
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#1e2a3a55' }, title: { display: true, text: 'Clicks', color: '#64748b' } },
+      y1: { beginAtZero: true, position: 'right', grid: { display: false }, title: { display: true, text: 'CTR %', color: '#64748b' }, ticks: { callback: v => v + '%' } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// Device Pie
+new Chart(document.getElementById('devicePie'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Desktop', 'Mobile', 'Tablet'],
+    datasets: [{
+      data: [582, 407, 7],
+      backgroundColor: ['#3b82f6', '#a855f7', '#f59e0b'],
+      borderWidth: 0,
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, font: { size: 11 } } } },
+    cutout: '62%'
+  }
+});
+
+// Device Bar
+new Chart(document.getElementById('deviceBar'), {
+  type: 'bar',
+  data: {
+    labels: ['Mobile', 'Desktop', 'Tablet'],
+    datasets: [
+      { label: 'Sep 2025', data: [96, 64, 4], backgroundColor: '#a855f750', borderRadius: 6 },
+      { label: 'Mar 2026', data: [244, 115, 6], backgroundColor: '#a855f7', borderRadius: 6 }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, font: { size: 11 } } } },
+    scales: { y: { beginAtZero: true, grid: { color: '#1e2a3a55' } }, x: { grid: { display: false } } }
+  }
+});
+
+// Pages Bar
+new Chart(document.getElementById('pagesBar'), {
+  type: 'bar',
+  data: {
+    labels: ['Homepage', 'Sales & Rentals', 'Seacan Sale', 'Contact', 'On-Site Rentals', 'Rentals', '20ft Standard', 'About', '40ft HC', 'Guide', 'Prince Albert'],
+    datasets: [{
+      data: [662, 199, 64, 56, 54, 41, 33, 30, 28, 26, 24],
+      backgroundColor: ['#3b82f6', '#22c55e', '#22c55e', '#f59e0b', '#22c55e', '#22c55e', '#06b6d4', '#64748b', '#06b6d4', '#a855f7', '#a855f7'],
+      borderRadius: 6
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: { x: { beginAtZero: true, grid: { color: '#1e2a3a55' } }, y: { grid: { display: false } } }
+  }
+});
+
+// Visitor Bar
+new Chart(document.getElementById('visitorBar'), {
+  type: 'bar',
+  data: {
+    labels: ['New Sessions', 'Returning Sessions', 'New Conversions', 'Returning Conv'],
+    datasets: [
+      { label: 'Sep 2025', data: [368, 58, 42, 3], backgroundColor: '#06b6d450', borderRadius: 6 },
+      { label: 'Mar 2026', data: [844, 104, 47, 15], backgroundColor: '#06b6d4', borderRadius: 6 }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, font: { size: 11 } } } },
+    scales: { y: { beginAtZero: true, grid: { color: '#1e2a3a55' } }, x: { grid: { display: false } } }
+  }
+});
+
+// Timeline Chart
+new Chart(document.getElementById('timelineChart'), {
+  type: 'line',
+  data: {
+    labels: ['Jan 25', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan 26', 'Feb', 'Mar 26'],
+    datasets: [
+      {
+        label: 'Sessions',
+        data: [341, 250, 283, 294, 321, null, null, null, 467, 650, 994, 1067, 990, 850, 996],
+        borderColor: '#3b82f6',
+        backgroundColor: '#3b82f618',
+        fill: true,
+        tension: 0.35,
+        pointRadius: 4,
+        pointBackgroundColor: '#3b82f6',
+        borderWidth: 2.5,
+        spanGaps: true,
+        yAxisID: 'y'
+      },
+      {
+        label: 'Conversions',
+        data: [27, 24, 57, 23, 18, null, null, null, 47, 39, 59, 66, 50, 46, 62],
+        borderColor: '#22c55e',
+        backgroundColor: '#22c55e18',
+        fill: true,
+        tension: 0.35,
+        pointRadius: 4,
+        pointBackgroundColor: '#22c55e',
+        borderWidth: 2,
+        spanGaps: true,
+        yAxisID: 'y1'
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, font: { size: 11 } } } },
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#1e2a3a55' }, title: { display: true, text: 'Sessions', color: '#64748b' } },
+      y1: { beginAtZero: true, position: 'right', grid: { display: false }, title: { display: true, text: 'Conversions', color: '#64748b' } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// Organic Timeline
+new Chart(document.getElementById('organicTimeline'), {
+  type: 'bar',
+  data: {
+    labels: ['Jan 25', 'Feb', 'Mar', 'Apr', 'May', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan 26', 'Feb', 'Mar 26'],
+    datasets: [
+      {
+        label: 'Google Sessions',
+        data: [224, 146, 171, 190, 192, 189, 198, 162, 109, 255, 329, 448],
+        backgroundColor: '#3b82f680',
+        borderRadius: 6,
+        yAxisID: 'y'
+      },
+      {
+        label: 'SC Clicks',
+        type: 'line',
+        data: [66, 86, 116, 138, 154, 164, 152, 134, 88, 207, 263, 365],
+        borderColor: '#22c55e',
+        pointBackgroundColor: '#22c55e',
+        pointRadius: 4,
+        borderWidth: 2.5,
+        tension: 0.3,
+        fill: false,
+        yAxisID: 'y'
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, font: { size: 11 } } } },
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#1e2a3a55' } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// Scorecard
+const scores = [
+  ['Organic Search Volume', 3, 7, 'green'],
+  ['Search Rankings', 2, 7, 'green'],
+  ['Click-Through Rate', 2, 5, 'green'],
+  ['Site Architecture', 3, 8, 'green'],
+  ['Content Depth', 3, 6, 'green'],
+  ['Local/City Coverage', 1, 6, 'green'],
+  ['Conversion Optimization', 5, 6, 'orange'],
+  ['AI/LLM Visibility', 0, 3, 'cyan'],
+  ['Multi-Engine Presence', 2, 6, 'green'],
+];
+const sc = document.getElementById('scorecard');
+scores.forEach(([label, old, now, color]) => {
+  const bars = Array.from({length: 10}, (_, i) =>
+    `<div class="score-bar ${i < now ? 'filled ' + color : ''}"></div>`
+  ).join('');
+  sc.innerHTML += `
+    <div class="score-item">
+      <div class="score-label">${label}</div>
+      <div class="score-bars">${bars}</div>
+      <div class="score-val" style="color: var(--${color})">${now}/10</div>
+    </div>`;
+});
+
+// Tabs
+function showTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// Scroll animations
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
