@@ -94,13 +94,16 @@ DOMAIN=ccansam.com EMAIL=you@example.com sudo bash deploy.sh
                                               │
                                               ▼
                                 ┌─────────────────────────────────┐
-                                │         JSON Files              │
+                                │     JSON Files (on server)      │
                                 │                                 │
                                 │  data/inventory.json            │
-                                │  data/submissions.json          │
                                 │  data/reviews.json              │
-                                │  data/quote-requests.json       │
-                                │  data/spam-log.json             │
+                                │  data/submissions.json    *     │
+                                │  data/quote-requests.json *     │
+                                │  data/spam-log.json       *     │
+                                │                                 │
+                                │  * Created by PHP at runtime,   │
+                                │    not stored in git             │
                                 └─────────────────────────────────┘
 ```
 
@@ -165,7 +168,7 @@ When you deploy and the version changes, `scripts/migrate.js` runs automatically
 ## Deploying
 
 ```bash
-npm run deploy:staging   # → ccan.crkid.com (develop branch)
+npm run deploy:staging   # → ccan.crkid.com (main branch)
 npm run deploy:prod      # → ccansam.com (main branch)
 ```
 
@@ -382,15 +385,15 @@ Catches sophisticated bots that bypass basic filters.
 
 ### File Locations
 
-| File | Purpose | Backed Up |
-|------|---------|-----------|
-| `data/inventory.json` | Container stock | Yes |
-| `data/reviews.json` | Google reviews | Yes |
-| `data/submissions.json` | Contact form logs | Yes |
-| `data/quote-requests.json` | Quote request logs | Yes |
-| `data/spam-log.json` | Blocked spam attempts | Yes |
-| `data/rate-limits.json` | IP rate limit tracking | No |
-| `config.yaml` | Site configuration | Yes |
+| File | Purpose | Backed Up | Location |
+|------|---------|-----------|----------|
+| `data/inventory.json` | Container stock | Yes | In git |
+| `data/reviews.json` | Google reviews | Yes | In git |
+| `data/submissions.json` | Contact form logs | Yes | Server only |
+| `data/quote-requests.json` | Quote request logs | Yes | Server only |
+| `data/spam-log.json` | Blocked spam attempts | Yes | Server only |
+| `data/rate-limits.json` | IP rate limit tracking | No | Server only |
+| `config.yaml` | Site configuration | Yes | In git |
 
 ### Backup System
 
@@ -509,7 +512,7 @@ This ensures PHP (running as www-data) can:
 Server components add complexity for a site that changes once a week. Static HTML is simpler and faster.
 
 **Why not a headless CMS?**
-Three product pages don't need a database. Markdown + YAML is version-controlled and free.
+40+ pages (product pages, city landing pages, guides, blog posts) still don't need a database. Markdown + YAML is version-controlled and free.
 
 **Why not Vercel/Netlify?**
 A $6 VPS handles this traffic easily and gives full control. No vendor lock-in, no surprise bills.
@@ -525,7 +528,7 @@ Things intentionally omitted:
 
 | Omission | Reason |
 |----------|--------|
-| **CMS** | Three product pages don't need a database |
+| **CMS** | 40+ pages still don't need a database |
 | **User auth** | One admin, one secret URL |
 | **Client-side routing** | Every page is a full HTML document |
 | **Build pipeline** | SSH + `npm run build` is the pipeline |
@@ -618,9 +621,9 @@ The HVAC vertical (Fire & Frost Mechanical) lives in `backup/stash/`. Same codeb
 ├── data/
 │   ├── inventory.json       # Live container inventory
 │   ├── reviews.json         # Google reviews
-│   ├── submissions.json     # Contact form logs
-│   ├── quote-requests.json  # Quote request logs
 │   └── backups/             # Backup archives (gitignored)
+│   # submissions.json, quote-requests.json, and spam-log.json
+│   # exist on the server only (created by PHP at runtime, not in git)
 ├── public/                  # Static assets
 └── dist/                    # Build output (gitignored)
 ```

@@ -315,7 +315,7 @@ contact_form:
 email:
   # Resend API key (starts with "re_")
   # Leave empty to fall back to PHP mail() - often lands in spam
-  resend_api_key: "re_U5h93je3_2zV9MPz3i7QXjbcYLeYR6uET"
+  resend_api_key: "SET_IN_CONFIG_LOCAL_YAML"  # Override in config.local.yaml on server
 
   # From email address
   # Must be from a verified domain in Resend, or use: onboarding@resend.dev
