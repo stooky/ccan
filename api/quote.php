@@ -5,7 +5,12 @@
  */
 
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
+// CORS: restrict to own domain
+$allowedOrigins = ['https://ccansam.com', 'https://ccan.crkid.com'];
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($origin, $allowedOrigins)) {
+    header("Access-Control-Allow-Origin: $origin");
+}
 header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
@@ -51,11 +56,11 @@ if (!file_exists($inventoryPath)) {
 
 $inventory = json_decode(file_get_contents($inventoryPath), true);
 
-// Get form data
+// Get form data (sanitize for HTML email)
 $itemId = trim($_POST['item_id'] ?? '');
-$name = trim($_POST['name'] ?? '');
+$name = htmlspecialchars(trim($_POST['name'] ?? ''), ENT_QUOTES, 'UTF-8');
 $email = trim($_POST['email'] ?? '');
-$phone = trim($_POST['phone'] ?? '');
+$phone = htmlspecialchars(trim($_POST['phone'] ?? ''), ENT_QUOTES, 'UTF-8');
 
 // Validate required fields
 if (empty($itemId) || empty($name) || empty($email)) {

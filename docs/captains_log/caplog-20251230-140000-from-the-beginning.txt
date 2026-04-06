@@ -305,7 +305,7 @@ Solution: Remove static script tags, inject via JS after consent granted.
 - Deploy: `cd /var/www/ccan && git pull && npm run build`
 
 ### Admin Panel
-- URL: https://ccansam.com/api/admin.php?key=ccan-admin-2024
+- URL: https://ccansam.com/api/admin.php?key=[REDACTED]
 
 ### Repository
 - GitHub: stooky/ccan

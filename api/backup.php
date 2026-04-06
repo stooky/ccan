@@ -59,7 +59,12 @@ if (file_exists($localConfigPath)) {
 }
 
 // Auth check
-$secretPath = $config['admin']['secret_path'] ?? 'ccan-admin-2024';
+$secretPath = $config['admin']['secret_path'] ?? null;
+if (!$secretPath || $secretPath === 'SET_IN_CONFIG_LOCAL_YAML') {
+    http_response_code(503);
+    echo json_encode(['success' => false, 'message' => 'Admin not configured']);
+    exit();
+}
 $providedKey = $_GET['key'] ?? $_POST['key'] ?? '';
 
 if ($providedKey !== $secretPath) {
@@ -67,6 +72,10 @@ if ($providedKey !== $secretPath) {
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit();
 }
+
+// Audit log
+$action = $_GET['action'] ?? $_POST['action'] ?? 'unknown';
+auditLog('backup.' . $action);
 
 // Files to backup (unique data)
 $backupFiles = [

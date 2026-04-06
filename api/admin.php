@@ -18,7 +18,7 @@ if (file_exists($configPath)) {
     } else {
         // Simple parser
         $content = file_get_contents($configPath);
-        $config = ['admin' => ['secret_path' => 'ccan-admin-2024', 'per_page' => 50]];
+        $config = ['admin' => ['per_page' => 50]];
         if (preg_match('/secret_path:\s*["\']?([^"\'\n]+)["\']?/', $content, $matches)) {
             $config['admin']['secret_path'] = trim($matches[1]);
         }
@@ -47,7 +47,11 @@ if (file_exists($localConfigPath)) {
     }
 }
 
-$secretPath = $config['admin']['secret_path'] ?? 'ccan-admin-2024';
+$secretPath = $config['admin']['secret_path'] ?? null;
+if (!$secretPath || $secretPath === 'SET_IN_CONFIG_LOCAL_YAML') {
+    http_response_code(503);
+    die('Admin not configured. Set admin.secret_path in config.local.yaml.');
+}
 $perPage = $config['admin']['per_page'] ?? 100;
 $logFile = dirname(__DIR__) . '/' . ($config['logging']['submissions_file'] ?? 'data/submissions.json');
 
@@ -57,6 +61,13 @@ if ($providedKey !== $secretPath) {
     http_response_code(404);
     echo '<!DOCTYPE html><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1></body></html>';
     exit();
+}
+
+// Audit log all admin POST actions
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    auditLog('admin.' . $_POST['action'], [
+        'tab' => $_GET['tab'] ?? 'submissions',
+    ]);
 }
 
 // Load all submissions
@@ -980,14 +991,21 @@ if ($config && isset($config['products']['containers'])) {
 
 // Handle Rich Snippets form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_products') {
+    // Sanitize a string for safe YAML embedding (strip control chars, quotes, newlines)
+    function sanitizeYamlString($str) {
+        $str = trim($str);
+        $str = preg_replace('/["\'\n\r\\\\:{}[\]|>&*!%#`@]/', '', $str);
+        return substr($str, 0, 500); // length limit
+    }
+
     // Build updated products array from POST data
     $updatedProducts = [];
     foreach ($_POST['products'] as $index => $product) {
         $updatedProducts[] = [
-            'size' => $product['size'],
-            'slug' => $product['slug'],
-            'name' => $product['name'],
-            'description' => $product['description'],
+            'size' => sanitizeYamlString($product['size'] ?? ''),
+            'slug' => preg_replace('/[^a-z0-9\-]/', '', strtolower($product['slug'] ?? '')),
+            'name' => sanitizeYamlString($product['name'] ?? ''),
+            'description' => sanitizeYamlString($product['description'] ?? ''),
             'new' => !empty($product['new_min']) ? [
                 'min' => (int)$product['new_min'],
                 'max' => (int)$product['new_max']

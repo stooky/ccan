@@ -244,7 +244,7 @@ npm run deploy:prod
 ssh root@ccansam.com
 
 # View admin panel
-https://ccansam.com/api/admin.php?key=ccan-admin-2024
+https://ccansam.com/api/admin.php?key=[REDACTED]
 
 # Update inventory
 # Edit data/inventory.json, then:

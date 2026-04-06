@@ -1,0 +1,284 @@
+================================================================================
+SECURITY AUDIT: C-Can Sam
+Date: 2026-04-05 18:00
+Scope: Entire codebase
+Auditor: Claude (AI-assisted)
+================================================================================
+
+## Summary
+
+| Category           | Findings | Critical | High | Medium | Low |
+|--------------------|----------|----------|------|--------|-----|
+| Authentication     | 3        | 1        | 2    | 0      | 0   |
+| Input Validation   | 4        | 0        | 1    | 2      | 1   |
+| Secrets            | 2        | 1        | 1    | 0      | 0   |
+| Encryption         | 1        | 0        | 0    | 0      | 1   |
+| Network            | 2        | 0        | 0    | 2      | 0   |
+| Infrastructure     | 1        | 0        | 0    | 1      | 0   |
+| Dependencies       | 1        | 0        | 1    | 0      | 0   |
+| Monitoring         | 2        | 0        | 0    | 1      | 1   |
+| Operational        | 1        | 0        | 0    | 1      | 0   |
+| **Total**          | **17**   | **2**    | **4**| **7**  | **4**|
+
+================================================================================
+FINDINGS
+================================================================================
+
+## Critical
+
+[C1] Admin secret committed to version control
+File: sites/ccansam.com/config.yaml:330, api/admin.php:21,50, api/backup.php:62
+Category: Secrets
+Description: The admin panel secret "ccan-admin-2024" is committed in
+  config.yaml, hardcoded as PHP fallback in admin.php and backup.php, and
+  appears in 3 captain's log files with full URLs. Anyone with repo access
+  (or who reads this audit) has admin access including: view all form
+  submissions (PII), delete data, rebuild site, execute shell commands
+  (npm run build via exec()), write to config.yaml.
+Risk: Full admin takeover. PII exposure. Remote code execution via
+  rebuild/tag-reviews actions. Config poisoning.
+Fix: 1. Rotate the admin secret immediately on the server (config.local.yaml)
+     2. Replace all hardcoded fallbacks with a fail-closed pattern
+     3. Remove the secret from config.yaml (use placeholder)
+     4. Redact from captain's log files
+     5. Consider: this secret has been in git history forever — treat it
+        as permanently compromised and use a new one
+
+[C2] YAML injection via admin product save
+File: api/admin.php:~982-1028
+Category: Input Validation
+Description: The save_products action takes $_POST['products'] array fields
+  (name, description, slug, size) and writes them directly into config.yaml
+  via string interpolation without YAML escaping. An attacker with admin
+  access could inject arbitrary YAML keys, potentially overwriting:
+  - admin.secret_path (lock out real admin)
+  - email.resend_api_key (redirect emails)
+  - contact_form.recipient_email (steal form submissions)
+Risk: Config poisoning leading to data theft, email hijacking, or denial
+  of service. Requires admin key (currently C1 makes this trivially
+  exploitable).
+Fix: Use the YAML library to serialize data instead of string interpolation.
+  Validate product fields against an allowlist of characters (alphanumeric,
+  spaces, hyphens, periods only).
+
+--------------------------------------------------------------------------------
+
+## High
+
+[H1] exec() gated only by compromised admin secret
+File: api/admin.php:641, api/tag-reviews.php:60,74
+Category: Authentication
+Description: Three exec() calls (site rebuild, tag-reviews, npm build) are
+  protected only by the admin secret key. Given C1, these are effectively
+  unauthenticated. While the commands use server-derived paths (not user
+  input), they execute npm/node processes as www-data.
+Risk: Arbitrary build execution. If config.yaml is poisoned (C2), the build
+  could be influenced. An attacker could trigger resource exhaustion via
+  repeated rebuild requests.
+Fix: Fixing C1 (rotating the secret) is the primary mitigation. Additionally:
+  - Add rate limiting to admin actions
+  - Add CSRF token to POST actions
+  - Log all admin actions with IP and timestamp
+
+[H2] Admin authentication is secret URL only — no session, no CSRF
+File: api/admin.php:46-54
+Category: Authentication
+Description: Admin auth is a query parameter (?key=...) compared to config.
+  No session management, no CSRF protection, no login form, no lockout
+  after failed attempts. The key is transmitted in URLs (logged in nginx
+  access logs, browser history, referrer headers).
+Risk: Key leakage via logs, browser history, shoulder surfing. No protection
+  against CSRF — any page can trigger admin actions if the key is known.
+Fix: Phase 1: Rotate key, move to POST body or cookie instead of URL param.
+  Phase 2: Add session-based auth with proper login form.
+  Phase 3: Add rate limiting on auth failures.
+
+[H3] PHP fallback defaults to known admin secret
+File: api/admin.php:21,50, api/backup.php:62
+Category: Authentication
+Description: If config.yaml fails to parse, PHP falls back to hardcoded
+  default: ['admin' => ['secret_path' => 'ccan-admin-2024']]. This means
+  even if the config is rotated, a parse failure reverts to the known key.
+Fix: Change fallback to fail-closed: if config parse fails, deny all access.
+  Replace fallback default with exit/die.
+
+[H4] 15 npm dependency vulnerabilities (7 high severity)
+File: package-lock.json
+Category: Dependencies
+Description: npm audit reports 15 vulnerabilities:
+  - 7 high: prototype pollution in defu/lodash/devalue, request smuggling
+    in h3, path traversal in h3
+  - 6 moderate: ReDoS in ajv, Astro allowlist bypass, YAML stack overflow
+  - 2 low: various
+  All have fixes available via npm audit fix.
+Risk: Most are in dev/build dependencies (not runtime), but h3 and astro
+  vulnerabilities could affect the dev server. The yaml vulnerability
+  affects the build pipeline (config parsing).
+Fix: Run npm audit fix. Pin dependency versions after fixing.
+
+--------------------------------------------------------------------------------
+
+## Medium
+
+[M1] CORS origin reflection in track.php
+File: api/track.php:12
+Category: Network
+Description: track.php reflects $_SERVER['HTTP_ORIGIN'] directly into the
+  Access-Control-Allow-Origin header with no whitelist. Any origin can make
+  requests to the tracking endpoint.
+Risk: Cross-origin data leakage (though track.php only writes, doesn't
+  expose sensitive data). Could be used to pollute analytics from any site.
+Fix: Whitelist allowed origins: ccansam.com, ccan.crkid.com.
+
+[M2] Wildcard CORS on contact.php and quote.php
+File: api/contact.php:14, api/quote.php:8
+Category: Network
+Description: Both endpoints set Access-Control-Allow-Origin: * — allowing
+  any origin to submit forms.
+Risk: Cross-origin form submission. Spam bots from any domain can submit
+  contact forms. (Mitigated partially by honeypot and rate limiting.)
+Fix: Restrict to ccansam.com origin only.
+
+[M3] HTML injection in quote.php email body
+File: api/quote.php:~80-120
+Category: Input Validation
+Description: $name, $phone, and $item['remarks'] are interpolated into
+  HTML email without htmlspecialchars(). Malicious input could inject HTML
+  into the notification email.
+Risk: Email HTML injection — phishing link injection, layout manipulation
+  in the admin's email client.
+Fix: Apply htmlspecialchars() to all user-supplied values before HTML
+  email interpolation.
+
+[M4] Hardcoded tracking salt
+File: api/track.php:265
+Category: Secrets
+Description: The IP anonymization salt "ccansam_tracking_salt" is a static
+  hardcoded string. If the codebase is public, the salt is known, and the
+  daily hash can be reversed via rainbow tables for common IPs.
+Risk: Weakened visitor anonymization.
+Fix: Move salt to config.local.yaml. Generate a random salt per site.
+
+[M5] No request logging for admin actions
+File: api/admin.php
+Category: Monitoring
+Description: Admin actions (delete submissions, add reviews, rebuild site,
+  save prices) are not logged. There is no audit trail of who did what
+  and when.
+Risk: No forensic trail if the admin panel is compromised.
+Fix: Log all admin actions to a separate audit log file with timestamp,
+  IP, action, and parameters.
+
+[M6] formType not validated against allowlist
+File: api/contact.php:~190
+Category: Input Validation
+Description: formType from POST data is used to branch logic but is not
+  validated against known values (message, quote, quick-quote). Unknown
+  values fall through silently and are stored in submission logs.
+Risk: Low direct risk, but could cause unexpected behavior or log pollution.
+Fix: Validate formType against an explicit allowlist. Reject unknown values.
+
+[M7] No file integrity monitoring on data files
+File: data/*.json
+Category: Infrastructure
+Description: JSON data files are writable by www-data with no integrity
+  checks. A compromised PHP script could modify submissions, reviews, or
+  spam logs without detection.
+Risk: Silent data tampering.
+Fix: Add periodic checksum verification or read-only flag on archival data.
+
+--------------------------------------------------------------------------------
+
+## Low
+
+[L1] Admin key transmitted in URL query parameter
+File: api/admin.php, api/backup.php, api/tag-reviews.php
+Category: Authentication (subset of H2)
+Description: Key is passed as ?key=... in the URL, which appears in nginx
+  access logs, browser history, and potentially referrer headers.
+Risk: Key leakage via log files.
+Fix: Move to POST body, cookie, or Authorization header.
+
+[L2] No TLS enforcement in PHP API calls
+File: api/contact.php (Resend API call)
+Category: Encryption
+Description: The Resend API call uses https:// (good) but there is no
+  explicit SSL certificate verification option set. PHP's default
+  stream_context should verify by default on modern systems.
+Risk: Very low — Resend API is HTTPS and PHP verifies by default.
+Fix: Explicitly set verify_peer and verify_host in stream context options.
+
+[L3] track.php has no authentication
+File: api/track.php
+Category: Monitoring
+Description: Anyone can send fake tracking beacons to /api/track.php,
+  polluting the traffic analytics data.
+Risk: Analytics data integrity. Low business impact.
+Fix: Accept — this is standard for analytics beacons. Add basic validation
+  (check referrer matches site domain) for defense in depth.
+
+[L4] No rate limiting on admin panel access
+File: api/admin.php
+Category: Authentication
+Description: No limit on failed auth attempts to the admin panel. An
+  attacker can brute-force the secret path.
+Risk: Low if secret is long/random; high if secret is weak (as it is now).
+Fix: Add rate limiting by IP (same pattern as contact.php).
+
+================================================================================
+RECOMMENDATIONS (prioritized)
+================================================================================
+
+### Immediate (do today)
+
+1. **Rotate admin secret** on both servers via config.local.yaml. Use a
+   random 32+ character string. Verify admin panel still works.
+
+2. **Replace PHP fallback defaults** with fail-closed pattern. If config
+   parse fails, return 503, don't fall back to a known key.
+
+3. **Remove admin secret from config.yaml** — use placeholder like
+   "SET_IN_CONFIG_LOCAL_YAML" (same pattern as Resend key).
+
+4. **Run npm audit fix** to patch 15 dependency vulnerabilities.
+
+### This week
+
+5. **Fix YAML injection in save_products** — use YAML library for
+   serialization, validate product field contents.
+
+6. **Restrict CORS** on contact.php, quote.php, track.php to site domain.
+
+7. **Fix HTML injection in quote.php** email body — htmlspecialchars().
+
+8. **Add admin action audit logging** — timestamp, IP, action to a
+   separate log file.
+
+### This month
+
+9. **Move admin key from URL to POST/cookie** — stop logging it in
+    nginx access logs.
+
+10. **Add rate limiting to admin panel** — IP-based, same as contact form.
+
+11. **Move tracking salt to config.local.yaml** — per-site random salt.
+
+12. **Redact admin URLs from captain's log files** in git history
+    (or accept the risk since the key will be rotated).
+
+================================================================================
+ACCEPTED RISKS
+================================================================================
+
+| Item | Rationale |
+|------|-----------|
+| No MFA on admin | Single-user system, secret URL + IP logging is acceptable |
+| No WAF | $6/mo VPS, traffic volume doesn't justify cost |
+| Flat-file JSON storage | No sensitive financial data; PII limited to contact forms |
+| track.php unauthenticated | Standard pattern for analytics beacons |
+| GTM/GA4 IDs in config | These are public-facing by design |
+| Security-through-obscurity for /d4t4/ | Reports are noindex + robots.txt blocked; not sensitive data |
+
+================================================================================
+END OF AUDIT
+================================================================================

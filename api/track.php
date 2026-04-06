@@ -8,8 +8,12 @@
  * Privacy-conscious: No PII stored, IPs are hashed, respects DNT.
  */
 
-// CORS headers for beacon requests
-header('Access-Control-Allow-Origin: ' . ($_SERVER['HTTP_ORIGIN'] ?? '*'));
+// CORS: restrict to own domain
+$allowedOrigins = ['https://ccansam.com', 'https://ccan.crkid.com'];
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($origin, $allowedOrigins)) {
+    header("Access-Control-Allow-Origin: $origin");
+}
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 

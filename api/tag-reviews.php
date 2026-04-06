@@ -30,10 +30,15 @@ if (file_exists($localConfigPath)) {
 }
 
 // Check admin auth
-$secret = $config['admin']['secret_path'] ?? '';
+$secret = $config['admin']['secret_path'] ?? null;
+if (!$secret || $secret === 'SET_IN_CONFIG_LOCAL_YAML') {
+    http_response_code(503);
+    echo json_encode(['success' => false, 'message' => 'Admin not configured']);
+    exit;
+}
 $providedKey = $_GET['key'] ?? '';
 
-if (!$secret || $providedKey !== $secret) {
+if ($providedKey !== $secret) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;

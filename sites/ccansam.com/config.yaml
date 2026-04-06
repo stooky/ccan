@@ -327,7 +327,7 @@ email:
 admin:
   # Secret URL path for admin access (e.g., /api/admin.php?key=your-secret-here)
   # Change this to something unique and hard to guess!
-  secret_path: "ccan-admin-2024"
+  secret_path: "SET_IN_CONFIG_LOCAL_YAML"  # Override on server — never commit real secret
 
   # Number of submissions to show per page
   per_page: 50

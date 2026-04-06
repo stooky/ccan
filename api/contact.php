@@ -11,7 +11,12 @@
 
 // Set headers for JSON response
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
+// CORS: restrict to own domain (allow both prod and staging)
+$allowedOrigins = ['https://ccansam.com', 'https://ccan.crkid.com'];
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($origin, $allowedOrigins)) {
+    header("Access-Control-Allow-Origin: $origin");
+}
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
@@ -225,7 +230,11 @@ if ($learnedPatternsResult !== true) {
 }
 
 // Validate required fields based on form type
+$validFormTypes = ['message', 'quote', 'quick-quote'];
 $formType = $data['formType'] ?? 'message';
+if (!in_array($formType, $validFormTypes)) {
+    $formType = 'message';
+}
 $errors = [];
 
 if ($formType === 'quote') {

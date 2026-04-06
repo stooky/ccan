@@ -36,6 +36,14 @@ PHP form handlers (contact forms, quote requests) implement multiple layers of s
   - `Referrer-Policy: strict-origin-when-cross-origin`
   - `Permissions-Policy` (restrictive)
 
+## Audit History
+
+| Date | Findings | Critical | High | Medium | Low |
+|------|----------|----------|------|--------|-----|
+| 2026-04-05 | 17 | 2 | 4 | 7 | 4 |
+
+Full audit report: `docs/security/20260405-180000-security-audit.txt`
+
 ## Known Limitations
 
 - **No multi-factor authentication.** The admin panel has no MFA or even password-based auth.

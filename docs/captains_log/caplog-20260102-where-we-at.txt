@@ -167,10 +167,10 @@ cd /var/www/ccan && git pull && npm run build
 bash reload-nginx.sh
 
 # View submissions
-https://ccansam.com/api/admin.php?key=ccan-admin-2024
+https://ccansam.com/api/admin.php?key=[REDACTED]
 
 # Tag reviews (in admin panel, or manually)
-https://ccansam.com/api/tag-reviews.php?key=ccan-admin-2024
+https://ccansam.com/api/tag-reviews.php?key=[REDACTED]
 
 --------------------------------------------------------------------------------
 ## Files Changed This Sprint
