@@ -12,6 +12,7 @@ import ContactPointSchema from '../components/schema/ContactPointSchema.astro';
 import SpeakableSchema from '../components/schema/SpeakableSchema.astro';
 import PlaceSchema from '../components/schema/PlaceSchema.astro';
 import ReviewSchema from '../components/schema/ReviewSchema.astro';
+import TrustBadges from '../components/TrustBadges.astro';
 import { siteConfig, getContainerBySlug, getReviewsForPage } from '../config/site';
 
 const { reviews: homeReviews } = getReviewsForPage('/');
@@ -144,10 +145,17 @@ const features = [
   <Hero
     title="Sea Can Sales & Rentals Saskatoon"
     subtitle="Saskatchewan's trusted shipping container supplier since 2022. New sea cans from $4,450, used from $3,000. Buy, rent, or store — we deliver across the province."
-    primaryCta={{ text: "WhatsApp Us", href: "https://wa.me/13062814100?text=Hello%20there!%20I%20am%20interested%20in%20your%20services.", variant: "whatsapp" }}
-    secondaryCta={{ text: "Our Containers", href: "/storage-container-sales-and-rentals", variant: "blue" }}
+    primaryCta={{ text: "Get a Free Quote", href: "/contact", variant: "blue" }}
+    secondaryCta={{ text: "WhatsApp Us", href: "https://wa.me/13062814100?text=Hello%20there!%20I%20am%20interested%20in%20your%20services.", variant: "whatsapp" }}
     backgroundImage={heroBg}
   />
+
+  <!-- Trust Badges below hero -->
+  <div class="bg-gray-50 py-4 border-b border-gray-200">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <TrustBadges variant="compact" showRating={true} showGuarantees={false} />
+    </div>
+  </div>
 
   <!-- Contact Banner -->
   <div class="bg-secondary-600 text-white py-3">
@@ -187,7 +195,7 @@ const features = [
     <a href="/contact" class="mb-8 block max-w-2xl mx-auto rounded-xl bg-gradient-to-r from-green-600 via-emerald-500 to-green-600 p-4 text-center shadow-lg hover:from-green-700 hover:via-emerald-600 hover:to-green-700 transition-all hover:shadow-xl hover:scale-[1.01] cursor-pointer group">
       <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
         <div class="flex items-center gap-2 text-white">
-          <svg class="h-6 w-6 animate-bounce" fill="currentColor" viewBox="0 0 20 20">
+          <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M5 2a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2V4a2 2 0 00-2-2H5zm2.5 3a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm6.207.293a1 1 0 00-1.414 0l-6 6a1 1 0 101.414 1.414l6-6a1 1 0 000-1.414zM12.5 10a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" clip-rule="evenodd"/>
           </svg>
           <span class="text-base sm:text-lg font-bold">Rental Special:</span>
