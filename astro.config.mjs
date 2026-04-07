@@ -38,13 +38,9 @@ export default defineConfig({
           item.priority = 0.9;
           item.changefreq = 'weekly';
         }
-        // City landing pages
+        // City landing pages (all /containers-* pages)
         else if (
-          item.url.includes('/containers-saskatoon') ||
-          item.url.includes('/containers-regina') ||
-          item.url.includes('/containers-prince-albert') ||
-          item.url.includes('/containers-moose-jaw') ||
-          item.url.includes('/containers-swift-current')
+          item.url.match(/\/containers-[a-z]/)
         ) {
           item.priority = 0.85;
           item.changefreq = 'weekly';

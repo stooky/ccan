@@ -1,23 +1,21 @@
-# Current Sprint — Bolt 4
+# Current Sprint — Bolt 5
 
-**Goal:** Fix Critical and High security findings from audit
+**Goal:** Fix SEO audit critical/warning findings + design review
 **Status:** In Progress
-**Opened:** 2026-04-05
-**Source:** Security Audit (20260405-180000) — 2 Critical, 4 High
+**Opened:** 2026-04-07
+**Source:** SEO Audit (searchfit-seo), Design Panel
 
 ## Items
 
 | # | Item | Size | Status | Finding |
 |---|------|------|--------|---------|
-| 1 | Rotate admin secret, remove from config.yaml | S | pending | C1 |
-| 2 | Replace PHP fallback defaults with fail-closed | S | pending | H3 |
-| 3 | Redact admin secret from captain's logs | S | pending | C1 |
-| 4 | Fix YAML injection in save_products | M | pending | C2 |
-| 5 | Restrict CORS on all PHP endpoints | S | pending | M1, M2 |
-| 6 | Fix HTML injection in quote.php email | S | pending | M3 |
-| 7 | Run npm audit fix | S | pending | H4 |
-| 8 | Add admin action audit logging | M | pending | M5 |
-| 9 | Validate formType against allowlist | S | pending | M6 |
+| 1 | Fix double brand name in title (containers-saskatoon + others) | S | pending | SEO Critical |
+| 2 | Add 7 orphan pages to nav/footer config | M | pending | SEO Critical |
+| 3 | Add 4 missing city pages to sitemap priorities | S | pending | SEO Warning |
+| 4 | Fix blog index title | S | pending | SEO Warning |
+| 5 | Add width/height to raw img tags | M | pending | SEO Warning |
+| 6 | Deploy ReviewSchema to key pages | S | pending | SEO Warning |
+| 7 | Design panel review + implement fixes | L | pending | Design |
 
 ## Blockers
 
@@ -26,4 +24,4 @@ None.
 ## Metrics
 
 - Commits this bolt: 0
-- Findings fixed: 0/17
+- SEO score: 78/100 (target: 88+)

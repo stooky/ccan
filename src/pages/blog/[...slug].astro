@@ -74,6 +74,9 @@ const imageSrcSet = post.data.image ? `
             src={post.data.image}
             alt={post.data.imageAlt || post.data.title}
             class="h-full w-full object-cover"
+            width="1200"
+            height="800"
+            loading="eager"
           />
         </picture>
         <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-gray-900/30"></div>
@@ -220,6 +223,8 @@ const imageSrcSet = post.data.image ? `
                     src={relatedPost.data.image}
                     alt={relatedPost.data.imageAlt || relatedPost.data.title}
                     class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    width="400"
+                    height="300"
                     loading="lazy"
                   />
                 ) : (

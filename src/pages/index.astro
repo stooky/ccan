@@ -11,7 +11,10 @@ import ServiceSchema from '../components/schema/ServiceSchema.astro';
 import ContactPointSchema from '../components/schema/ContactPointSchema.astro';
 import SpeakableSchema from '../components/schema/SpeakableSchema.astro';
 import PlaceSchema from '../components/schema/PlaceSchema.astro';
-import { siteConfig, getContainerBySlug } from '../config/site';
+import ReviewSchema from '../components/schema/ReviewSchema.astro';
+import { siteConfig, getContainerBySlug, getReviewsForPage } from '../config/site';
+
+const { reviews: homeReviews } = getReviewsForPage('/');
 import heroBg from '../assets/images/hero-bg.webp';
 
 // Helper to format price from config
@@ -135,6 +138,7 @@ const features = [
     { name: 'North Battleford' },
     { name: 'Lloydminster' },
   ]} />
+  {homeReviews.length > 0 && <ReviewSchema reviews={homeReviews} maxReviews={5} />}
 
   <!-- Hero Section -->
   <Hero

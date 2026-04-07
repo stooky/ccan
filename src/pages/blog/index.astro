@@ -15,7 +15,7 @@ const remainingPosts = posts.slice(1);
 ---
 
 <Layout
-  title="Blog"
+  title="Shipping Container Tips, Guides & Industry Insights"
   description="Tips, guides, and insights about shipping containers. Learn about buying, renting, and using sea cans for storage, construction, and more."
 >
   <!-- Hero Section -->
@@ -56,6 +56,9 @@ const remainingPosts = posts.slice(1);
                 src={featuredPost.data.image}
                 alt={featuredPost.data.imageAlt || featuredPost.data.title}
                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                width="800"
+                height="600"
+                loading="eager"
               />
             </picture>
           ) : (
