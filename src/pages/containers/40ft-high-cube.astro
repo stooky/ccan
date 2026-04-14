@@ -10,8 +10,8 @@ import { siteConfig, getContainerBySlug } from '../../config/site';
 
 // Get pricing from config
 const container = getContainerBySlug('40ft-high-cube');
-const priceRange = container?.price?.used
-  ? `$${container.price.used.toLocaleString()}+`
+const priceRange = container?.used
+  ? `$${container.used.min.toLocaleString()}+`
   : 'Contact for pricing';
 
 // Product-specific FAQs

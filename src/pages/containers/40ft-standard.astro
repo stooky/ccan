@@ -10,8 +10,8 @@ import { siteConfig, getContainerBySlug } from '../../config/site';
 
 // Get pricing from config
 const container = getContainerBySlug('40ft-standard');
-const priceRange = container?.price?.used
-  ? `$${container.price.used.toLocaleString()}+`
+const priceRange = container?.used
+  ? `$${container.used.min.toLocaleString()}+`
   : 'Contact for pricing';
 
 // Product-specific FAQs
@@ -30,7 +30,7 @@ const faqs = [
   },
   {
     question: "What's the difference between buying and renting a 40ft container?",
-    answer: "Purchasing ($" + (container?.price?.used?.toLocaleString() || '4,500') + "+) gives you full ownership with no monthly payments. Renting ($200-250/month) is ideal for temporary needs with delivery and pickup included."
+    answer: "Purchasing ($" + (container?.used?.min?.toLocaleString() || '4,500') + "+) gives you full ownership with no monthly payments. Renting ($200-250/month) is ideal for temporary needs with delivery and pickup included."
   },
   {
     question: "How is a 40ft container delivered?",

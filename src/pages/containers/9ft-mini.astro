@@ -9,8 +9,8 @@ import { siteConfig, getContainerBySlug } from '../../config/site';
 
 // Get pricing from config
 const container = getContainerBySlug('9ft-mini');
-const priceRange = container?.price?.new
-  ? `$${container.price.new.toLocaleString()}+`
+const priceRange = container?.new
+  ? `$${container.new.min.toLocaleString()}+`
   : 'Contact for pricing';
 
 // Product-specific FAQs

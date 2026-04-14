@@ -48,6 +48,10 @@ const cities = defineCollection({
     faqSectionSubtitle: z.string(),
     ctaTitle: z.string(),
     ctaDescription: z.string(),
+    useCases: z.array(z.object({
+      title: z.string(),
+      description: z.string(),
+    })).optional(),
     faqs: z.array(z.object({
       question: z.string(),
       answer: z.string(),

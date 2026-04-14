@@ -166,11 +166,28 @@ const whatsappLink = `${siteConfig.social.whatsapp}?text=${encodeURIComponent(ci
     </p>
   </Section>
 
+  <!-- Use Cases (city-specific) -->
+  {city.useCases && city.useCases.length > 0 && (
+    <Section
+      title={`Popular Uses in ${city.name}`}
+      subtitle={`How ${city.name} residents and businesses use shipping containers`}
+      background="gray"
+    >
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4 max-w-5xl mx-auto">
+        {city.useCases.map((useCase: { title: string; description: string }) => (
+          <div class="rounded-xl bg-white p-6 shadow-sm hover:shadow-lg transition-shadow text-center">
+            <h3 class="text-lg font-semibold text-gray-900">{useCase.title}</h3>
+            <p class="mt-2 text-sm text-gray-600">{useCase.description}</p>
+          </div>
+        ))}
+      </div>
+    </Section>
+  )}
+
   <!-- Services -->
   <Section
     title={city.servicesSectionTitle}
     subtitle={city.servicesSectionSubtitle}
-    background="gray"
   >
     <div class="grid gap-6 md:grid-cols-3 max-w-4xl mx-auto">
       <a href="/seacan-storage-containers-for-sale" class="group block rounded-xl bg-white p-6 shadow-sm hover:shadow-lg transition-shadow">
