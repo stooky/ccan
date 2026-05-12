@@ -283,43 +283,38 @@ $submission = [
     'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
     'formType' => $formType,
     'email' => filter_var(trim($data['email']), FILTER_SANITIZE_EMAIL),
-    'phone' => htmlspecialchars(trim($data['phone'] ?? ''), ENT_QUOTES, 'UTF-8'),
+    'phone' => trim($data['phone'] ?? ''),
     'userAgent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
     'referer' => $_SERVER['HTTP_REFERER'] ?? 'direct'
 ];
 
 if ($formType === 'quote') {
-    // Full quote form fields
-    $submission['name'] = htmlspecialchars(trim($data['name']), ENT_QUOTES, 'UTF-8');
-    $submission['containerSize'] = htmlspecialchars(trim($data['containerSize'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $submission['condition'] = htmlspecialchars(trim($data['condition'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $submission['intention'] = htmlspecialchars(trim($data['intention'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $submission['delivery'] = htmlspecialchars(trim($data['delivery'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $submission['locationType'] = htmlspecialchars(trim($data['locationType'] ?? ''), ENT_QUOTES, 'UTF-8');
-    // Urban address fields
-    $submission['streetAddress'] = htmlspecialchars(trim($data['streetAddress'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $submission['city'] = htmlspecialchars(trim($data['city'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $submission['postalCode'] = htmlspecialchars(trim($data['postalCode'] ?? ''), ENT_QUOTES, 'UTF-8');
-    // Rural address fields
-    $submission['landLocation'] = htmlspecialchars(trim($data['landLocation'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $submission['additionalDirections'] = htmlspecialchars(trim($data['additionalDirections'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $submission['message'] = htmlspecialchars(trim($data['message'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $submission['referralSource'] = htmlspecialchars(trim($data['referralSource'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $submission['name'] = trim($data['name']);
+    $submission['containerSize'] = trim($data['containerSize'] ?? '');
+    $submission['condition'] = trim($data['condition'] ?? '');
+    $submission['intention'] = trim($data['intention'] ?? '');
+    $submission['delivery'] = trim($data['delivery'] ?? '');
+    $submission['locationType'] = trim($data['locationType'] ?? '');
+    $submission['streetAddress'] = trim($data['streetAddress'] ?? '');
+    $submission['city'] = trim($data['city'] ?? '');
+    $submission['postalCode'] = trim($data['postalCode'] ?? '');
+    $submission['landLocation'] = trim($data['landLocation'] ?? '');
+    $submission['additionalDirections'] = trim($data['additionalDirections'] ?? '');
+    $submission['message'] = trim($data['message'] ?? '');
+    $submission['referralSource'] = trim($data['referralSource'] ?? '');
     $submission['subject'] = 'Quote Request';
 } elseif ($formType === 'quick-quote') {
-    // Quick quote form fields (simplified form)
-    $submission['name'] = htmlspecialchars(trim($data['name']), ENT_QUOTES, 'UTF-8');
-    $submission['interest'] = htmlspecialchars(trim($data['interest'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $submission['message'] = htmlspecialchars(trim($data['message'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $submission['referralSource'] = htmlspecialchars(trim($data['referralSource'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $submission['name'] = trim($data['name']);
+    $submission['interest'] = trim($data['interest'] ?? '');
+    $submission['message'] = trim($data['message'] ?? '');
+    $submission['referralSource'] = trim($data['referralSource'] ?? '');
     $submission['subject'] = 'Quick Quote Request';
 } else {
-    // Message form fields
-    $submission['firstName'] = htmlspecialchars(trim($data['firstName']), ENT_QUOTES, 'UTF-8');
-    $submission['lastName'] = htmlspecialchars(trim($data['lastName']), ENT_QUOTES, 'UTF-8');
-    $submission['subject'] = htmlspecialchars(trim($data['subject'] ?? 'General Inquiry'), ENT_QUOTES, 'UTF-8');
-    $submission['message'] = htmlspecialchars(trim($data['message']), ENT_QUOTES, 'UTF-8');
-    $submission['referralSource'] = htmlspecialchars(trim($data['referralSource'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $submission['firstName'] = trim($data['firstName']);
+    $submission['lastName'] = trim($data['lastName']);
+    $submission['subject'] = trim($data['subject'] ?? 'General Inquiry');
+    $submission['message'] = trim($data['message']);
+    $submission['referralSource'] = trim($data['referralSource'] ?? '');
 }
 
 // Log submission to file
