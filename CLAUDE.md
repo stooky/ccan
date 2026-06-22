@@ -76,4 +76,4 @@ node scripts/deploy.js production --site ccansam.com  # Explicit site
 
 ## Branch
 - Main branch: `storage-containers`
-- Both prod and staging deploy from `main`
+- Both prod and staging deploy from `storage-containers` (set in `sites/sites.yaml` → `branch:`, with `scripts/deploy.js` defaults to match)

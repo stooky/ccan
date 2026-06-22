@@ -9,7 +9,7 @@ sites:
     config: sites/ccansam.com/config.yaml
     server: ccansam.com
     staging_server: ccan.crkid.com
-    branch: main
+    branch: storage-containers
     status: active
     nginx_conf: deploy/nginx-prod.conf
     staging_nginx_conf: deploy/nginx-staging.conf
