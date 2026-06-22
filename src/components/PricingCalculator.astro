@@ -126,7 +126,7 @@ const phoneLink = `tel:${siteConfig.contact.phone.replace(/\D/g, '')}`;
         <span id="calc-period" class="text-gray-400"></span>
       </div>
       <p id="calc-note" class="text-sm text-gray-400 mt-2">
-        + Free delivery within 50km of Saskatoon
+        + Delivery available (quoted by location)
       </p>
       <a
         href={phoneLink}
@@ -200,7 +200,7 @@ const phoneLink = `tel:${siteConfig.contact.phone.replace(/\D/g, '')}`;
           noteEl.textContent = `${isNew ? 'New' : 'Used'} ${size} containers - limited availability`;
         } else {
           priceEl.textContent = `$${minPrice.toLocaleString()} - $${maxPrice.toLocaleString()}`;
-          noteEl.textContent = '+ Free delivery within 50km of Saskatoon';
+          noteEl.textContent = '+ Delivery available (quoted by location)';
         }
         periodEl.textContent = '';
       } else {
@@ -208,7 +208,7 @@ const phoneLink = `tel:${siteConfig.contact.phone.replace(/\D/g, '')}`;
         const rental = rentalPrices[size] || { min: 150, max: 200 };
         priceEl.textContent = `$${rental.min} - $${rental.max}`;
         periodEl.textContent = '/month';
-        noteEl.textContent = 'Delivery & pickup included. No long-term contract required.';
+        noteEl.textContent = 'Delivery & pickup available. No long-term contract required.';
       }
     }
 

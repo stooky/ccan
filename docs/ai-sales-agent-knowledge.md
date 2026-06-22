@@ -16,7 +16,7 @@
 - **Address:** 12 Peters Avenue, Martensville, SK S0K 0A2, Canada
 - **Primary Service Area:** Saskatchewan (Saskatoon, Martensville, Warman, and surrounding areas)
 - **Delivery Range:** Throughout Saskatchewan
-- **Delivery Included:** Within 50km of Martensville
+- **Delivery:** Available throughout Saskatchewan — billable service, arranged by C-Can Sam, quoted by location
 
 ### Contact Information
 - **Toll-Free:** 1-844-473-2226
@@ -52,7 +52,7 @@ Customers can buy new or used shipping containers outright for permanent ownersh
 - Containers hold value well - can resell if needs change
 - No restrictions on placement duration
 - New and used options available
-- Delivery included within 50km
+- Delivery available (billable, quoted by location)
 
 **Who Buys:**
 - Homeowners (permanent backyard storage)
@@ -65,7 +65,7 @@ Customers can buy new or used shipping containers outright for permanent ownersh
 ### 2. Container Rentals
 **URL:** /storage-container-rentals/
 
-Flexible month-to-month rentals with delivery and pickup included.
+Flexible month-to-month rentals with delivery and pickup available (billable, quoted by location).
 
 **Key Selling Points:**
 - Flexible month-to-month terms with no long-term commitment
@@ -268,8 +268,8 @@ Long-term lease arrangements for extended storage needs.
 - Delivery distance
 
 **Standard Policy:**
-- Delivery included within 50km of Martensville
-- Beyond 50km: Custom quote provided
+- Delivery available throughout Saskatchewan — billable service, arranged by C-Can Sam
+- Rates quoted by location (distance from Martensville); contact us for a quote
 - Contact for current pricing and availability
 
 **Response:** "Prices fluctuate based on container condition and current inventory. Let me get you an exact quote - what size are you looking at, and where would you need it delivered?"
@@ -418,8 +418,8 @@ A:
 - Mention inventory changes regularly
 
 **"Can you deliver to [remote location]?"**
-- Free delivery within 50km
-- Custom quotes for farther distances
+- Delivery available throughout Saskatchewan — we arrange it
+- Rates quoted by location; custom quotes for any distance
 - Always possible, just need to calculate
 
 ### Closing Phrases

@@ -18,7 +18,7 @@ const container = getContainerBySlug('20ft-standard');
 const faqs = [
   {
     question: "How much does a 20ft shipping container cost?",
-    answer: `New 20ft containers (one-trip) range from $${container?.new?.min.toLocaleString()} to $${container?.new?.max.toLocaleString()}. Used containers in wind & watertight condition start at $${container?.used?.min.toLocaleString()}. Prices include delivery within 50km of Saskatoon.`
+    answer: `New 20ft containers (one-trip) range from $${container?.new?.min.toLocaleString()} to $${container?.new?.max.toLocaleString()}. Used containers in wind & watertight condition start at $${container?.used?.min.toLocaleString()}. Delivery is available as a separate service, quoted by location.`
   },
   {
     question: "What can I fit in a 20ft container?",
@@ -30,7 +30,7 @@ const faqs = [
   },
   {
     question: "Can I rent a 20ft container instead of buying?",
-    answer: "Yes! We offer flexible month-to-month rentals for 20ft containers starting at $150-$175/month. Delivery and pickup are included within 50km. No long-term contract required."
+    answer: "Yes! We offer flexible month-to-month rentals for 20ft containers starting at $150-$175/month. Delivery and pickup are available — we arrange it and quote the rate by location. No long-term contract required."
   },
   {
     question: "What's the difference between new and used containers?",
@@ -108,7 +108,7 @@ const useCases = [
                   </div>
                 )}
               </div>
-              <p class="text-xs text-gray-400 mt-2">+ Free delivery within 50km</p>
+              <p class="text-xs text-gray-400 mt-2">+ Delivery available (quoted by location)</p>
             </div>
           )}
 
@@ -258,7 +258,7 @@ const useCases = [
 
       <div class="rounded-2xl bg-white p-8 shadow-lg border-2 border-primary-500">
         <h3 class="text-2xl font-bold text-gray-900">Rental</h3>
-        <p class="mt-2 text-gray-600">Flexible monthly rentals for short or long-term storage needs. Delivery and pickup included.</p>
+        <p class="mt-2 text-gray-600">Flexible monthly rentals for short or long-term storage needs. Delivery and pickup available.</p>
         <ul class="mt-4 space-y-2 text-sm text-gray-700">
           <li class="flex items-center gap-2">
             <svg class="h-4 w-4 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -266,7 +266,7 @@ const useCases = [
           </li>
           <li class="flex items-center gap-2">
             <svg class="h-4 w-4 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-            Delivery included
+            Delivery available
           </li>
           <li class="flex items-center gap-2">
             <svg class="h-4 w-4 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>

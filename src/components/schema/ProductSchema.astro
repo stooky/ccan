@@ -33,14 +33,13 @@ if (!product) {
   console.warn(`ProductSchema: No product found for slug "${slug}"`);
 }
 
-// Shipping details - Free within 50km, rates apply beyond
+// Shipping details - delivery available, rates quoted by location
 const shippingDetails = {
   "@type": "OfferShippingDetails",
   "shippingRate": {
     "@type": "MonetaryAmount",
-    "value": "0",
     "currency": currency,
-    "description": "Free delivery within 50km. Shipping rates apply outside 50km."
+    "description": "Delivery available throughout Saskatchewan; rates quoted by location."
   },
   "shippingDestination": {
     "@type": "DefinedRegion",
