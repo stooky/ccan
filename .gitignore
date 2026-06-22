@@ -41,6 +41,8 @@ data/submissions.json
 data/spam-log.json
 data/quote-requests.json
 data/rate-limits.json
+data/traffic.json
+data/traffic.json.lock
 
 # Local config overrides (per-server settings)
 config.local.yaml

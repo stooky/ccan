@@ -136,7 +136,7 @@ try {
   const backupDir = `data/backups/${timestamp}`;
   ssh(`cd ${remotePath} && mkdir -p ${backupDir}`);
 
-  const dataFiles = ['submissions.json', 'reviews.json', 'inventory.json', 'spam-log.json', 'quote-requests.json', 'rate-limits.json'];
+  const dataFiles = ['submissions.json', 'reviews.json', 'inventory.json', 'spam-log.json', 'quote-requests.json', 'rate-limits.json', 'traffic.json'];
   for (const file of dataFiles) {
     try {
       ssh(`cd ${remotePath} && [ -f data/${file} ] && cp data/${file} ${backupDir}/ && echo '   ✓ ${file}'`);
